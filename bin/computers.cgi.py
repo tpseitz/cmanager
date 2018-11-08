@@ -1,38 +1,33 @@
 #!/usr/bin/env python3
 # Encoding: UTF-8
-import json, sys, re, os
+import random, json, sys, re, os
 import objects, hypertext
 CONFIG_FILE = '/etc/computer_manager.json'
 ENCODING, LANG, HTTP ='UTF-8', 'en', False
 AVAILABLE_LANGUAGES = { 'en', 'fi' }
-_COOKIE, _GET = {}, {}
+_COOKIES, _GET = {}, {}
 
 lang = {}
 
 def log(lvl, message, extra=None):
-  global HTTP
-
-  if not HTTP:
-    print(message)
-    if extra is not None: print('  %r' % (extra,))
-  else:
-    sys.stdout.buffer.write(message.encode(ENCODING))
-    if extra is not None:
-      extra = '  %r\n' % (extra,)
-      sys.stdout.buffer.write(extra.encode(ENCODING))
-    if lvl == 0: outputPage(message)
+  sys.stdout.buffer.write(message.encode(ENCODING))
+  if extra is not None:
+    extra = '  %r\n' % (extra,)
+    sys.stdout.buffer.write(extra.encode(ENCODING))
+  if lvl == 0: outputPage(message)
 
 def init():
   global CONFIG_FILE, LANG, _COOKIES, _GET, lang
 
   conf = {}
   CONFIG_FILE = os.path.expanduser(CONFIG_FILE)
+  if not os.path.isfile(CONFIG_FILE): raise Exception('No config file')
   if os.path.exists(CONFIG_FILE):
     with open(CONFIG_FILE, 'r') as f: conf = json.loads(f.read())
 
   objects.SHIFT_NAMES = conf.get('shift_names', objects.SHIFT_NAMES)
   objects.DIRECTORY = conf.get('data_directory', objects.DIRECTORY)
-  LANG = _GET.get('lang') or _COOKIE.get('lang') or conf.get('lang') or LANG
+  LANG = _GET.get('lang') or _COOKIES.get('lang') or conf.get('lang') or LANG
   hypertext.LAYOUT_DIRECTORY = conf.get('layout_directory', objects.DIRECTORY)
 
   objects.SHIFTS = len(objects.SHIFT_NAMES)
@@ -99,7 +94,7 @@ def runCommand(cmd, *argv):
       print('Unknown type: %s' % tp)
     objects.saveData()
   elif cmd in ('delete', 'del', 'remove'):
-    for nm in argv: delete(nm)
+    for nm in argv: objects.delete(nm)
     objects.saveData()
   elif cmd == 'shift':
     if len(argv) < 3:
@@ -183,16 +178,20 @@ def formData(data):
   else: log(0, 'Unknown form: %s' % (name,))
 
 def printDebugData():
-  sys.stdout.write('Content-Type: text/html\r\n\r\n')
+  html = ''
   for key in sorted(os.environ):
-    sys.stdout.write("%s = %r<br>\n" % (key, os.environ[key]))
-  sys.stdout.write('<hr>\n')
-  for t in _GET.items(): sys.stdout.write("%s = %r<br>\n" % t)
-  sys.exit(0)
+    html += "%s = %r<br>\n" % (key, os.environ[key])
+  html += '<hr>\n'
+  for t in _GET.items(): html += "%s = %r<br>\n" % t
+  html += '<hr>\n'
+  for t in _COOKIES.items(): html += "%s = %r<br>\n" % t
+  outputPage(html)
 
 def outputPage(html):
   # Headers
   sys.stdout.write('Content-Type: text/html; charset=%s\r\n' % (ENCODING,))
+  sys.stdout.write('Set-Cookie: test=\r\n')
+  sys.stdout.write('Set-Cookie: sessid=testikeksi\r\n')
   sys.stdout.write('\r\n')
   sys.stdout.flush()
   # HTML page
@@ -222,13 +221,23 @@ def menu():
     'title': nm, 'path': 'computers/' + nm })
   return hypertext.mustache('menu', menu)
 
+def randomString(length=16):
+  chars = strin.letters + string.digits
+  return ''.join([random.choose(chars) for i in range(length)])
+
 def mainCGI():
-  global HTTP, _COOKIES, _GET
+  global HTTP, _COOKIES, _SESSION, _GET
 
   HTTP = True
 
   _GET = dict([('=' in o and o.split('=', 1) or (o, True))
-    for o in os.environ.get('QUERY_STRING', '').split('&')])
+    for o in os.environ.get('QUERY_STRING', '').split('&') if o])
+
+  _COOKIES = dict([o.strip().split('=')
+    for o in os.environ.get('HTTP_COOKIE', '').split(';') if o])
+  if 'sessid' not in _COOKIES: _COOKIES['sessid'] = randomString(32)
+
+  _SESSION = {}
 
   init()
   objects.log = log
