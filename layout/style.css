@@ -1,0 +1,23 @@
+li#menu { display: table; border: 1px solid #888; background: #ddd;
+  width: 100%; margin: 3px; }
+li#menu ul { display: table-cell; padding: 3px 10px; }
+div#panel { float: right; }
+div.form { border: solid 1px #888; background: #ddd; width: 300px;
+  padding: 7px; margin: 3px; }
+table.list { border-collapse: collapse; margin: 3px; }
+table.list td { border: solid 1px #444; padding: 3px 10px;
+  vertical-align: top; }
+table.list td.missing { background: #fdd; }
+table.list td.present { background: #dfd; }
+table.list td.delete a { color: #a00; }
+table.list a { text-decoration: none; font-weight: bold; color: #002; }
+table.list a:hover { color: #00a; }
+table.list th { border: solid 1px #444; padding: 3px 10px; background: #eee; }
+table.list td.free     { background: #6d6; color: #666; }
+table.list td.reserved { background: #aaa; color: #666; }
+table.list td.active   { background: #d66; color: #222; }
+table.userinfo { border-collapse: collapse; margin: 3px; }
+table.userinfo td { border: solid 1px #444; padding: 3px 10px; }
+table.userinfo th { border: solid 1px #444; padding: 3px 10px; }
+table.userinfo td.reserved { background: #aaa; color: #666; }
+table.userinfo td.active   { background: #6d6; color: #222; }

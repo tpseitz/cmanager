@@ -1,0 +1,9 @@
+<h2>Assign computer</h2>
+<p>User: {{user.name}}</p>
+{{#user.computer}}<p>Current computer: {{user.computer}}</p>
+{{^user.computer}}<p>No current computer</p>
+{{/user.computer}}
+<li>{{#computers}}
+  <ul><a href="{{user.uid}}/{{id}}">{{name}}</a></ul>{{^computers}}
+  <ul>No computers available</ul>{{/computers}}
+</li>

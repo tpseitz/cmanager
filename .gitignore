@@ -1,0 +1,7 @@
+.*.swp
+*~
+*.[oa]
+*.class
+*.pro.user
+*.pyc
+__pycache__
