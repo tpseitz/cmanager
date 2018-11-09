@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Encoding: UTF-8
-import random, json, sys, re, os
+import random, string, json, sys, re, os
 import objects, hypertext
 CONFIG_FILE = '/etc/computer_manager.json'
 ENCODING, LANG, HTTP ='UTF-8', 'en', False
@@ -222,8 +222,8 @@ def menu():
   return hypertext.mustache('menu', menu)
 
 def randomString(length=16):
-  chars = strin.letters + string.digits
-  return ''.join([random.choose(chars) for i in range(length)])
+  chars = string.ascii_letters + string.digits
+  return ''.join([random.choice(chars) for i in range(length)])
 
 def mainCGI():
   global HTTP, _COOKIES, _SESSION, _GET
