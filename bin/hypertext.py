@@ -10,6 +10,9 @@ REGEX_FORM_VARIABLE = re.compile(r'{[a-z_]+}')
 REGEX_MUSTACHE_BLOCK = re.compile(r'\{\{\#(\$\d+|[A-Za-z_\.]+)(=[A-Za-z\d\._]+)?\}\}')
 REGEX_MUSTACHE_VARIABLE = re.compile(
   r'\{\{(\&?)(\$\d+|[A-Za-z\._]+)(\:[A-Za-z\d_,]+)?\}\}')
+REGEX_MUSTACHE_BLOCK_BARE = re.compile(r'\{\{[^\{\}]+\}\}')
+
+def log(lvl, msg): pass
 
 def link(path, text):
   if path and path[0] == '/': path = path[1:]
@@ -18,7 +21,7 @@ def link(path, text):
 def form(name, data={}, formdata=None):
   if name in FORMS: formdata = FORMS[name]
   elif formdata is None: return 'form(%s)' % (name,)
-  title, button = formdata.pop(0)
+  title, button, redirect = formdata.pop(0)
   if not title: title = name
 
   html = '<form id="%s" action="{{script}}/form"' % (name,) \
@@ -52,6 +55,7 @@ def form(name, data={}, formdata=None):
           % (iid, i, n)
       html += '  <br>\n'
 
+  html += '  <input type="hidden" name="_next" value="%s"><br>\n' % (redirect,)
   html += '  <input id="send" class="button" type="submit" value="%s"><br>\n' \
     % (button,)
   html += '</form>\n'
@@ -72,9 +76,16 @@ def frame(html, data={}):
   start, end = layout('frame').split('{{content}}')
   return mustache(start + html + end, data)
 
+MAX_ITERATIONS, MAX_PAGE_SIZE = 15, 1048576
+MAX_BLOCK_LOOPS, MAX_VARIABLE_LOOPS = 10, 150
 _BASE_DATA = {}
 def mustache(html, data={}, default=None, *outside):
   global _BASE_DATA, GLOBALS
+
+  # Check for max iterations
+  if len(outside) > MAX_ITERATIONS: log(0, 'Stack overflow')
+  # Check for too larde html page
+  if len(html) > MAX_PAGE_SIZE: log(0, 'Page is too large')
 
   if REGEX_LAYOUT_NAME.match(html): html = layout(html)
 
@@ -82,13 +93,16 @@ def mustache(html, data={}, default=None, *outside):
     _BASE_DATA = FUNCTIONS.copy()
     _BASE_DATA.update(GLOBALS)
 
-  while True:
+  count = 0
+  while count < MAX_BLOCK_LOOPS:
+    count += 1
     mt = REGEX_MUSTACHE_BLOCK.search(html)
     if mt is None: break
 
     tag, key, comp = mt.group(0), mt.group(1), mt.group(2)
     val = data
     i, l = html.find('{{/%s}}' % key), 5 + len(key)
+    if i < 0: log(0, 'Layout error: No end tag for %s' % (tag,))
     start, blk, nblk, end = html[:mt.start()], html[mt.end():i], '', html[i+l:]
     if '{{^%s}}' % key in blk: blk, nblk = blk.split('{{^%s}}' % key, 1)
 
@@ -112,7 +126,7 @@ def mustache(html, data={}, default=None, *outside):
       val = val == cp
 
     if not val:
-      ht = mustache(nblk, data)
+      ht = mustache(nblk, data, *outside)
     elif isinstance(val, (tuple, list, set)):
       ht = ''
       for vv in val:
@@ -127,7 +141,9 @@ def mustache(html, data={}, default=None, *outside):
       ht = mustache(blk, dt, val, data, *outside)
     html = start + ht + end
 
-  while True:
+  count = 0
+  while count < MAX_VARIABLE_LOOPS:
+    count += 1
     mt = REGEX_MUSTACHE_VARIABLE.search(html)
     if mt is None: break
 

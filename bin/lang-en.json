@@ -21,6 +21,13 @@
   "NO_SHIFT": "no shift",
   "NO_SEAT": "no seat",
   "UPDATE": "update",
+  "MSG_ADD_SHIFT": "Adding shift for user %s: %s (%s)",
+  "MSG_ADD_USER": "Adding user %s",
+  "MSG_ADD_COMPUTER": "Adding computer %s",
+  "MSG_ASSIGN_COMPUTER": "Adding computer %s for user %s",
+  "MSG_DEL": "Deleted %s from database",
+  "MSG_REMOVING_USER": "Removing user %s",
+  "MSG_REMOVING_COMPUTER": "Removing computer %s",
   "ERR_NO_SHIFT": "User has no shift",
   "ERR_ILLEGAL_SHIFT": "Illegal shift %d",
   "ERR_ILLEGAL_DAYS": "Illegal days %r",
@@ -34,7 +41,4 @@
   "ERR_DUPLICATE_USER": "Duplicate user: %s",
   "ERR_DUPLICATE_SEAT": "Duplicate computer for a shift %s %s",
   "ERR_SEAT_TAKEN": "This computer for the shift is already in use",
-  "MSG_ADD_SHIFT": "Adding shift for user %s: %s (%s)",
-  "MSG_ADD_USER": "Adding user %s",
-  "MSG_ADD_COMPUTER": "Adding computer %s",
-  "MSG_DEL": "Deleted %s from database" }
+  "ERR_GENERIC": "Unknwon error" }

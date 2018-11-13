@@ -18,11 +18,10 @@
     </td>
   </tr>
 {{#users}}
-<!-- {{status}} :: {{name}} -->
   <tr>
     <td>{{shift_name}}</td>
 {{#presence}}{{#$3}}
-    <td class="{{status}}">{{username}}</td>{{^$3}}
+    <td class="{{status}}">{{name}}</td>{{^$3}}
     <td class="reserved">{{lang.RESERVED}}</td>{{/$3}}{{/presence}}
   </tr>{{/users}}
 {{/computers}}

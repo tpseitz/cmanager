@@ -7,14 +7,26 @@ ENCODING, LANG, HTTP ='UTF-8', 'en', False
 AVAILABLE_LANGUAGES = { 'en', 'fi' }
 _COOKIES, _GET = {}, {}
 
+HTML_REDIRECT = '''<!DOCTYPE html><html>
+  <head>
+    <meta http-equiv="refresh" content="%d; URL=%s">
+  </head><body>
+%s
+    <p>Redirecting to <a href="%s">%s</a></p>
+  </body>
+</html>
+'''
+
 lang = {}
+_messages = []
 
 def log(lvl, message, extra=None):
-  sys.stdout.buffer.write(message.encode(ENCODING))
+  _messages.append((lvl, message, extra))
+  if lvl <= 1: sys.stderr.buffer.write(message.encode(ENCODING))
   if extra is not None:
     extra = '  %r\n' % (extra,)
-    sys.stdout.buffer.write(extra.encode(ENCODING))
-  if lvl == 0: outputPage(message)
+    sys.stderr.buffer.write(extra.encode(ENCODING))
+  if lvl == 0: outputPage(message + "\n")
 
 def init():
   global CONFIG_FILE, LANG, _COOKIES, _GET, lang
@@ -161,21 +173,25 @@ def handleForm():
 def formData(data):
   name = data.get('_form', '')
   if name == 'adduser':
-    u = objects.User(data['name'], int(data['shift']), map(int, data['days']))
+    u = objects.User(data['name'], int(data['shift']), map(int, data.get('days', '')))
     if u in objects.User._USERS.values():
       log(2, lang['MSG_ADD_USER'] % (str(u),))
       objects.saveData()
+    redirect('users', 3)
   elif name == 'updateuser':
     u = objects.User._USERS[data['uid']]
     rc = u.assignShift(int(data['shift']), map(int, data['days']))
     objects.saveData()
-    redirect('user/%s' % data['uid'])
+    redirect('user/%s' % data['uid'], 3)
   elif name == 'addcomputer':
     c = objects.Computer(data['name'])
     if c in objects.Computer._COMPUTERS.values():
       log(2, lang['MSG_ADD_COMPUTER'] % (str(c),))
       objects.saveData()
+    redirect('computers', 3)
   else: log(0, 'Unknown form: %s' % (name,))
+
+  redirect(data.get('_next', ''), 3)
 
 def printDebugData():
   html = ''
@@ -199,16 +215,18 @@ def outputPage(html):
   # Stop running
   sys.exit(0)
 
-def redirect(url):
+def redirect(url, delay=None):
   if not (url.startswith('http://') or url.startswith('https://')):
     url = '%s/%s' % (os.environ.get('SCRIPT_NAME', ''), url)
   # Headers
-  sys.stdout.write('Location: %s\r\n' % (url,))
+  if delay is None:
+    sys.stdout.write('Location: %s\r\n' % (url,))
   sys.stdout.write('Content-Type: text/html; charset=%s\r\n' % (ENCODING,))
   sys.stdout.write('\r\n')
   sys.stdout.flush()
   # HTML page
-  msg = 'Redirecting to: <a href="%s">%s</a>' % (url, url)
+  messages = '<br>\n'.join([msg[1] for msg in _messages if msg[0] < 4])
+  msg = HTML_REDIRECT % (delay, url, messages, url, url)
   sys.stdout.buffer.write(msg.encode(ENCODING))
   # Stop running
   sys.exit(0)
@@ -241,17 +259,19 @@ def mainCGI():
 
   init()
   objects.log = log
+  hypertext.log = log
 
   path = os.environ.get('PATH_INFO', '/')
   path = [d for d in path.split('/') if d]
-  if len(path) == 0: printDebugData()
-  elif path[0] == 'user' and len(path) == 2 and path[1] in objects.User._USERS:
+  if len(path) == 0: redirect('computers')
+#  elif : printDebugData()
+  elif path[0] == 'user' and len(path) == 2 and path[1] in uls:
     outputPage(hypertext.frame('user',
       { 'user': objects.User._USERS[path[1]].toDict() }))
   elif path[0] == 'computers':
     cls = []
     shfs = { i+1: { 'shift_name': n, 'presence': 5 * [True],
-      'status': 'free', 'username': '{{lang.VACANT}}' }
+      'status': 'free', 'name': '{{lang.VACANT}}' }
         for i, n in enumerate(objects.SHIFT_NAMES) }
     for cpu in map(objects.Computer.toDict,
       objects.Computer._COMPUTERS.values()):
@@ -267,8 +287,8 @@ def mainCGI():
       'computers': cls }
     outputPage(hypertext.frame('computers', data))
   elif path[0] == 'users':
-    data = { 'users': [usr.toDict() for usr in
-      sorted(objects.User._USERS.values(), key=lambda u: u.name)] }
+    uls = sorted(objects.User._USERS.values(), key=lambda u: u.name.lower())
+    data = { 'users': [usr.toDict() for usr in uls] }
     outputPage(hypertext.frame('users', data))
   elif path[0] == 'assign':
     if len(path) == 3 \
@@ -276,9 +296,10 @@ def mainCGI():
       and path[2] in objects.Computer._COMPUTERS:
         objects.User._USERS[path[1]].assignComputer(path[2])
         objects.saveData()
-        outputPage(hypertext.frame("Added computer %s for user %s" % (
-          objects.User._USERS[path[1]].name,
-          objects.Computer._COMPUTERS[path[2]].name)))
+        log(2, lang['MSG_ASSIGN_COMPUTER'] % (
+          objects.Computer._COMPUTERS[path[2]].name,
+          objects.User._USERS[path[1]].name))
+        redirect('user/%s' % (path[1],), 3)
     elif len(path) == 2 and path[1] in objects.User._USERS:
       usr = objects.User._USERS[path[1]]
       dt = { 'user': usr.toDict(), 'computers':
@@ -286,12 +307,16 @@ def mainCGI():
           for cpu in computersVacant(usr.shift)] }
       outputPage(hypertext.frame(hypertext.mustache(
         hypertext.layout('assign'), dt)))
-    else: outputPage('NO!') #XXX
+    else: log(0, lang['ERR_GERERIC']) #XXX
   elif path[0] == 'delete' and len(path) == 2:
-    nm = delete(path[1])
+    if path[1] in objects.User._USERS: rd = 'users'
+    elif path[1] in objects.Computer._COMPUTERS: rd ='computers'
+    else: rd = ''
+    nm = objects.delete(path[1])
     if nm:
       objects.saveData()
-      outputPage(lang['MSG_DEL'] % (nm,))
+      redirect(rd, 3)
+#      outputPage(lang['MSG_DEL'] % (nm,))
     else:
       log(0, lang['ERR_UNKNOWN_UNIT'] % path[1])
   elif path[0] == 'form':

@@ -3,12 +3,14 @@ import json, re, os
 DIRECTORY = None
 ROOMS, SHIFT_NAMES, SHIFTS = [], [], 0
 
+LEVELS = ['ERR', 'WAR', 'NFO', 'NFO', 'DBG']
 REGEX_STRIP = re.compile(r'[^A-Za-z\d]')
 
 lang = {}
 
 def log(lvl, message, extra=None):
-  print(message)
+  if lvl >= len(LEVELS): lvl = len(LEVELS) - 1
+  print('[%s] %s' % (LEVELS[lvl], message))
   if extra is not None: print('  %r' % (extra,))
 
 class Computer(object):
@@ -61,7 +63,7 @@ class User(object):
     if not 0 <= self.shift <= SHIFTS:
       log(0, lang['ERR_ILLEGAL_SHIFT'] % self.shift, (SHIFT_NAMES, SHIFTS))
       self.shift, self.days = 0, []
-    elif days and (min(self.days) < 0 or max(self.days) > 4):
+    elif self.days and (min(self.days) < 0 or max(self.days) > 4):
       log(0, lang['ERR_ILLEGAL_DAYS'] % (self.days,))
       self.shift, self.days = 0, []
 
@@ -211,12 +213,12 @@ def delete(name):
   nm = REGEX_STRIP.sub('', name.lower())
   if   nm in Computer._COMPUTERS:
     name = Computer._COMPUTERS[nm].name
-    print('Removing %s from computer list' % name)
+    log(2, lang['MSG_REMOVING_COMPUTER'] % name)
     del Computer._COMPUTERS[nm]
     return name
   elif nm in User._USERS:
     name = User._USERS[nm].name
-    print('Removing %s from user list' % name)
+    log(2, lang['MSG_REMOVING_USER'] % name)
     del User._USERS[nm]
     return name
   return None
