@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # Encoding: UTF-8
 import random, string, json, sys, re, os
-import objects, hypertext
+import database, objects, hypertext
 CONFIG_FILE = '/etc/computer_manager.json'
 ENCODING, LANG, HTTP ='UTF-8', 'en', False
 AVAILABLE_LANGUAGES = { 'en', 'fi' }
-_COOKIES, _GET = {}, {}
+_SESSION, _COOKIES, _GET = None, {}, {}
 _SHIFTS = {}
 
 HTML_REDIRECT = '''<!DOCTYPE html><html>
@@ -73,6 +73,8 @@ def init():
     = [(i+1, d) for i, d in enumerate(objects.SHIFT_NAMES)]
   hypertext.GLOBALS['list_rooms'] \
     = [(i, r['name']) for i, r in enumerate(objects.ROOMS)]
+
+  if 'lang' in _GET: _COOKIES['lang'] = _GET['lang']
 
 def runCommand(cmd, *argv):
   argv = list(argv)
@@ -174,9 +176,12 @@ def handleForm():
   formData(formdata)
 
 def formData(data):
+  global _SESSION
+
   name = data.get('_form', '')
   if name == 'adduser':
-    u = objects.User(data['name'], int(data['shift']), map(int, data.get('days', '')))
+    u = objects.User(data['name'], int(data['shift']),
+      map(int, data.get('days', '')))
     if u in objects.User._USERS.values():
       log(2, lang['MSG_ADD_USER'] % (str(u),))
       objects.saveData()
@@ -192,6 +197,10 @@ def formData(data):
       log(2, lang['MSG_ADD_COMPUTER'] % (str(c),))
       objects.saveData()
     redirect('computers', 3)
+  elif name == 'login':
+    _SESSION = database.checkPassword(data['username'], data['password'])
+    if _SESSION: redirect(data.get('source') or data['_next'], 3)
+    else: redirect('login/failed')
   else: log(0, 'Unknown form: %s' % (name,))
 
   redirect(data.get('_next', ''), 3)
@@ -207,10 +216,10 @@ def printDebugData():
   outputPage(html)
 
 def outputPage(html):
+  global _COOKIES
   # Headers
   sys.stdout.write('Content-Type: text/html; charset=%s\r\n' % (ENCODING,))
-  sys.stdout.write('Set-Cookie: test=\r\n')
-  sys.stdout.write('Set-Cookie: sessid=testikeksi\r\n')
+  for c in _COOKIES.items(): sys.stdout.write('Set-Cookie: %s=%s\r\n' % c)
   sys.stdout.write('\r\n')
   sys.stdout.flush()
   # HTML page
@@ -261,12 +270,14 @@ def mainCGI():
   _SESSION = {}
 
   init()
+  database.log = log
   objects.log = log
   hypertext.log = log
 
   path = os.environ.get('PATH_INFO', '/')
   path = [d for d in path.split('/') if d]
-  if len(path) == 0: redirect('computers')
+  if not _SESSION: outputPage(hypertext.frame(hypertext.form('login')))
+  elif len(path) == 0: redirect('computers')
 #  elif : printDebugData()
   elif path[0] == 'user' and len(path) == 2 and path[1] in objects.User._USERS:
     outputPage(hypertext.frame('user',

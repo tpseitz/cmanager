@@ -18,7 +18,7 @@ def link(path, text):
   if path and path[0] == '/': path = path[1:]
   return '<a href="%s/%s">%s</a>' % (GLOBALS['script'], path, text)
 
-def form(name, data={}, formdata=None):
+def form(name, data={}, formdata=None, redirect=None):
   if name in FORMS: formdata = FORMS[name]
   elif formdata is None: return 'form(%s)' % (name,)
   title, button, redirect = formdata.pop(0)
@@ -54,6 +54,9 @@ def form(name, data={}, formdata=None):
         html += '  <input type="checkbox" name="%s" value="%s">%s\n' \
           % (iid, i, n)
       html += '  <br>\n'
+    elif tp == 'password':
+      html += '  %s\n' % (nm,)
+      html += '  <input type="password" name="%s" value=""><br>\n' % (iid,)
 
   html += '  <input type="hidden" name="_next" value="%s"><br>\n' % (redirect,)
   html += '  <input id="send" class="button" type="submit" value="%s"><br>\n' \
