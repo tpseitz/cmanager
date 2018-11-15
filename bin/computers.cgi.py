@@ -6,6 +6,7 @@ CONFIG_FILE = '/etc/computer_manager.json'
 ENCODING, LANG, HTTP ='UTF-8', 'en', False
 AVAILABLE_LANGUAGES = { 'en', 'fi' }
 _COOKIES, _GET = {}, {}
+_SHIFTS = {}
 
 HTML_REDIRECT = '''<!DOCTYPE html><html>
   <head>
@@ -29,7 +30,7 @@ def log(lvl, message, extra=None):
   if lvl == 0: outputPage(message + "\n")
 
 def init():
-  global CONFIG_FILE, LANG, _COOKIES, _GET, lang
+  global CONFIG_FILE, LANG, _SHIFTS, _COOKIES, _GET, lang
 
   conf = {}
   CONFIG_FILE = os.path.expanduser(CONFIG_FILE)
@@ -43,6 +44,8 @@ def init():
   hypertext.LAYOUT_DIRECTORY = conf.get('layout_directory', objects.DIRECTORY)
 
   objects.SHIFTS = len(objects.SHIFT_NAMES)
+  _SHIFTS = { objects.strip(nm): (i+1, nm)
+    for i, nm in enumerate(objects.SHIFT_NAMES) }
 
   objects.DIRECTORY = os.path.expanduser(objects.DIRECTORY)
   hypertext.LAYOUT_DIRECTORY = os.path.expanduser(hypertext.LAYOUT_DIRECTORY)
@@ -244,7 +247,7 @@ def randomString(length=16):
   return ''.join([random.choice(chars) for i in range(length)])
 
 def mainCGI():
-  global HTTP, _COOKIES, _SESSION, _GET
+  global HTTP, _SHIFTS, _COOKIES, _SESSION, _GET
 
   HTTP = True
 
@@ -265,11 +268,14 @@ def mainCGI():
   path = [d for d in path.split('/') if d]
   if len(path) == 0: redirect('computers')
 #  elif : printDebugData()
-  elif path[0] == 'user' and len(path) == 2 and path[1] in uls:
+  elif path[0] == 'user' and len(path) == 2 and path[1] in objects.User._USERS:
     outputPage(hypertext.frame('user',
       { 'user': objects.User._USERS[path[1]].toDict() }))
   elif path[0] == 'computers':
-    cls = []
+    cls, shift = [], 0
+    if len(path) > 1:
+      sid = objects.strip(path[1])
+      if sid in _SHIFTS: shift = _SHIFTS[sid][0]
     shfs = { i+1: { 'shift_name': n, 'presence': 5 * [True],
       'status': 'free', 'name': '{{lang.VACANT}}' }
         for i, n in enumerate(objects.SHIFT_NAMES) }
@@ -279,11 +285,15 @@ def mainCGI():
         for u in objects.User._USERS.values():
           if u.computer is None or u.computer.cid != cpu['cid']: continue
           uls[u.shift] = u.toDict()
-        cpu['user'] =  uls.pop(1)
-        cpu['users'] = [uls[i] for i in range(2, objects.SHIFTS+1)]
+        if shift > 0:
+          cpu['user'] = uls.get(shift)
+          cpu['users'] = []
+        else:
+          cpu['user'] =  uls.pop(1)
+          cpu['users'] = [uls[i] for i in range(2, objects.SHIFTS+1)]
         cls.append(cpu)
     cls = sorted(cls, key=lambda c: c['name'])
-    data = { 'shift_count': objects.SHIFTS,
+    data = { 'shift_count': shift and 1 or objects.SHIFTS,
       'computers': cls }
     outputPage(hypertext.frame('computers', data))
   elif path[0] == 'users':
