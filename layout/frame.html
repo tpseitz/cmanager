@@ -7,6 +7,14 @@
 <body>
 {{menu}}
 <div id="panel">
+  <div class="login">
+{{#session.fullname}}
+    <p>{{lang.USER}}: {{session.fullname}}<br>
+    <a href="{{script}}/logout">{{lang.LOGOUT}}</a></p>
+{{^session.fullname}}
+    {{form:login}}
+{{/session.fullname}}
+  </div>
   <div class="form">{{form:adduser}}</div>
   <div class="form">{{form:addcomputer}}</div>
 </div>

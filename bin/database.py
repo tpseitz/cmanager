@@ -19,15 +19,23 @@ def configuration(conf):
   PASSWORD = conf.pop('db_password', PASSWORD)
   DATABASE = conf.get('db_database', DATABASE)
 
+  if not (HOSTNAME and USERNAME and PASSWORD and DATABASE):
+    log(0, 'No database configuration')
+
 __CONNECTION = None
 def _cursor():
-  global __CONNECTION
+  global HOSTNAME, USERNAME, PASSWORD, DATABASE, __CONNECTION
+
+  if not (HOSTNAME and USERNAME and PASSWORD and DATABASE):
+    log(0, 'Database not configured')
+
   if not __CONNECTION:
     __CONNECTION = MySQLdb.connect(HOSTNAME, USERNAME, PASSWORD, DATABASE)
   return __CONNECTION.cursor()
 
 def close():
-  global __CONNECTION
+  global HOSTNAME, USERNAME, PASSWORD, DATABASE, __CONNECTION
+
   if __CONNECTION:
     __CONNECTION.commit()
     __CONNECTION.close()
@@ -40,7 +48,7 @@ def checkPassword(username, password):
     return None
 
   cur = _cursor()
-  query = 'SELECT id, password, tries, username, fullname, lastlogin' \
+  query = 'SELECT id, password, tries, username, level, fullname, lastlogin' \
     + ' FROM users WHERE username = %s'
   cur.execute(query, (username,))
   rows = cur.fetchall()
@@ -49,20 +57,19 @@ def checkPassword(username, password):
     if len(rows) > 1: log(0, 'Database error: More than one result')
     else: log(2, 'Wrong username or password') #TODO
     return None
-  uid, pwhash, tries, username, fullname, lastlogin = rows[0]
-  print(pwhash) #XXX
+  uid, pwhash, tries, username, level, fullname, lastlogin = rows[0]
 
   if tries > MAX_TRIES:
     log(2, 'This account is locked')
     return None
 
   hsh = crypt.crypt(password, pwhash)
-  print(hsh) #XXX
   if hmac.compare_digest(hsh, pwhash):
     query = 'UPDATE users SET lastlogin = %s, tries = %s WHERE id = %s'
     cur.execute(query, (int(time.time()), 0, uid))
     close()
-    return {'username': username, 'fullname': fullname, 'lastlogin': lastlogin}
+    return {'username': username, 'level': level,
+      'fullname': fullname, 'lastlogin': lastlogin}
   else:
     query = 'UPDATE users SET tries = %s WHERE id = %s'
     cur.execute(query, (tries + 1, uid))

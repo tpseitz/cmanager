@@ -2,6 +2,8 @@
   "COMPUTERS": "tietokoneet",
   "USER": "k\u00E4ytt\u00E4j\u00E4",
   "USERS": "k\u00E4ytt\u00E4j\u00E4t",
+  "ACCOUNT": "Tunnus",
+  "LOGOUT": "kirjaudu ulos",
   "SHIFT": "vuoro",
   "DAYS": "p\u00E4iv\u00E4t",
   "NAME": "nimi",

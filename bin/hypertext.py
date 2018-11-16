@@ -1,5 +1,5 @@
 # Encoding: UTF-8
-import json, re, os
+import collections, json, re, os
 LAYOUT_DIRECTORY = '~/layout'
 SHIFT_NAMES, FORMS, FUNCTIONS, GLOBALS = [], {}, {}, {}
 
@@ -18,15 +18,16 @@ def link(path, text):
   if path and path[0] == '/': path = path[1:]
   return '<a href="%s/%s">%s</a>' % (GLOBALS['script'], path, text)
 
-def form(name, data={}, formdata=None, redirect=None):
+def form(name, data={}, formdata=None, redirect=None, target=None):
   if name in FORMS: formdata = FORMS[name]
   elif formdata is None: return 'form(%s)' % (name,)
   title, button, redirect = formdata.pop(0)
   if not title: title = name
+  if not target: target = 'form'
 
-  html = '<form id="%s" action="{{script}}/form"' % (name,) \
+  html = '<form id="%s" action="{{script}}/%s"' % (name, target) \
     + ' method="post" enctype="multipart/form-data">\n'
-  html += '  <p>%s</p>' % (title,)
+  html += '  <p>%s</p>\n' % (title,)
   html += '  <input type="hidden" name="_form" value="%s"><br>\n' % (name,)
 
   for iid, tp, nm, vls in formdata:
@@ -102,7 +103,7 @@ def mustache(html, data={}, default=None, *outside):
     mt = REGEX_MUSTACHE_BLOCK.search(html)
     if mt is None: break
 
-    tag, key, comp = mt.group(0), mt.group(1), mt.group(2)
+    tag, key, compare = mt.group(0), mt.group(1), mt.group(2)
     val = data
     i, l = html.find('{{/%s}}' % key), 5 + len(key)
     if i < 0: log(0, 'Layout error: No end tag for %s' % (tag,))
@@ -112,20 +113,18 @@ def mustache(html, data={}, default=None, *outside):
     if key == '_': val = default
     else:
       for k in key.split('.'):
-        for dt in (val,) + outside + (_BASE_DATA,):
-          val = dt.get(k, '{{}}')
-          if val != '{{}}': break
-        if val ==  '{{}}':
-          val = '[%s]' % key
-          break
+        tmp = collections.ChainMap(val, *outside, GLOBALS, FUNCTIONS)
+        val = tmp.get(k)
+        if val is None: break
 
-    if comp:
-      cp = {}
-      for k in comp[1:].split('.'):
-        for dt in (cp,) + outside + (_BASE_DATA,):
-          cp = dt.get(k, '{{}}')
-          if cp != '{{}}': break
-        if cp ==  '{{}}': break
+    if val is None: val = '[%s]' % key
+
+    if compare:
+      val, cp = data, {}
+      for k in compare[1:].split('.'):
+        tmp = collections.ChainMap(val, *outside, GLOBALS, FUNCTIONS)
+        val = tmp.get(k)
+        if val is None: break
       val = val == cp
 
     if not val:
