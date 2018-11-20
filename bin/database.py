@@ -5,6 +5,8 @@ HOSTNAME, USERNAME, PASSWORD, DATABASE = 'localhost', None, None, None
 MAX_TRIES = 5
 
 REGEX_USERNAME = re.compile(r'^[a-z][a-z\d]+$')
+#REGEX_FULLNAME = re.compile(r'^[A-Z][a-z]+( [A-Z][a-z]*){,3}$')
+REGEX_FULLNAME = re.compile(r'^[^\d"\';\\]+$')
 REGEX_ESCAPE = re.compile(r'["\';\\]')
 
 def log(lvl, message, *extra):
@@ -40,6 +42,34 @@ def close():
     __CONNECTION.commit()
     __CONNECTION.close()
   __CONNECTION = None
+
+def createUser(username, fullname, level, password):
+  username = username.lower()
+  if not REGEX_USERNAME.match(username):
+    log(1, 'Illegal username: %s' % (username,))
+    return False
+
+  if not REGEX_FULLNAME.match(fullname):
+    log(1, 'Illegal username: %s' % (fullname,))
+    return False
+
+  level = int(level)
+
+  if len(password) < 3:
+    log(1, 'Password too short')
+    return False
+  password = crypt.crypt(password)
+
+  cur = _cursor()
+  query = 'INSERT INTO users (username, fullname, level, password)' \
+    + ' VALUES (%s, %s, %s, %4)'
+  cur.execute(query, (username, fullname, level, password))
+  rows = cur.fetchall()
+
+  uid = __CONNECTION.insert_id()
+  if uid: return True
+
+  return False
 
 def checkPassword(username, password):
   username = username.lower()
