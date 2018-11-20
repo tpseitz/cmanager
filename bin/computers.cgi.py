@@ -49,15 +49,11 @@ def init():
   if LANG not in AVAILABLE_LANGUAGES: raise Exception('Unknown language')
 
   fdn = os.path.split(os.path.realpath(__file__))[0]
-  ffn = os.path.join(fdn, 'lang-%s.json' % LANG)
-  with open(ffn, 'r') as f: lang = json.loads(f.read())
-  ffn = os.path.join(fdn, 'forms.json')
-  with open(ffn, 'r') as f: hypertext.FORMS = json.loads(f.read())
+  lang = hypertext.loadLanguage(LANG)
 
   objects.lang = lang
   hypertext.lang = lang
 
-  hypertext.GLOBALS['lang'] = lang
   hypertext.GLOBALS['script'] = os.environ.get('SCRIPT_NAME', '')
 
   hypertext.FUNCTIONS['menu'] = menu
@@ -192,7 +188,7 @@ def menu():
   return hypertext.mustache('menu', menu)
 
 def mainCGI():
-  global HTTP, _SHIFTS
+  global _SHIFTS
 
   path = web.startCGI(init)
   if len(path) == 0: path = ['computers']

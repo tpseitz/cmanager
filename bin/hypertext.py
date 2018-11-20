@@ -14,6 +14,18 @@ REGEX_MUSTACHE_BLOCK_BARE = re.compile(r'\{\{[^\{\}]+\}\}')
 
 def log(lvl, msg): pass
 
+def loadLanguage(code):
+  global GLOBALS, FORMS
+
+  fdn = os.path.split(os.path.realpath(__file__))[0]
+  ffn = os.path.join(fdn, 'lang-%s.json' % code)
+  with open(ffn, 'r') as f: lang = json.loads(f.read())
+  ffn = os.path.join(fdn, 'forms.json')
+  with open(ffn, 'r') as f: FORMS = json.loads(f.read())
+  GLOBALS['lang'] = lang
+
+  return lang
+
 def link(path, text):
   if path and path[0] == '/': path = path[1:]
   return '<a href="%s/%s">%s</a>' % (GLOBALS['script'], path, text)
