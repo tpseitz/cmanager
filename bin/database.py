@@ -43,31 +43,50 @@ def close():
     __CONNECTION.close()
   __CONNECTION = None
 
+def listAccounts():
+  cur = _cursor()
+  names = ['id','tries','username','level','fullname','lastlogin']
+  query = 'SELECT id,tries,username,level,fullname,lastlogin' \
+    + ' FROM users;'
+  cur.execute(query)
+  rows = cur.fetchall()
+
+  return [ dict(zip(names, row)) for row in rows ]
+
 def createUser(username, fullname, level, password):
   username = username.lower()
   if not REGEX_USERNAME.match(username):
-    log(1, 'Illegal username: %s' % (username,))
+    log(0, 'Illegal username: %s' % (username,))
     return False
 
   if not REGEX_FULLNAME.match(fullname):
-    log(1, 'Illegal username: %s' % (fullname,))
+    log(0, 'Illegal username: %s' % (fullname,))
     return False
 
   level = int(level)
 
   if len(password) < 3:
-    log(1, 'Password too short')
+    log(0, 'Password too short')
     return False
   password = crypt.crypt(password)
 
   cur = _cursor()
+  query = 'SELECT id FROM users WHERE username = %s'
+  cur.execute(query, (username,))
+  if len(cur.fetchall()) > 0:
+    log(0, 'User allready in database')
+    return False
+
+  cur = _cursor()
   query = 'INSERT INTO users (username, fullname, level, password)' \
-    + ' VALUES (%s, %s, %s, %4)'
+    + ' VALUES (%s, %s, %s, %s)'
   cur.execute(query, (username, fullname, level, password))
   rows = cur.fetchall()
 
   uid = __CONNECTION.insert_id()
-  if uid: return True
+  if uid:
+    close()
+    return True
 
   return False
 

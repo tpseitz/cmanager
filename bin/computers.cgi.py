@@ -11,7 +11,6 @@ AVAILABLE_LANGUAGES = { 'en', 'fi' }
 _SHIFTS = {}
 
 lang = {}
-
 log = web.log
 database.log = log
 objects.log = log
@@ -264,7 +263,8 @@ def mainCGI():
     elif path[0] == 'form':
       handleForm()
 
-  web.outputPage(hypertext.frame(hypertext.form('login', target='login')))
+  web.outputPage(hypertext.frame('<div class="form">' \
+    + hypertext.form('login', target='login') + '</div>'))
 
 if __name__ == '__main__':
   if 'QUERY_STRING' in os.environ: mainCGI()

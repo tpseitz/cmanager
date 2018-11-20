@@ -1,10 +1,23 @@
+body { font-family: Sans-Serif; }
 li#menu { display: table; border: 1px solid #888; background: #ddd;
   width: 100%; margin: 3px; }
 li#menu ul { display: table-cell; padding: 3px 10px; }
 div#panel { float: right; }
-div.form { border: solid 1px #888; background: #ddd; width: 300px;
-  padding: 7px; margin: 3px; }
-table.list { border-collapse: collapse; margin: 3px; }
+div.login { border: solid 1px #888; background: #eee; }
+div.form { border: solid 1px #888; background: #eee; text-align: right;
+  min-width: 200px; max-width: 400px; margin: 5px; padding: 0px; }
+div.form p { padding: 3px 7px; margin: 0px; text-align: left; }
+div.form p:first-child { background: #ddd; border: solid 0px #444;
+  border-width: 0px 0px 1px 0px; text-align: left; }
+input { border: solid 1px #000; border-width: 0px 0px 1px 0px;
+  margin: 1px 7px; margin-right: 0px; }
+input[type=text] { width: 50%; }
+input[type=password] { width: 50%; }
+input[type=submit] { border: solid 1px #888; border-width: 1px;
+  color: #000; background: #ddd; font-size: 18px; margin: 3px 7px; }
+p.checklist { display: table-row; }
+p.checklist input { display: table-cell; margin: 3px 7px; }
+table.list { border-collapse: collapse; margin: 3px; margin: 5px; }
 table.list td { border: solid 1px #444; padding: 3px 10px;
   vertical-align: top; }
 table.list td.missing { background: #fdd; }

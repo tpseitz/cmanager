@@ -1,0 +1,19 @@
+<div class="form">
+{{form:addaccount}}
+</div>
+<table class="list">
+  <tr>
+    <th>{{lang.USERNAME}}</th>
+    <th>{{lang.FULLNAME}}</th>
+    <th>{{lang.USER_LEVEL}}</th>
+    <th>{{lang.LASTLOGIN}}</th>
+  </tr>
+{{#accounts}}
+  <tr>
+    <td>{{username}}</td>
+    <td>{{fullname}}</td>
+    <td>{{level_name}}</td>
+    <td>{{lastlogin_name}}</td>
+  </tr>
+{{/accounts}}
+</table>

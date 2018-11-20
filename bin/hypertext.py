@@ -44,32 +44,31 @@ def form(name, data={}, formdata=None, redirect=None, target=None):
 
   for iid, tp, nm, vls in formdata:
     if isinstance(vls, str) and REGEX_FORM_VARIABLE.match(vls):
-      vls = GLOBALS[vls[1:-1]]
+      vls = GLOBALS.get(vls[1:-1], [])
 
     if   tp == 'static':
-      html += '  %s: %s<br>\n' % (nm, vls[1])
-      html += '  <input type="hidden" name="%s" value="%s"><br>\n' \
+      html += '  <p>%s: %s</p>\n' % (nm, vls[1])
+      if vls: html += '  <input type="hidden" name="%s" value="%s">\n' \
         % (iid, vls[0])
     elif tp == 'text':
-      html += '  %s\n' % (nm,)
-      html += '  <input type="text" name="%s" value=""><br>\n' % (iid,)
+      html += '  <p>%s<input type="text" name="%s" value=""></p>\n' % (nm, iid)
     elif tp in ('select', 'select0'):
       iter(vls) # Test that vls is of iterable type
-      html += '  %s\n' % (nm,)
+      html += '  <p>%s\n' % (nm,)
       html += '  <select name="%s" required="true">\n' % iid
       if tp == 'select0': html += '    <option value="null">-</option>\n'
       for i, n in vls:
         html += '    <option value="%s">%s</option>\n' % (i, n)
-      html += '  </select><br>\n'
+      html += '  </select></p>\n'
     elif tp == 'checklist':
-      html += '  <strong>%s:</strong>\n' % (nm,)
+      html += '  <p class="checklist"><strong>%s:</strong>\n' % (nm,)
       for i, n in vls:
         html += '  <input type="checkbox" name="%s" value="%s">%s\n' \
           % (iid, i, n)
-      html += '  <br>\n'
+      html += '  </p>\n'
     elif tp == 'password':
-      html += '  %s\n' % (nm,)
-      html += '  <input type="password" name="%s" value=""><br>\n' % (iid,)
+      html += '  <p>%s<input type="password" name="%s" value=""></p>\n' \
+        % (nm, iid)
 
   html += '  <input type="hidden" name="_next" value="%s"><br>\n' % (redirect,)
   html += '  <input id="send" class="button" type="submit" value="%s"><br>\n' \
