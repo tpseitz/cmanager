@@ -35,6 +35,14 @@ def init():
     or web.SESSION or conf.get('lang') or LANG
   hypertext.LAYOUT_DIRECTORY = conf.get('layout_directory', objects.DIRECTORY)
   web.SESSION_DIRECTORY = conf.get('session_directory', web.SESSION_DIRECTORY)
+  hypertext.PATH_ADMIN = conf.get('path_admin', hypertext.PATH_ADMIN)
+  hypertext.PATH_COMPUTERS = conf.get('path_computers',hypertext.PATH_COMPUTERS)
+
+  hypertext.GLOBALS['submenu'] = [
+    { 'title': '{{lang.COMPUTERS}}', 'path': 'computers' },
+    { 'title': '{{lang.USERS}}', 'path': 'users' }]
+  for nm in objects.SHIFT_NAMES: hypertext.GLOBALS['submenu'].append({
+    'title': nm, 'path': 'computers/' + nm })
 
   database.configuration(conf)
 
@@ -54,8 +62,6 @@ def init():
   hypertext.lang = lang
 
   hypertext.GLOBALS['script'] = os.environ.get('SCRIPT_NAME', '')
-
-  hypertext.FUNCTIONS['menu'] = menu
 
   objects.loadData()
 
@@ -138,35 +144,33 @@ def computersVacant(shift):
     if shift not in sls: ls.append(cpu)
   return sorted(ls, key=lambda c: c.cid)
 
-def formData(data):
-  name = data.get('_form', '')
+def formData():
+  if web.SESSION.get('level', -1) < 100: return
+
+  name = web.POST.get('_form', '')
   if name == 'adduser':
-    u = objects.User(data['name'], int(data['shift']),
-      map(int, data.get('days', '')))
+    u = objects.User(web.POST['name'], int(web.POST['shift']),
+      map(int, web.POST.get('days', '')))
     if u in objects.User._USERS.values():
       log(2, lang['MSG_ADD_USER'] % (str(u),))
       objects.saveData()
     web.redirect('users', 3)
   elif name == 'updateuser':
-    u = objects.User._USERS[data['uid']]
-    rc = u.assignShift(int(data['shift']), map(int, data['days']))
+    u = objects.User._USERS[web.POST['uid']]
+    rc = u.assignShift(int(web.POST['shift']), map(int, web.POST['days']))
     objects.saveData()
-    web.redirect('user/%s' % data['uid'], 3)
+    web.redirect('user/%s' % web.POST['uid'], 3)
   elif name == 'addcomputer':
-    c = objects.Computer(data['name'])
+    c = objects.Computer(web.POST['name'])
     if c in objects.Computer._COMPUTERS.values():
       log(2, lang['MSG_ADD_COMPUTER'] % (str(c),))
       objects.saveData()
     web.redirect('computers', 3)
-  elif name == 'login':
-    web.SESSION.update(database.checkPassword(data['username'], data['password']))
-    if web.SESSION.get('username'):
-      writeSession()
-      web.redirect(data.get('source') or data['_next'], 3)
-    else: web.redirect('login/failed', 5)
   else: log(0, 'Unknown form: %s' % (name,))
 
-  web.redirect(data.get('_next', ''), 3)
+  web.redirect(web.POST.get('_next', ''), 3)
+
+web.handleForm = formData
 
 def printDebugData():
   html = ''
@@ -177,14 +181,6 @@ def printDebugData():
   html += '<hr>\n'
   for t in web.COOKIES.items(): html += "%s = %r<br>\n" % t
   web.outputPage(html)
-
-def menu():
-  menu = { 'elements': [
-    { 'title': '{{lang.COMPUTERS}}', 'path': 'computers' },
-    { 'title': '{{lang.USERS}}', 'path': 'users' }]}
-  for nm in objects.SHIFT_NAMES: menu['elements'].append({
-    'title': nm, 'path': 'computers/' + nm })
-  return hypertext.mustache('menu', menu)
 
 def mainCGI():
   global _SHIFTS
@@ -241,7 +237,7 @@ def mainCGI():
           log(2, lang['MSG_ASSIGN_COMPUTER'] % (
             objects.Computer._COMPUTERS[path[2]].name,
             objects.User._USERS[path[1]].name))
-          web.redirect('user/%s' % (path[1],), 3)
+          web.redirect('users', 3)
       elif len(path) == 2 and path[1] in objects.User._USERS:
         usr = objects.User._USERS[path[1]]
         dt = { 'user': usr.toDict(), 'computers':
@@ -260,8 +256,6 @@ def mainCGI():
         web.redirect(rd, 3, lang['MSG_DEL'] % (nm,))
       else:
         log(0, lang['ERR_UNKNOWN_UNIT'] % path[1])
-    elif path[0] == 'form':
-      handleForm()
 
   web.outputPage(hypertext.frame('<div class="form">' \
     + hypertext.form('login', target='login') + '</div>'))

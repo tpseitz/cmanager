@@ -2,6 +2,7 @@
 import collections, json, re, os
 LAYOUT_DIRECTORY = '~/layout'
 SHIFT_NAMES, FORMS, FUNCTIONS, GLOBALS = [], {}, {}, {}
+PATH_ADMIN, PATH_COMPUTERS = '/admin.cgi', '/computers.cgi'
 
 HTML_CELL_FREE = None
 HTML_CELL_RESERVED = None
@@ -13,6 +14,10 @@ REGEX_MUSTACHE_VARIABLE = re.compile(
 REGEX_MUSTACHE_BLOCK_BARE = re.compile(r'\{\{[^\{\}]+\}\}')
 
 def log(lvl, msg): pass
+
+GLOBALS['menu'] = [
+  { 'title': '{{lang.ACCOUNT_MANAGEMENT}}', 'path': PATH_ADMIN },
+  { 'title': '{{lang.COMPUTER_MANAGEMENT}}', 'path': PATH_COMPUTERS }]
 
 def loadLanguage(code):
   global GLOBALS, FORMS
@@ -33,16 +38,16 @@ def link(path, text):
 def form(name, data={}, formdata=None, redirect=None, target=None):
   if name in FORMS: formdata = FORMS[name]
   elif formdata is None: return 'form(%s)' % (name,)
-  title, button, redirect = formdata.pop(0)
-  if not title: title = name
+  title, button, redirect = formdata[0]
+#  if not title: title = name
   if not target: target = 'form'
 
   html = '<form id="%s" action="{{script}}/%s"' % (name, target) \
     + ' method="post" enctype="multipart/form-data">\n'
-  html += '  <p>%s</p>\n' % (title,)
-  html += '  <input type="hidden" name="_form" value="%s"><br>\n' % (name,)
+  if title: html += '  <p>%s</p>\n' % (title,)
+  html += '  <input type="hidden" name="_form" value="%s">\n' % (name,)
 
-  for iid, tp, nm, vls in formdata:
+  for iid, tp, nm, vls in formdata[1:]:
     if isinstance(vls, str) and REGEX_FORM_VARIABLE.match(vls):
       vls = GLOBALS.get(vls[1:-1], [])
 
@@ -70,7 +75,7 @@ def form(name, data={}, formdata=None, redirect=None, target=None):
       html += '  <p>%s<input type="password" name="%s" value=""></p>\n' \
         % (nm, iid)
 
-  html += '  <input type="hidden" name="_next" value="%s"><br>\n' % (redirect,)
+  html += '  <input type="hidden" name="_next" value="%s">\n' % (redirect,)
   html += '  <input id="send" class="button" type="submit" value="%s"><br>\n' \
     % (button,)
   html += '</form>\n'
@@ -128,7 +133,7 @@ def mustache(html, data={}, default=None, *outside):
         val = tmp.get(k)
         if val is None: break
 
-    if val is None: val = '[%s]' % key
+#    if val is None: val = '[%s]' % key
 
     if compare:
       val, cp = data, {}

@@ -34,6 +34,8 @@
   "PASSWORD": "Password",
   "PASSWORD_AGAIN": "Repeat password",
   "NEVER": "never",
+  "ACCOUNT_MANAGEMENT": "User accounts",
+  "COMPUTER_MANAGEMENT": "Computer management",
   "MSG_ADD_SHIFT": "Adding shift for user %s: %s (%s)",
   "MSG_ADD_USER": "Adding user %s",
   "MSG_ADD_COMPUTER": "Adding computer %s",

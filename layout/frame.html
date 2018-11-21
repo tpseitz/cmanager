@@ -5,14 +5,19 @@
   <link rel="stylesheet" href="/computers.css">
 </head>
 <body>
-{{menu}}
+  <li id="menu">
+{{#menu}}    <ul><a href="{{script}}/{{path}}">{{title}}</a></ul>
+{{/menu}}  </li>
+  <li id="submenu">
+{{#submenu}}    <ul><a href="{{script}}/{{path}}">{{title}}</a></ul>
+{{/submenu}}  </li>
 <div id="panel">
-  <div class="login">
+  <div class="minilogin">
 {{#session.fullname}}
-    <p>{{lang.USER}}: {{session.fullname}}<br>
+    <p class="user">{{session.fullname}}<br>
     <a href="{{script}}/logout">{{lang.LOGOUT}}</a></p>
 {{^session.fullname}}
-    {{form:login}}
+    {{form:minilogin}}
 {{/session.fullname}}
   </div>
 </div>

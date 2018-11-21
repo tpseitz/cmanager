@@ -3,7 +3,7 @@ import random, string, json, time, sys, os
 import database
 
 SESSION_DIRECTORY = '/tmp/session'
-COOKIE_AGE = 14400
+COOKIE_AGE, COOKIE_PATH = 14400, '/'
 ENCODING ='UTF-8'
 LOG_BUFFER = 30
 SESSION, COOKIES, POST, GET = None, {}, {}, {}
@@ -28,6 +28,8 @@ HTML_REDIRECT = '''<!DOCTYPE html><html>
 
 _messages = []
 
+def handleForm(): log(0, 'No subroutine')
+
 def log(lvl, message, extra=None):
   global LOG_BUFFER, _messages
 
@@ -50,9 +52,10 @@ def outputPage(html):
   global COOKIES
   # Headers
   sys.stdout.write('Content-Type: text/html; charset=%s\r\n' % (ENCODING,))
-  for c in COOKIES.items():
-    if c[0] == 'PHPSESSID': continue
-    sys.stdout.write('Set-Cookie: %s=%s; Max-Age=%d;\r\n' % (c + (COOKIE_AGE,)))
+  for key, val in COOKIES.items():
+    if val == 'PHPSESSID': continue
+    sys.stdout.write('Set-Cookie: %s=%s; Path=%s; Max-Age=%d;\r\n' \
+      % (key, val, COOKIE_PATH, COOKIE_AGE))
   sys.stdout.write('\r\n')
   sys.stdout.flush()
   # HTML page
@@ -61,7 +64,7 @@ def outputPage(html):
   writeSession()
   sys.exit(0)
 
-def redirect(url, delay=None):
+def redirect(url, delay=None, *msg):
   if delay is None:
     sys.stdout.write('Location: %s\r\n' % (url,))
 
@@ -192,8 +195,11 @@ def startCGI(init=None):
   path = [d for d in path.split('/') if d]
 
   if len(path) > 0:
+    form = POST.get('_form')
     if   path[0] == 'login': login()
+    elif form in ('login','minilogin'): login()
     elif path[0] == 'logout': destroySession()
+    elif path[0] == 'form': handleForm()
 
   return path
 

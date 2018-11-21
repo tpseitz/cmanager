@@ -34,6 +34,8 @@
   "PASSWORD": "Salasana",
   "PASSWORD_AGAIN": "Salasana uudelleen",
   "NEVER": "ei koskaan",
+  "ACCOUNT_MANAGEMENT": "Tunnusten hallinta",
+  "COMPUTER_MANAGEMENT": "Konehallinta",
   "MSG_ADD_SHIFT": "Lis\u00E4t\u00E4\u00E4n k\u00E4ytt\u00E4j\u00E4lle %s vuoro: %s (%s)",
   "MSG_ADD_USER": "Lis\u00E4t\u00E4\u00E4n k\u00E4ytt\u00E4j\u00E4 %s",
   "MSG_ADD_COMPUTER": "Lis\u00E4t\u00E4\u00E4n tietokone %s",

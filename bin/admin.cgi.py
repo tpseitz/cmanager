@@ -14,7 +14,7 @@ database.log = log
 hypertext.log = log
 
 def init():
-  global CONFIG_FILES, LANG, _SHIFTS, lang
+  global CONFIG_FILES, USER_LEVELS, LANG, _SHIFTS, lang
 
   if 'CONFIG_FILE' in os.environ:
     CONFIG_FILES = [os.environ['CONFIG_FILE']] + CONFIG_FILES
@@ -28,6 +28,10 @@ def init():
 
   hypertext.LAYOUT_DIRECTORY = conf.get('layout_directory')
   web.SESSION_DIRECTORY = conf.get('session_directory', web.SESSION_DIRECTORY)
+  if 'user_levels' in conf:
+    USER_LEVELS = { int(k): v for k, v in conf['user_levels'].items() }
+
+  hypertext.GLOBALS['submenu'] = False
 
   lang = hypertext.loadLanguage(conf.get('lang', 'en'))
   hypertext.GLOBALS['script'] = os.environ.get('SCRIPT_NAME', '')
@@ -61,8 +65,17 @@ def createUser():
 
   rc = database.createUser(username, fullname, level, password)
   if rc: web.redirect(web.POST.get('next', ''))
-  else:
-    log(0, 'Could not create user')
+  else: log(0, 'Could not create user')
+
+def handleForm():
+  if web.SESSION.get('level', -1) < 100: return
+
+  form = web.POST.get('_form', '')
+  if form == 'addaccount': createUser()
+  elif form in ('login', 'minilogin'): web.login()
+  else: log(0, 'Unknown form: %s' % (form,))
+
+web.handleForm = handleForm
 
 def mainCGI():
   path = web.startCGI(init)
@@ -75,8 +88,6 @@ def mainCGI():
   elif level < 200:
     log(0, lang['ERR_ACCESS_DENIED'])
     return
-  elif path and path[0] == 'form':
-    createUser()
   else:
     accounts = database.listAccounts()
     for acc in accounts:
