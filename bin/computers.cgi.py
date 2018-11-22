@@ -37,6 +37,8 @@ def init():
   web.SESSION_DIRECTORY = conf.get('session_directory', web.SESSION_DIRECTORY)
   hypertext.PATH_ADMIN = conf.get('path_admin', hypertext.PATH_ADMIN)
   hypertext.PATH_COMPUTERS = conf.get('path_computers',hypertext.PATH_COMPUTERS)
+  PATH_ADMIN = conf.get('path_admin', PATH_ADMIN)
+  PATH_COMPUTERS = conf.get('path_computers', PATH_COMPUTERS)
 
   hypertext.GLOBALS['submenu'] = [
     { 'title': '{{lang.COMPUTERS}}', 'path': 'computers' },
