@@ -4,7 +4,8 @@ import json, sys, os
 import database, objects, hypertext, web
 CONFIG_FILES = ['~/.config/computer_manager.json',
   '/etc/computer_manager.json',
-  os.path.split(os.path.realpath(__file__))[0] + '/computer_manager.json']
+  os.sep.join(os.path.realpath(__file__).split(os.sep)[:-2]) \
+    + '/computer_manager.json']
 
 LANG = 'en'
 AVAILABLE_LANGUAGES = { 'en', 'fi' }
@@ -176,6 +177,8 @@ def formData():
 web.handleForm = formData
 
 def printDebugData():
+  global CONFIG_FILES
+
   html = ''
   for key in sorted(os.environ):
     html += "%s = %r<br>\n" % (key, os.environ[key])
@@ -183,6 +186,11 @@ def printDebugData():
   for t in web.GET.items(): html += "%s = %r<br>\n" % t
   html += '<hr>\n'
   for t in web.COOKIES.items(): html += "%s = %r<br>\n" % t
+  html += '<hr>\n'
+  for k in sorted(web.SESSION): html += "%s = %r<br>\n" % (k, web.SESSION[k])
+  html += '<hr>\n'
+  for fn in CONFIG_FILES: html += '%s<br>\n' % (os.path.expanduser(fn),)
+
   web.outputPage(html)
 
 def mainCGI():
