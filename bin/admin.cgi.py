@@ -30,6 +30,8 @@ def init():
   web.SESSION_DIRECTORY = conf.get('session_directory', web.SESSION_DIRECTORY)
   if 'user_levels' in conf:
     USER_LEVELS = { int(k): v for k, v in conf['user_levels'].items() }
+  PATH_ADMIN = conf.get('path_admin', PATH_ADMIN)
+  PATH_COMPUTERS = conf.get('path_computers', PATH_COMPUTERS)
 
   hypertext.GLOBALS['submenu'] = False
 
