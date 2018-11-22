@@ -2,7 +2,7 @@
 import collections, json, re, os
 LAYOUT_DIRECTORY = '~/layout'
 SHIFT_NAMES, FORMS, FUNCTIONS, GLOBALS = [], {}, {}, {}
-PATH_ADMIN, PATH_COMPUTERS = '/hallinta', '/konehallinta'
+PATH_ADMIN, PATH_COMPUTERS = '/admin', '/konehallinta'
 
 HTML_CELL_FREE = None
 HTML_CELL_RESERVED = None
@@ -14,10 +14,6 @@ REGEX_MUSTACHE_VARIABLE = re.compile(
 REGEX_MUSTACHE_BLOCK_BARE = re.compile(r'\{\{[^\{\}]+\}\}')
 
 def log(lvl, msg): pass
-
-GLOBALS['menu'] = [
-  { 'title': '{{lang.ACCOUNT_MANAGEMENT}}', 'path': PATH_ADMIN },
-  { 'title': '{{lang.COMPUTER_MANAGEMENT}}', 'path': PATH_COMPUTERS }]
 
 def loadLanguage(code):
   global GLOBALS, FORMS
