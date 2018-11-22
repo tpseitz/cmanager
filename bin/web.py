@@ -6,7 +6,7 @@ SESSION_DIRECTORY = '/tmp/session'
 COOKIE_AGE, COOKIE_PATH = 14400, '/'
 ENCODING ='UTF-8'
 LOG_BUFFER = 30
-SESSION, COOKIES, POST, GET = None, {}, {}, {}
+SESSION, COOKIES, POST, GET = {}, {}, {}, {}
 
 HTML_ERROR = '''<!DOCTYPE html><html>
   <head>
