@@ -7,6 +7,7 @@
     <th>{{lang.FULLNAME}}</th>
     <th>{{lang.USER_LEVEL}}</th>
     <th>{{lang.LASTLOGIN}}</th>
+    <th>{{lang.DELETE}}</th>
   </tr>
 {{#accounts}}
   <tr>
@@ -14,6 +15,9 @@
     <td>{{fullname}}</td>
     <td>{{level_name}}</td>
     <td>{{lastlogin_name}}</td>
+    <td class="delete">
+      <a href="{{script}}/delete/{{username}}">{{lang.DELETE}}</a>
+    </td>
   </tr>
 {{/accounts}}
 </table>

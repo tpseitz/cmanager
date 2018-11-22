@@ -90,6 +90,16 @@ def createUser(username, fullname, level, password):
 
   return False
 
+def removeUser(username):
+  if not username: return False
+
+  cur = _cursor()
+  query = 'DELETE FROM users WHERE username = %s'
+  cur.execute(query, (username,))
+  close()
+
+  return True
+
 def checkPassword(username, password):
   username = username.lower()
   if not REGEX_USERNAME.match(username):

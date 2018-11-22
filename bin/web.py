@@ -68,8 +68,9 @@ def redirect(url, delay=None, *msg):
   if delay is None:
     sys.stdout.write('Location: %s\r\n' % (url,))
 
-  if not (url.startswith('http://') or url.startswith('https://')):
-    url = '%s/%s' % (os.environ.get('SCRIPT_NAME', ''), url)
+  if not (url.startswith('http://') or url.startswith('https://')
+    or url.startswith('/')):
+      url = '%s/%s' % (os.environ.get('SCRIPT_NAME', ''), url)
 
   messages = '<br>\n'.join([msg[1] for msg in _messages if msg[0] < 4])
   outputPage(HTML_REDIRECT % (delay or 0, url, messages, url, url))
@@ -80,6 +81,7 @@ def randomString(length=16):
 
 def readSession(session_id):
   global SESSION_DIRECTORY, SESSION
+  SESSION = {}
 
   if SESSION_DIRECTORY is None: return False
   if not os.path.isdir(SESSION_DIRECTORY):
@@ -127,7 +129,7 @@ def destroySession(session_id=None):
   if os.path.isfile(ffn): os.unlink(ffn)
   COOKIES['sessid'] = randomString(32)
 
-  redirect('', 3)
+  redirect(os.environ.get('HTTP_REFERER', '/'), 3)
 
 def login():
   global SESSION, POST

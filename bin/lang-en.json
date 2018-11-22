@@ -43,6 +43,8 @@
   "MSG_DEL": "Deleted %s from database",
   "MSG_REMOVING_USER": "Removing user %s",
   "MSG_REMOVING_COMPUTER": "Removing computer %s",
+  "MSG_USER_CREATED": "User was succesfully created",
+  "MSG_USER_DELETED": "User %s has been removed",
   "ERR_NO_SHIFT": "User has no shift",
   "ERR_ILLEGAL_SHIFT": "Illegal shift %d",
   "ERR_ILLEGAL_DAYS": "Illegal days %r",
@@ -59,4 +61,5 @@
   "ERR_NO_FULLNAME": "User's full name is missing",
   "ERR_NO_USERNAME": "You must give login name",
   "ERR_PASSWORD_MISMATCH": "Passwords do not match",
+  "ERR_DELETE_SELF": "You can not remove your own account",
   "ERR_GENERIC": "Unknwon error" }
