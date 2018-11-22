@@ -213,7 +213,7 @@ def mainCGI():
       if len(path) > 1:
         sid = objects.strip(path[1])
         if sid in _SHIFTS: shift = _SHIFTS[sid][0]
-      shfs = { i+1: { 'shift_name': n, 'presence': 5 * [True],
+      shfs = { i+1: { 'shift_name': n, 'presence': 5 * [(None, None, True)],
         'status': 'free', 'name': '{{lang.VACANT}}' }
           for i, n in enumerate(objects.SHIFT_NAMES) }
       for cpu in map(objects.Computer.toDict,
