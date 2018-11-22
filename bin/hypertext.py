@@ -2,7 +2,7 @@
 import collections, json, re, os
 LAYOUT_DIRECTORY = '~/layout'
 SHIFT_NAMES, FORMS, FUNCTIONS, GLOBALS = [], {}, {}, {}
-PATH_ADMIN, PATH_COMPUTERS = '/admin.cgi', '/computers.cgi'
+PATH_ADMIN, PATH_COMPUTERS = '/hallinta', '/konehallinta'
 
 HTML_CELL_FREE = None
 HTML_CELL_RESERVED = None
