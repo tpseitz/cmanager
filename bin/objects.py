@@ -147,6 +147,7 @@ class User(object):
       'presence': [(d, lang['DAY_NAMES'][d], d in self.days and True or False)
         for d in range(5)],
       'status': self.computer and 'active' or None,
+      'computer_name': self.computer and self.computer.name or None,
       'shift_name': SHIFT_NAMES[self.shift-1] })
     return tmp
 

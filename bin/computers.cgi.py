@@ -164,6 +164,8 @@ def formData():
   elif name == 'updateuser':
     u = objects.User._USERS[web.POST['uid']]
     rc = u.assignShift(int(web.POST['shift']), map(int, web.POST['days']))
+    if web.POST.get('cid', '') in objects.Computer._COMPUTERS:
+      u.assignComputer(web.POST['cid'])
     objects.saveData()
     web.redirect('user/%s' % web.POST['uid'], 3)
   elif name == 'addcomputer':
