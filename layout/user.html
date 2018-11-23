@@ -3,9 +3,10 @@
   <input type="hidden" name="_form" value="updateuser">
   <input type="hidden" name="uid" value="{{user.uid}}">
   <p>{{lang.SHIFT}}:
-    <select name="shift" required="true">
-{{#list_shifts}}      <option value="{{$1}}"{{#$1=user.shift}} selected="true"{{/$1}}>{{$2}}</option>
-{{/list_shifts}}
+    <select name="shift" required="true">{{#list_shifts}}
+      <option value="{{$1}}"{{#$1=user.shift}} selected="true"{{/$1}}>
+        {{$2}}
+      </option>{{/list_shifts}}
     </select>
   </p>
   <p>{{lang.COMPUTER}}: {{#user.computer}}{{_}}{{/user.computer}}</p>

@@ -129,13 +129,11 @@ def mustache(html, data={}, default=None, *outside):
         val = tmp.get(k)
         if val is None: break
 
-#    if val is None: val = '[%s]' % key
-
     if compare:
-      val, cp = data, {}
+      cp = data
       for k in compare[1:].split('.'):
-        tmp = collections.ChainMap(val, *outside, GLOBALS, FUNCTIONS)
-        val = tmp.get(k)
+        tmp = collections.ChainMap(cp, *outside, GLOBALS, FUNCTIONS)
+        cp = tmp.get(k)
         if val is None: break
       val = val == cp
 
