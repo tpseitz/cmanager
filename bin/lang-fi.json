@@ -41,6 +41,7 @@
   "MSG_ADD_USER": "Lis\u00E4t\u00E4\u00E4n k\u00E4ytt\u00E4j\u00E4 %s",
   "MSG_ADD_COMPUTER": "Lis\u00E4t\u00E4\u00E4n tietokone %s",
   "MSG_ASSIGN_COMPUTER": "Lis\u00E4t\u00E4\u00E4n tietokone %s k\u00E4ytt\u00E4j\u00E4lle %s",
+  "MSG_UNASSIGN_COMPUTER": "Poistettiin tietokone k\u00E4ytt\u00E4j\u00E4lt\u00E4 %s",
   "MSG_DEL": "%s on poistettu tietokannasta",
   "MSG_REMOVING_USER": "Poistetaan k\u00E4ytt\u00E4j\u00E4 %s",
   "MSG_REMOVING_COMPUTER": "Poistetaan tietokone %s",

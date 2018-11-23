@@ -9,7 +9,11 @@
       </option>{{/list_shifts}}
     </select>
   </p>
-  <p>{{lang.COMPUTER}}: {{#user.computer}}{{_}}{{/user.computer}}</p>
+  <!-- {{user}} -->
+  <p>{{lang.COMPUTER}}:{{#user.computer}}
+    {{_}} <a href="{{script}}/assign/{{user.uid}}/NULL">{{lang.DELETE}}</a>{{^user.computer}}
+    <a href="{{script}}/assign/{{user.uid}}">{{lang.NO_SEAT}}</a>{{/user.computer}}
+  </p>
   <table class="userinfo">
     <tr>{{#lang.DAY_NAMES}}<th>{{_}}</th>{{/lang.DAY_NAMES}}</tr>
     <tr>{{#user.presence}}

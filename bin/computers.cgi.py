@@ -261,10 +261,20 @@ def mainCGI():
         and path[2] in objects.Computer._COMPUTERS:
           objects.User._USERS[path[1]].assignComputer(path[2])
           objects.saveData()
-          log(2, lang['MSG_ASSIGN_COMPUTER'] % (
+          message = lang['MSG_ASSIGN_COMPUTER'] % (
             objects.Computer._COMPUTERS[path[2]].name,
-            objects.User._USERS[path[1]].name))
-          web.redirect('users', 3)
+            objects.User._USERS[path[1]].name)
+          log(2, message)
+          web.redirect('users', 3, message)
+      if len(path) == 3 \
+        and path[1] in objects.User._USERS \
+        and path[2] in (None, 'NULL'):
+          objects.User._USERS[path[1]].assignComputer(None)
+          objects.saveData()
+          message = lang['MSG_UNASSIGN_COMPUTER'] \
+            % (objects.User._USERS[path[1]].name,)
+          log(2, message)
+          web.redirect('users', 3, message)
       elif len(path) == 2 and path[1] in objects.User._USERS:
         usr = objects.User._USERS[path[1]]
         dt = { 'user': usr.toDict(), 'computers':
@@ -272,7 +282,7 @@ def mainCGI():
             for cpu in computersVacant(usr.shift)] }
         web.outputPage(hypertext.frame(hypertext.mustache(
           hypertext.layout('assign'), dt)))
-      else: log(0, lang['ERR_GERERIC']) #XXX
+      else: log(0, lang['ERR_GENERIC'] + ' :: '+ ', '.join(path)) #XXX
     elif path[0] == 'delete' and len(path) == 2:
       if path[1] in objects.User._USERS: rd = 'users'
       elif path[1] in objects.Computer._COMPUTERS: rd ='computers'

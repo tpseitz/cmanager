@@ -41,6 +41,7 @@
   "MSG_ADD_USER": "Adding user %s",
   "MSG_ADD_COMPUTER": "Adding computer %s",
   "MSG_ASSIGN_COMPUTER": "Adding computer %s for user %s",
+  "MSG_UNASSIGN_COMPUTER": "Removed computer from user %s",
   "MSG_DEL": "Deleted %s from database",
   "MSG_REMOVING_USER": "Removing user %s",
   "MSG_REMOVING_COMPUTER": "Removing computer %s",
