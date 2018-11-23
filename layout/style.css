@@ -30,6 +30,9 @@ p.checklist input { display: table-cell; margin: 3px 7px; }
 table.lines { border-collapse: collapse; margin: 3px; margin: 5px; }
 table.lines th { border: solid 1px #444; padding: 3px 10px;
   text-align: left; border-width: 0px 0px 1px 0px; }
+table.lines tr.space { background: #eee; }
+table.lines tr.full { background: #888; }
+table.lines tr.overflow { background: #f00; }
 table.lines td { border: solid 1px #444; padding: 3px 10px;
   text-align: right; border-width: 0px 0px 1px 0px; }
 table.list { border-collapse: collapse; margin: 3px; margin: 5px; }
@@ -37,6 +40,7 @@ table.list td { border: solid 1px #444; padding: 3px 10px;
   vertical-align: top; }
 table.list td.missing { background: #fdd; }
 table.list td.present { background: #dfd; }
+table.list td.full { background: #666; }
 table.list td.delete a { color: #a00; }
 table.list a { text-decoration: none; font-weight: bold; color: #002; }
 table.list a:hover { color: #00a; }

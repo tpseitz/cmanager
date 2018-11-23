@@ -19,6 +19,7 @@
   "DAY_NAMES": ["maanantai", "tiistai", "keskiviikko", "torstai", "perjantai"],
   "VACANT": "vapaa",
   "RESERVED": "varattu",
+  "FULL": "t\u00E4ynn\u00E4",
   "DELETE": "poista",
   "ADD": "lis\u00E4\u00E4",
   "ADD_USER": "lis\u00E4\u00E4 k\u00E4ytt\u00E4j\u00E4",

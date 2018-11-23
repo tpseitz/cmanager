@@ -219,12 +219,19 @@ def mainCGI():
             if u.shift == i+1]),
           'computers_used': len([u for u in objects.User._USERS.values()
             if u.shift == i+1 and u.computer])})
+        for s in scnt:
+          uc, mu = s.get('user_count'), s.get('max_users')
+          if   uc  < mu: s['status'] = 'space'
+          elif uc == mu: s['status'] = 'full'
+          else: s['status'] = 'overflow'
       if len(path) > 1:
         sid = objects.strip(path[1])
         if sid in _SHIFTS: shift = _SHIFTS[sid][0]
-      shfs = { i+1: { 'shift_name': nm, 'presence': 5 * [(None, None, True)],
-        'status': 'free', 'name': '{{lang.VACANT}}' }
-          for i, nm in enumerate(objects.SHIFT_NAMES) }
+      shfs = { i+1: { 'shift_name': shf['shift_name'],
+        'presence': 5 * [(None, None, True)],
+        'name': shf['status']=="space" and '{{lang.VACANT}}' or '{{lang.FULL}}',
+        'status': shf['status'] == "space" and 'free' or 'full' }
+          for i, shf in enumerate(scnt) }
       for cpu in map(objects.Computer.toDict,
         objects.Computer._COMPUTERS.values()):
           uls = shfs.copy()

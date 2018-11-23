@@ -19,6 +19,7 @@
   "DAY_NAMES": ["monday", "tuesday", "wednesday", "thursday", "friday"],
   "VACANT": "vacant",
   "RESERVED": "reserved",
+  "FULL": "full",
   "DELETE": "delete",
   "ADD": "add",
   "ADD_USER": "add user",
