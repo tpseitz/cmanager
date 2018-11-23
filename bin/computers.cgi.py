@@ -30,12 +30,14 @@ def init():
       break
   if not conf: raise Exception('No config file')
 
-  objects.SHIFT_NAMES = conf.get('shift_names', objects.SHIFT_NAMES)
+  objects.SHIFT_PROPERTIES = conf.get('shift_names', objects.SHIFT_NAMES)
   objects.DIRECTORY = conf.get('data_directory', objects.DIRECTORY)
   LANG = web.GET.get('lang') or web.COOKIES.get('lang') \
     or web.SESSION or conf.get('lang') or LANG
   hypertext.LAYOUT_DIRECTORY = conf.get('layout_directory', objects.DIRECTORY)
   web.SESSION_DIRECTORY = conf.get('session_directory', web.SESSION_DIRECTORY)
+
+  objects.SHIFT_NAMES = [nm for nm, mx in objects.SHIFT_PROPERTIES]
 
   hypertext.GLOBALS['menu'] = [
     { 'title': '{{lang.COMPUTER_MANAGEMENT}}',
@@ -210,12 +212,19 @@ def mainCGI():
         { 'user': objects.User._USERS[path[1]].toDict() }))
     elif path[0] == 'computers':
       cls, shift = [], 0
+      scnt = []
+      for i, (nm, mx) in enumerate(objects.SHIFT_PROPERTIES):
+        scnt.append({ 'shift_name': nm, 'max_users': mx,
+          'user_count': len([u for u in objects.User._USERS.values()
+            if u.shift == i+1]),
+          'computers_used': len([u for u in objects.User._USERS.values()
+            if u.shift == i+1 and u.computer])})
       if len(path) > 1:
         sid = objects.strip(path[1])
         if sid in _SHIFTS: shift = _SHIFTS[sid][0]
-      shfs = { i+1: { 'shift_name': n, 'presence': 5 * [(None, None, True)],
+      shfs = { i+1: { 'shift_name': nm, 'presence': 5 * [(None, None, True)],
         'status': 'free', 'name': '{{lang.VACANT}}' }
-          for i, n in enumerate(objects.SHIFT_NAMES) }
+          for i, nm in enumerate(objects.SHIFT_NAMES) }
       for cpu in map(objects.Computer.toDict,
         objects.Computer._COMPUTERS.values()):
           uls = shfs.copy()
@@ -231,7 +240,7 @@ def mainCGI():
           cls.append(cpu)
       cls = sorted(cls, key=lambda c: c['name'])
       data = { 'shift_count': shift and 1 or objects.SHIFTS,
-        'computers': cls }
+        'computers': cls, 'shift_users': scnt }
       web.outputPage(hypertext.frame('computers', data))
     elif path[0] == 'users':
       uls = sorted(objects.User._USERS.values(), key=lambda u: u.name.lower())

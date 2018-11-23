@@ -1,4 +1,16 @@
 <div class="form">{{form:addcomputer}}</div>
+<div class="vuorot">
+<table class="lines">
+{{#shift_users}}
+  <tr>
+    <th>{{shift_name}}</th>
+<!--    <td align="right">{{computers_used}} /</td>-->
+    <td align="right">{{user_count}} /</td>
+    <td>{{max_users}}</td>
+  </tr>
+{{/shift_users}}
+</table>
+</div>
 <table class="list">
   <tr>
     <th>{{lang.COMPUTER}}</th>

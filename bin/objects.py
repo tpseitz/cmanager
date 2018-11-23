@@ -2,6 +2,7 @@
 import json, re, os
 DIRECTORY = None
 ROOMS, SHIFT_NAMES, SHIFTS = [], [], 0
+SHIFT_PROPERTIES = []
 
 LEVELS = ['ERR', 'WAR', 'NFO', 'NFO', 'DBG']
 REGEX_STRIP = re.compile(r'[^A-Za-z\d]')
