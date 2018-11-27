@@ -86,7 +86,6 @@ def readSession(session_id):
   if SESSION_DIRECTORY is None: return False
   if not os.path.isdir(SESSION_DIRECTORY):
     log(0, 'Session directory does not exist: %s' % SESSION_DIRECTORY)
-    SESSION_DIRECTORY = None
     sys.exit(1)
 
   ffn = os.path.join(SESSION_DIRECTORY, '%s.json' % (session_id,))
@@ -147,7 +146,6 @@ def handlePOST():
   global POST
 
   if 'CONTENT_TYPE' not in os.environ: return
-#  log(0, 'Post: %r' % os.environ.get('CONTENT_TYPE')) #XXX
 
   conf = {}
   for key in os.environ['CONTENT_TYPE'].split(';'):
