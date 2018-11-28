@@ -6,6 +6,18 @@ Tampere Syke. It has simple login and user management system and of course the
 computer and people management system. User account database uses MySQL but at
 the moment all computer and people data is stored as JSON files.
 
+Implementation to server
+------------------------
+
+It is recommended to have scripts and data outsite the public html directory
+and linking or aliasing them to server. With Apache this can be done using
+SciptAlias directive of mod_alias.
+
+Program structure
+-----------------
+
+
+
 Scripts and modules
 -------------------
 
