@@ -104,7 +104,7 @@ def checkPassword(username, password):
   username = username.lower()
   if not REGEX_USERNAME.match(username):
     log(1, 'Illegal username: %s' % (username,))
-    return {}
+    return { 'username': None, 'level': -1, '_error': 'MSG_ILLEGA_USERNAME' }
 
   cur = _cursor()
   query = 'SELECT id, password, tries, username, level, fullname, lastlogin' \
@@ -114,13 +114,13 @@ def checkPassword(username, password):
 
   if len(rows) != 1:
     if len(rows) > 1: log(0, 'Database error: More than one result')
-    else: log(2, 'Wrong username or password') #TODO
-    return {}
+    else: log(2, 'Wrong username')
+    return { 'username': None, 'level': -1, '_error': 'MSG_LOGIN_FAILED' }
   uid, pwhash, tries, username, level, fullname, lastlogin = rows[0]
 
   if tries > MAX_TRIES:
     log(2, 'This account is locked')
-    return {}
+    return { 'username': None, 'level': -1, '_error': 'MSG_ACCOUNT_LOCKED' }
 
   hsh = crypt.crypt(password, pwhash)
   if hmac.compare_digest(hsh, pwhash):
@@ -132,7 +132,7 @@ def checkPassword(username, password):
   else:
     query = 'UPDATE users SET tries = %s WHERE id = %s'
     cur.execute(query, (tries + 1, uid))
-    log(2, 'Wrong username or password') #TODO
+    log(2, 'Wrong password')
     close()
-    return {}
+    return { 'username': None, 'level': -1, '_error': 'MSG_LOGIN_FAILED' }
 

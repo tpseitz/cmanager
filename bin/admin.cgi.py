@@ -42,6 +42,9 @@ def init():
   lang = hypertext.loadLanguage(conf.get('lang', 'en'))
   hypertext.GLOBALS['script'] = os.environ.get('SCRIPT_NAME', '')
 
+  hypertext.lang = lang
+  web.lang = lang
+
   hypertext.GLOBALS['list_roles'] = [
     (i, USER_LEVELS[i]) for i in sorted(USER_LEVELS)]
   hypertext.FUNCTIONS['menu'] = {}

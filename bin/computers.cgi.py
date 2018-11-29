@@ -66,6 +66,7 @@ def init():
 
   objects.lang = lang
   hypertext.lang = lang
+  web.lang = lang
 
   hypertext.GLOBALS['script'] = os.environ.get('SCRIPT_NAME', '')
 

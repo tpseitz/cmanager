@@ -26,7 +26,7 @@ HTML_REDIRECT = '''<!DOCTYPE html><html>
 </html>
 '''
 
-_messages = []
+_messages, lang = [], {}
 
 def handleForm(): log(0, 'No subroutine')
 
@@ -65,6 +65,8 @@ def outputPage(html):
   sys.exit(0)
 
 def redirect(url, delay=None, *msg):
+  global SESSION, _messages, lang
+
   if delay is None:
     sys.stdout.write('Location: %s\r\n' % (url,))
 
@@ -72,7 +74,11 @@ def redirect(url, delay=None, *msg):
     or url.startswith('/')):
       url = '%s/%s' % (os.environ.get('SCRIPT_NAME', ''), url)
 
-  messages = '<br>\n'.join([msg[1] for msg in _messages if msg[0] < 4])
+  if SESSION.get('level', -1) > 200:
+    msg = [m[1] for m in _messages if m[0] < 4] + list(msg)
+  msg = [lang.get(m, m) for m in msg]
+
+  messages = '<br>\n'.join(msg)
   outputPage(HTML_REDIRECT % (delay or 0, url, messages, url, url))
 
 def randomString(length=16):
@@ -111,7 +117,7 @@ def writeSession(session_id=None):
   if not session_id: return False
 
   ffn = os.path.join(SESSION_DIRECTORY, '%s.json' % (session_id,))
-  with open(ffn, 'w') as f: SESSION = f.write(json.dumps(SESSION))
+  with open(ffn, 'w') as f: f.write(json.dumps(SESSION))
 
   return True
 
@@ -128,7 +134,7 @@ def destroySession(session_id=None):
   if os.path.isfile(ffn): os.unlink(ffn)
   COOKIES['sessid'] = randomString(32)
 
-  redirect(os.environ.get('HTTP_REFERER', '/'), 3)
+  redirect(os.environ.get('HTTP_REFERER', '/', 'MSG_LOGGED_OUT'), 3)
 
 def login():
   global SESSION, POST
@@ -137,10 +143,12 @@ def login():
 
   SESSION.update(database.checkPassword(
     POST.get('username', ''), POST.get('password', '')))
-  if SESSION.get('username'):
+  err = '_error' in SESSION and SESSION.pop('_error') or ''
+  if err: redirect('', 5, err)
+  elif SESSION.get('username'):
     writeSession()
-    redirect(POST.get('source') or POST['_next'], 3)
-  else: redirect('login/failed', 5)
+    redirect(POST.get('source') or POST['_next'], 3, 'MSG_LOGGED_IN')
+  else: redirect('', 5, 'MSG_LOGIN_FAILED')
 
 def handlePOST():
   global POST
