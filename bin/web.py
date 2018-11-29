@@ -134,7 +134,7 @@ def destroySession(session_id=None):
   if os.path.isfile(ffn): os.unlink(ffn)
   COOKIES['sessid'] = randomString(32)
 
-  redirect(os.environ.get('HTTP_REFERER', '/', 'MSG_LOGGED_OUT'), 3)
+  redirect(os.environ.get('HTTP_REFERER', '/'), 3, 'MSG_LOGGED_OUT')
 
 def login():
   global SESSION, POST
