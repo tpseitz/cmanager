@@ -47,7 +47,7 @@
   "MSG_REMOVING_COMPUTER": "Removing computer %s",
   "MSG_USER_CREATED": "User was succesfully created",
   "MSG_USER_DELETED": "User %s has been removed",
-  "MSG_ILLEGA_USERNAME": "Illegal username",
+  "MSG_ILLEGAL_USERNAME": "Illegal username",
   "MSG_LOGIN_FAILED": "Wrong username or password",
   "MSG_ACCOUNT_LOCKED": "Account is locked",
   "MSG_LOGGED_OUT": "You have been logged out",

@@ -47,7 +47,7 @@
   "MSG_REMOVING_COMPUTER": "Poistetaan tietokone %s",
   "MSG_USER_CREATED": "K\u00E4ytt\u00E4j\u00E4 luotiin onnistuneesti",
   "MSG_USER_DELETED": "K\u00E4ytt\u00E4j\u00E4 %s poistettiin",
-  "MSG_ILLEGA_USERNAME": "Virheellinen k\u00E4ytt\u00E4j\u00E4nimi",
+  "MSG_ILLEGAL_USERNAME": "Virheellinen k\u00E4ytt\u00E4j\u00E4nimi",
   "MSG_LOGIN_FAILED": "V\u00E4\u00E4r\u00E4 k\u00E4ytt\u00E4j\u00E4nimi tai salasana",
   "MSG_ACCOUNT_LOCKED": "Tunnus on lukittu",
   "MSG_LOGGED_OUT": "Olet kirjautunut ulos",
