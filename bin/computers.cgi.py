@@ -271,7 +271,9 @@ def mainCGI():
       data = { 'users': [usr.toDict() for usr in uls] }
       web.outputPage(hypertext.frame('users', data))
     elif path[0] == 'floorplan':
-      data = { 'computers': [] }
+      data, shift = { 'computers': [] }, None
+      if len(path) > 1: shift = _SHIFTS[path[1]][0]
+      data['shift'] = shift
       yy = 4
       for cid, cpu in \
         sorted(objects.Computer._COMPUTERS.items(), key=lambda t: t[0]):
@@ -279,7 +281,10 @@ def mainCGI():
           if not cpu.location:
             tmp['x'], tmp['y'] = 4, yy
             yy += 32
-          tmp['users'] = [u.toDict() for u in cpu.users]
+          tmp['users'] = [u.toDict() for u in cpu.users
+            if shift is None or u.shift == shift]
+          if shift is None: tmp['status'] = 'normal'
+          else: tmp['status'] = len(tmp['users']) and 'reserved' or 'vacant'
           data['computers'].append(tmp)
       if not (FLOORPLAN and os.path.isfile(FLOORPLAN)):
         log(0, 'Floorplan does not exist')

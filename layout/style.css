@@ -60,6 +60,8 @@ table.userinfo td.active   { background: #6d6; color: #222; }
 .computer { font-family: Sans-Serif; font-size: 12pt; cursor: move; }
 .computer path {
   fill: currentColor; fill-opacity: 1; stroke: none; color: #4d4d4d; }
+.computer text { text-anchor: middle; font-size: 8pt; }
+rect.normal { fill: #44a; stroke-width: 0; }
 rect.vacant { fill: #0a0; stroke-width: 0; }
 rect.reserved { fill: #a00; stroke-width: 0; }
 .computer g.info { display: none; }
@@ -67,6 +69,6 @@ rect.reserved { fill: #a00; stroke-width: 0; }
   fill: #fff; stroke: #444; stroke-width: 0.1;
   width: 3cm; height: 2em;
 }
-.computer g.info text { fill: #000; }
+.computer g.info text { fill: #000; text-anchor: start; font-size: 12pt; }
 .computer:hover g.info { fill-opacity: 0.9; display: block; }
 
