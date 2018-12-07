@@ -11,6 +11,7 @@ CONFIG_FILES = [
 
 LANG = 'en'
 AVAILABLE_LANGUAGES = { 'en', 'fi' }
+FLOORPLAN = None
 _SHIFTS = {}
 
 lang = {}
@@ -20,7 +21,7 @@ objects.log = log
 hypertext.log = log
 
 def init():
-  global CONFIG_FILES, LANG, _SHIFTS, lang
+  global CONFIG_FILES, LANG, FLOORPLAN, _SHIFTS, lang
 
   if 'CONFIG_FILE' in os.environ:
     CONFIG_FILES = [os.environ['CONFIG_FILE']] + CONFIG_FILES
@@ -32,6 +33,7 @@ def init():
       break
   if not conf: log(0, 'No config file')
 
+  FLOORPLAN = conf.get('floorplan', FLOORPLAN)
   objects.SHIFT_PROPERTIES = conf.get('shift_names', objects.SHIFT_NAMES)
   objects.DIRECTORY = conf.get('data_directory', objects.DIRECTORY)
   LANG = web.GET.get('lang') or web.COOKIES.get('lang') \
@@ -204,7 +206,7 @@ def printDebugData():
   web.outputPage(html)
 
 def mainCGI():
-  global _SHIFTS
+  global FLOORPLAN, _SHIFTS
 
   path = web.startCGI(init)
   if len(path) == 0: path = ['computers']
@@ -267,6 +269,19 @@ def mainCGI():
       uls = sorted(objects.User._USERS.values(), key=lambda u: u.name.lower())
       data = { 'users': [usr.toDict() for usr in uls] }
       web.outputPage(hypertext.frame('users', data))
+    elif path[0] == 'floorplan':
+      data = { 'computers':
+        [objects.Computer._COMPUTERS[c].toDict()
+          for c in sorted(objects.Computer._COMPUTERS)] }
+      yy = 4
+      for cpu in data['computers']:
+        if not ('x' in cpu and 'y' in cpu):
+          cpu['x'], cpu['y'] = 4, yy
+          yy += 32
+      if not (FLOORPLAN and os.path.isfile(FLOORPLAN)):
+        log(0, 'Floorplan does not exist')
+      with open(FLOORPLAN, 'r') as f: svg = f.read()
+      web.outputPage(hypertext.frame('floorplan', data, svg))
 
   if usr_lvl >= 100:
     if path[0] == 'assign':

@@ -56,3 +56,17 @@ table.userinfo td { border: solid 1px #444; padding: 3px 10px; }
 table.userinfo th { border: solid 1px #444; padding: 3px 10px; }
 table.userinfo td.reserved { background: #aaa; color: #666; }
 table.userinfo td.active   { background: #6d6; color: #222; }
+/* Style for SVG */
+.computer { font-family: Sans-Serif; font-size: 12pt; cursor: move; }
+.computer path {
+  fill: currentColor; fill-opacity: 1; stroke: none; color: #4d4d4d; }
+rect.vacant { fill: #0a0; stroke-width: 0; }
+rect.reserved { fill: #a00; stroke-width: 0; }
+.computer g.info { display: none; }
+.computer g.info rect {
+  fill: #fff; stroke: #444; stroke-width: 0.1;
+  width: 3cm; height: 2em;
+}
+.computer g.info text { fill: #000; }
+.computer:hover g.info { fill-opacity: 0.9; display: block; }
+

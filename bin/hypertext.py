@@ -82,14 +82,16 @@ FUNCTIONS['form'] = form
 
 def layout(name):
   ffn = os.path.join(os.path.expanduser(LAYOUT_DIRECTORY), '%s.html' % (name,))
+  if not os.path.isfile(ffn):
+    ffn = os.path.join(os.path.expanduser(LAYOUT_DIRECTORY), '%s.svg' % (name,))
   if not os.path.isfile(ffn): return name
   with open(ffn, 'r') as f: html = f.read()
   return html
 
 REGEX_LAYOUT_NAME = re.compile(r'^[a-z\d_]+$')
-def frame(html, data={}):
+def frame(html, data={}, frame='frame'):
   if REGEX_LAYOUT_NAME.match(html): html = layout(html)
-  start, end = layout('frame').split('{{content}}')
+  start, end = layout(frame).split('{{content}}')
   return mustache(start + html + end, data)
 
 MAX_ITERATIONS, MAX_PAGE_SIZE = 15, 1048576

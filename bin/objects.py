@@ -149,6 +149,8 @@ class User(object):
       'status': self.computer and 'active' or None,
       'computer_name': self.computer and self.computer.name or None,
       'shift_name': SHIFT_NAMES[self.shift-1] })
+    if self.location:
+      tmp.update({ 'x': self.location[0], 'y': self.location[1] })
     return tmp
 
 def loadData():

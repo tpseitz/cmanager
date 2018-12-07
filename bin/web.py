@@ -1,5 +1,5 @@
 # Encoding: UTF-8
-import random, string, json, time, sys, os
+import mimetypes, random, string, json, time, sys, os
 import database
 
 SESSION_DIRECTORY = '/tmp/session'
@@ -7,6 +7,8 @@ COOKIE_AGE, COOKIE_PATH = 14400, '/'
 ENCODING ='UTF-8'
 LOG_BUFFER = 30
 SESSION, COOKIES, POST, GET = {}, {}, {}, {}
+STATIC_FILES = { 'svg_draw.js':
+    os.sep.join(os.path.realpath(__file__).split(os.sep)[:-1]+['svg_draw.js'])}
 
 HTML_ERROR = '''<!DOCTYPE html><html>
   <head>
@@ -51,7 +53,11 @@ def log(lvl, message, extra=None):
 def outputPage(html):
   global COOKIES
   # Headers
-  sys.stdout.write('Content-Type: text/html; charset=%s\r\n' % (ENCODING,))
+  mime = 'text/html'
+  if html.startswith('<?xml'):
+    if '<svg' in html: mime = 'image/svg+xml'
+    else: mime = 'image/xml'
+  sys.stdout.write('Content-Type: %s; charset=%s\r\n' % (mime, ENCODING))
   for key, val in COOKIES.items():
     if val == 'PHPSESSID': continue
     sys.stdout.write('Set-Cookie: %s=%s; Path=%s; Max-Age=%d;\r\n' \
@@ -63,6 +69,16 @@ def outputPage(html):
   # Write session and stop running
   writeSession()
   sys.exit(0)
+
+def outputFile(full_filename):
+  if not os.path.isfile(full_filename): log(0, "File not found")
+  with open(full_filename, 'rb') as f: data = f.read()
+  mime, encoding = mimetypes.guess_type(full_filename)
+  sys.stdout.write('Content-Type: %s\r\n' % (mime,))
+  sys.stdout.write('Content-Length: %d\r\n' % len(data))
+  sys.stdout.write('\r\n')
+  sys.stdout.flush()
+  sys.stdout.buffer.write(data)
 
 def redirect(url, delay=None, *msg):
   global SESSION, _messages, lang
@@ -182,7 +198,7 @@ def handlePOST():
       else: POST[key] = [POST[key], val]
 
 def startCGI(init=None):
-  global HTTP, COOKIES, SESSION, GET
+  global HTTP, COOKIES, SESSION, GET, STATIC_FILES
 
   HTTP = True
 
@@ -204,7 +220,8 @@ def startCGI(init=None):
 
   if len(path) > 0:
     form = POST.get('_form')
-    if   path[0] == 'login': login()
+    if   path[-1] in STATIC_FILES: outputFile(STATIC_FILES[path[-1]])
+    elif path[0] == 'login': login()
     elif form in ('login','minilogin'): login()
     elif path[0] == 'logout': destroySession()
     elif path[0] == 'form': handleForm()
