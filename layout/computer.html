@@ -1,0 +1,16 @@
+<h2>{{computer.name}}</h2>
+<table class="list">
+  <tr>
+    <th>{{lang.SHIFT}}</th>
+    {{#lang.DAY_NAMES}}<th>{{_}}</th>{{/lang.DAY_NAMES}}
+  </tr>
+{{#computer.users}}
+  <tr>
+    <td>{{shift_name}}</td>
+{{#presence}}{{#$3}}
+    <td class="{{status}}">{{name}}</td>{{^$3}}
+    <td class="reserved">{{lang.RESERVED}}</td>{{/$3}}{{/presence}}
+  </tr>{{/computer.users}}
+</table>
+<a href="{{script}}/delete/{{computer.cid}}" class="delete">{{lang.DELETE_COMPUTER}}</a><br>
+<a href="{{script}}/computers">{{lang.BACK}}</a>

@@ -66,6 +66,7 @@ def init():
 
   objects.lang = lang
   hypertext.lang = lang
+  web.lang = lang
 
   hypertext.GLOBALS['script'] = os.environ.get('SCRIPT_NAME', '')
 
@@ -212,6 +213,12 @@ def mainCGI():
     if path[0] == 'user' and len(path) == 2 and path[1] in objects.User._USERS:
       web.outputPage(hypertext.frame('user',
         { 'user': objects.User._USERS[path[1]].toDict() }))
+    elif path[0] == 'computer' and len(path) == 2 \
+      and path[1] in objects.Computer._COMPUTERS:
+        cpu = objects.Computer._COMPUTERS[path[1]]
+        data = cpu.toDict()
+        data['users'] = [u.toDict() for u in cpu.users]
+        web.outputPage(hypertext.frame('computer', { 'computer': data }))
     elif path[0] == 'computers':
       cls, shift = [], 0
       scnt = []
