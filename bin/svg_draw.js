@@ -1,3 +1,4 @@
+var SCRIPT = '{{script}}';
 var DRAG_CLASS = "computer";
 var REGEX_TRANSLATE = /translate\(\s*(\d+)\s*,\s*(\d+)\s*\)/;
 
@@ -37,16 +38,25 @@ function mouseDown(vnt) {
   }
 }
 
-function mouseUp(vnt)  { offset = null; dragged = null; }
+function mouseUp()  {
+  if (dragged && offset) {
+    mt = REGEX_TRANSLATE.exec(dragged.getAttribute('transform'));
+    var x, y;
+    if (mt) { x = parseInt(mt[1]); y = parseInt(mt[2]); }
+    var url = SCRIPT + '/update/' + dragged.id + '/' + x + '/' + y;
+    var http = new XMLHttpRequest();
+    http.open('GET', url, true);
+    http.send(null);
+  }
+  offset = null; dragged = null;
+}
 
 function mouseMove(vnt) {
   if (dragged && offset) {
     vnt.preventDefault();
     pt = getMouseLocation(vnt);
-    if (offset) {
-      pt.x = pt.x - offset.x;
-      pt.y = pt.y - offset.y;
-    }
+    pt.x = pt.x - offset.x;
+    pt.y = pt.y - offset.y;
     trn = 'translate(' + parseInt(pt.x) + ', ' + parseInt(pt.y) + ')';
     dragged.setAttribute('transform', trn);
   }

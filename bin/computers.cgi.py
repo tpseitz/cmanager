@@ -50,7 +50,8 @@ def init():
       'path': conf.get('path_admin', hypertext.PATH_ADMIN) } ]
   hypertext.GLOBALS['submenu'] = [
     { 'title': '{{lang.COMPUTERS}}', 'path': 'computers' },
-    { 'title': '{{lang.USERS}}', 'path': 'users' }]
+    { 'title': '{{lang.USERS}}', 'path': 'users' },
+    { 'title': '{{lang.MAP}}', 'path': 'floorplan' }]
   for nm in objects.SHIFT_NAMES: hypertext.GLOBALS['submenu'].append({
     'title': nm, 'path': 'computers/' + nm })
 
@@ -270,14 +271,16 @@ def mainCGI():
       data = { 'users': [usr.toDict() for usr in uls] }
       web.outputPage(hypertext.frame('users', data))
     elif path[0] == 'floorplan':
-      data = { 'computers':
-        [objects.Computer._COMPUTERS[c].toDict()
-          for c in sorted(objects.Computer._COMPUTERS)] }
+      data = { 'computers': [] }
       yy = 4
-      for cpu in data['computers']:
-        if not ('x' in cpu and 'y' in cpu):
-          cpu['x'], cpu['y'] = 4, yy
-          yy += 32
+      for cid, cpu in \
+        sorted(objects.Computer._COMPUTERS.items(), key=lambda t: t[0]):
+          tmp = cpu.toDict()
+          if not cpu.location:
+            tmp['x'], tmp['y'] = 4, yy
+            yy += 32
+          tmp['users'] = [u.toDict() for u in cpu.users]
+          data['computers'].append(tmp)
       if not (FLOORPLAN and os.path.isfile(FLOORPLAN)):
         log(0, 'Floorplan does not exist')
       with open(FLOORPLAN, 'r') as f: svg = f.read()
@@ -322,6 +325,11 @@ def mainCGI():
         web.redirect(rd, 3, lang['MSG_DEL'] % (nm,))
       else:
         log(0, lang['ERR_UNKNOWN_UNIT'] % path[1])
+    elif path[0] == 'update' and len(path) == 4 \
+      and path[1] in objects.Computer._COMPUTERS:
+        cid, x, y = path[1], int(path[2]), int(path[3])
+        objects.Computer._COMPUTERS[cid].location = (x, y)
+        objects.saveData()
 
   web.outputPage(hypertext.frame('<div class="form">' \
     + hypertext.form('login', target='login') + '</div>'))

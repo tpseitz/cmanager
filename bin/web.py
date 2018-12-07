@@ -70,9 +70,12 @@ def outputPage(html):
   writeSession()
   sys.exit(0)
 
-def outputFile(full_filename):
+def outputFile(full_filename, replace=False):
   if not os.path.isfile(full_filename): log(0, "File not found")
   with open(full_filename, 'rb') as f: data = f.read()
+  if replace:
+    data = data.replace(b'{{script}}',
+      os.environ.get('SCRIPT_NAME', '').encode('ASCII'))
   mime, encoding = mimetypes.guess_type(full_filename)
   sys.stdout.write('Content-Type: %s\r\n' % (mime,))
   sys.stdout.write('Content-Length: %d\r\n' % len(data))
@@ -220,7 +223,7 @@ def startCGI(init=None):
 
   if len(path) > 0:
     form = POST.get('_form')
-    if   path[-1] in STATIC_FILES: outputFile(STATIC_FILES[path[-1]])
+    if   path[-1] in STATIC_FILES: outputFile(STATIC_FILES[path[-1]], True)
     elif path[0] == 'login': login()
     elif form in ('login','minilogin'): login()
     elif path[0] == 'logout': destroySession()

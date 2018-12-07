@@ -8,8 +8,7 @@
   <g class="info">
     <rect x="8" y="0.5em" width="100pt" height="3em" />
     <text x="12" y="1.5em">
-{{#users}}{{fullname}} {{/users}}
-{{^users}}No users{{/users}}
+{{#users}}{{fullname}} {{^users}}No users{{/users}}
 </text>
   </g>
 </g>
