@@ -2,7 +2,9 @@
 # Encoding: UTF-8
 import json, sys, os
 import database, objects, hypertext, web
-CONFIG_FILES = ['~/.config/computer_manager.json',
+CONFIG_FILES = [
+  '~/.config/computer_manager.json',
+  '/etc/cmanager/config.json',
   '/etc/computer_manager.json',
   os.sep.join(os.path.realpath(__file__).split(os.sep)[:-2]) \
     + '/computer_manager.json']
@@ -28,7 +30,7 @@ def init():
     if os.path.exists(os.path.expanduser(ffn)):
       with open(ffn, 'r') as f: conf = json.loads(f.read())
       break
-  if not conf: raise Exception('No config file')
+  if not conf: log(0, 'No config file')
 
   objects.SHIFT_PROPERTIES = conf.get('shift_names', objects.SHIFT_NAMES)
   objects.DIRECTORY = conf.get('data_directory', objects.DIRECTORY)
@@ -59,7 +61,7 @@ def init():
   objects.DIRECTORY = os.path.expanduser(objects.DIRECTORY)
   hypertext.LAYOUT_DIRECTORY = os.path.expanduser(hypertext.LAYOUT_DIRECTORY)
 
-  if LANG not in AVAILABLE_LANGUAGES: raise Exception('Unknown language')
+  if LANG not in AVAILABLE_LANGUAGES: log(0, 'Unknown language')
 
   fdn = os.path.split(os.path.realpath(__file__))[0]
   lang = hypertext.loadLanguage(LANG)
@@ -79,6 +81,9 @@ def init():
     = [(i, r['name']) for i, r in enumerate(objects.ROOMS)]
 
   if 'lang' in web.GET: web.COOKIES['lang'] = web.GET['lang']
+
+  if not os.path.isdir(hypertext.LAYOUT_DIRECTORY):
+    log(0, 'Layout directory does not exist')
 
 def runCommand(cmd, *argv):
   argv = list(argv)
