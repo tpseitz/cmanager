@@ -14,19 +14,7 @@
   <li id="submenu">
 {{#submenu}}    <ul><a href="{{script}}/{{path}}">{{title}}</a></ul>
 {{/submenu}}  </li>
-  <div id="panel">
-    <div class="minilogin">
-{{#session.fullname}}
-      <p class="user">{{session.fullname}}<br>
-      <a href="{{script}}/logout">{{lang.LOGOUT}}</a></p>
-{{^session.fullname}}
-      {{form:minilogin}}
-{{/session.fullname}}
-    </div>
-  </div>
 </div>
-<article>
 {{content}}
-</article>
 </body>
 </html>

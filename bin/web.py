@@ -82,6 +82,7 @@ def outputFile(full_filename, replace=False):
   sys.stdout.write('\r\n')
   sys.stdout.flush()
   sys.stdout.buffer.write(data)
+  sys.exit(0)
 
 def redirect(url, delay=None, *msg):
   global SESSION, _messages, lang

@@ -3,7 +3,9 @@
 import datetime, json, os
 import hypertext, database, web
 
-CONFIG_FILES = ['~/.config/computer_manager.json',
+CONFIG_FILES = [
+  '~/.config/computer_manager.json',
+  '/etc/cmanager/config.json',
   '/etc/computer_manager.json',
   os.path.split(os.path.realpath(__file__))[0] + '/computer_manager.json']
 USER_LEVELS = { 0: 'User', 50: 'Observer', 100: 'Master', 200: 'Admin' }

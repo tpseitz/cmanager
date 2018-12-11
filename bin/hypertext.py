@@ -149,6 +149,9 @@ def mustache(html, data={}, default=None, *outside):
         elif isinstance(vv, (tuple, list)):
           dt = { '$%d' % (i + 1): n for i, n in enumerate(vv)}
         ht += mustache(blk, dt, vv, data, *outside)
+    elif callable(val):
+      argv = mustache(blk, data, *outside).split(',')
+      ht = val(*argv)
     else:
       dt = data
       if isinstance(val, dict): dt = val

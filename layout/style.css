@@ -1,4 +1,6 @@
-body { font-family: Sans-Serif; width: 1000px; }
+body { font-family: Sans-Serif; }
+.header { width: 1000px; }
+article { width: 1000px; }
 a { text-decoration: none; font-weight: bold; color: #008; }
 a:hover { text-decoration: underline; color: #66d; }
 li#menu { display: table; border: 1px solid #888; background: #ddd;
@@ -57,18 +59,23 @@ table.userinfo th { border: solid 1px #444; padding: 3px 10px; }
 table.userinfo td.reserved { background: #aaa; color: #666; }
 table.userinfo td.active   { background: #6d6; color: #222; }
 /* Style for SVG */
-.computer { font-family: Sans-Serif; font-size: 12pt; cursor: move; }
+svg.area { width: 200pt; }
+circle { fill: none; }
+.selected circle { stroke: #a00; stroke-width: 2pt; }
+.computer { font-family: Sans-Serif; font-size: 8pt; cursor: move; }
 .computer path {
   fill: currentColor; fill-opacity: 1; stroke: none; color: #4d4d4d; }
-.computer text { text-anchor: middle; font-size: 8pt; }
-rect.normal { fill: #44a; stroke-width: 0; }
-rect.vacant { fill: #0a0; stroke-width: 0; }
-rect.reserved { fill: #a00; stroke-width: 0; }
+.computer text { text-anchor: middle; }
+rect { fill: #44a; stroke-width: 0; }
+.vacant rect { fill: #0a0; stroke-width: 0; }
+.partly rect { fill: #f80; stroke-width: 0; }
+.reserved rect { fill: #a00; stroke-width: 0; }
 .computer g.info { display: none; }
+.computer:hover g.info { display: block; }
 .computer g.info rect {
-  fill: #fff; stroke: #444; stroke-width: 0.1;
+  fill: #fff; stroke: #888; stroke-width: 1;
   width: 3cm; height: 2em;
 }
-.computer g.info text { fill: #000; text-anchor: start; font-size: 12pt; }
-.computer:hover g.info { fill-opacity: 0.9; display: block; }
+.computer g.info text { fill: #000; text-anchor: start; }
+.computer g.info text tspan { display: block; clear: both; }
 

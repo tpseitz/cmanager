@@ -11,7 +11,7 @@ CONFIG_FILES = [
 
 LANG = 'en'
 AVAILABLE_LANGUAGES = { 'en', 'fi' }
-FLOORPLAN = None
+FLOORPLAN, VIEWBOX = None, [0, 0, 100, 100]
 _SHIFTS = {}
 
 lang = {}
@@ -21,7 +21,7 @@ objects.log = log
 hypertext.log = log
 
 def init():
-  global CONFIG_FILES, LANG, FLOORPLAN, _SHIFTS, lang
+  global CONFIG_FILES, LANG, FLOORPLAN, VIEWBOX, _SHIFTS, lang
 
   if 'CONFIG_FILE' in os.environ:
     CONFIG_FILES = [os.environ['CONFIG_FILE']] + CONFIG_FILES
@@ -34,6 +34,7 @@ def init():
   if not conf: log(0, 'No config file')
 
   FLOORPLAN = conf.get('floorplan', FLOORPLAN)
+  VIEWBOX = conf.get('viewbox', VIEWBOX)
   objects.SHIFT_PROPERTIES = conf.get('shift_names', objects.SHIFT_NAMES)
   objects.DIRECTORY = conf.get('data_directory', objects.DIRECTORY)
   LANG = web.GET.get('lang') or web.COOKIES.get('lang') \
@@ -43,6 +44,7 @@ def init():
 
   objects.SHIFT_NAMES = [nm for nm, mx in objects.SHIFT_PROPERTIES]
 
+  hypertext.GLOBALS['floorplan'] = floorplan
   hypertext.GLOBALS['menu'] = [
     { 'title': '{{lang.COMPUTER_MANAGEMENT}}',
       'path': conf.get('path_computers',hypertext.PATH_COMPUTERS) },
@@ -82,6 +84,7 @@ def init():
     = [(i+1, d) for i, d in enumerate(objects.SHIFT_NAMES)]
   hypertext.GLOBALS['list_rooms'] \
     = [(i, r['name']) for i, r in enumerate(objects.ROOMS)]
+  hypertext.GLOBALS['viewbox'] = ' '.join(map(str, VIEWBOX))
 
   if 'lang' in web.GET: web.COOKIES['lang'] = web.GET['lang']
 
@@ -206,6 +209,46 @@ def printDebugData():
 
   web.outputPage(html)
 
+BORDERS = 100
+def floorplan(shift=None, selected=None):
+  data = { 'computers': [] }
+  if shift is not None: shift = int(shift or -1)
+  if shift is not None and shift <= 0: shift = None
+  data['shift'] = shift
+  yy = 4
+  for cid, cpu in \
+    sorted(objects.Computer._COMPUTERS.items(), key=lambda t: t[0]):
+      tmp = cpu.toDict()
+      if not cpu.location:
+        tmp['x'], tmp['y'] = 4, yy
+        yy += 32
+      tmp['users'], cnt = [], 2
+      for usr in sorted(cpu.users, key=lambda u: u.shift):
+        if shift is not None and usr.shift != shift: continue
+        usr = usr.toDict()
+        usr['line'] = cnt
+        cnt += 1.5
+        tmp['users'].append(usr)
+      tmp['lines'] = max(cnt - 1, 2.5)
+      if shift is None:
+        if   len(tmp['users']) == 0: tmp['status'] = 'vacant'
+        elif len(tmp['users']) < objects.SHIFTS: tmp['status'] = 'partly'
+        else: tmp['status'] = 'reserved'
+      else: tmp['status'] = len(tmp['users']) and 'reserved' or 'vacant'
+      if selected is not None and cpu.cid == selected:
+        x, y = cpu.location
+        tmp['status'] = 'selected'
+      data['computers'].append(tmp)
+  if selected is not None:
+    data['viewbox'] = ' '.join(map(str,
+      [x - BORDERS, y - BORDERS, 2 * BORDERS, 2 * BORDERS]))
+    data['class'] = 'area'
+  if not (FLOORPLAN and os.path.isfile(FLOORPLAN)):
+    log(0, 'Floorplan does not exist')
+  with open(FLOORPLAN, 'r') as f: svg = f.read()
+
+  return hypertext.frame('floorplan', data, svg)
+
 def mainCGI():
   global FLOORPLAN, _SHIFTS
 
@@ -264,32 +307,19 @@ def mainCGI():
           cls.append(cpu)
       cls = sorted(cls, key=lambda c: c['name'])
       data = { 'shift_count': shift and 1 or objects.SHIFTS,
-        'computers': cls, 'shift_users': scnt }
+        'computers': cls, 'shift_users': scnt, 'shift': shift,
+        'shift_name': objects.SHIFT_NAMES[shift - 1] }
       web.outputPage(hypertext.frame('computers', data))
     elif path[0] == 'users':
       uls = sorted(objects.User._USERS.values(), key=lambda u: u.name.lower())
       data = { 'users': [usr.toDict() for usr in uls] }
       web.outputPage(hypertext.frame('users', data))
     elif path[0] == 'floorplan':
-      data, shift = { 'computers': [] }, None
-      if len(path) > 1: shift = _SHIFTS[path[1]][0]
-      data['shift'] = shift
-      yy = 4
-      for cid, cpu in \
-        sorted(objects.Computer._COMPUTERS.items(), key=lambda t: t[0]):
-          tmp = cpu.toDict()
-          if not cpu.location:
-            tmp['x'], tmp['y'] = 4, yy
-            yy += 32
-          tmp['users'] = [u.toDict() for u in cpu.users
-            if shift is None or u.shift == shift]
-          if shift is None: tmp['status'] = 'normal'
-          else: tmp['status'] = len(tmp['users']) and 'reserved' or 'vacant'
-          data['computers'].append(tmp)
-      if not (FLOORPLAN and os.path.isfile(FLOORPLAN)):
-        log(0, 'Floorplan does not exist')
-      with open(FLOORPLAN, 'r') as f: svg = f.read()
-      web.outputPage(hypertext.frame('floorplan', data, svg))
+      html, data = '{{floorplan}}', {}
+      data['scripts'] = [{ 'filename': 'svg_draw.js' }]
+      if len(path) > 1:
+        html = '{{floorplan:%s}}' % (_SHIFTS[objects.strip(path[1])][0],)
+      web.outputPage(hypertext.frame(html, data, 'imgframe'))
 
   if usr_lvl >= 100:
     if path[0] == 'assign':
