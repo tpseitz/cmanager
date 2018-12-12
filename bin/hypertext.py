@@ -1,7 +1,8 @@
 # Encoding: UTF-8
 import collections, json, re, os
 LAYOUT_DIRECTORY = '~/layout'
-SHIFT_NAMES, FORMS, FUNCTIONS, GLOBALS = [], {}, {}, {}
+FORMS, FUNCTIONS = {}, {}
+GLOBALS = { 'menu': None, 'submenu': None }
 PATH_ADMIN, PATH_COMPUTERS = '/admin', '/konehallinta'
 
 HTML_CELL_FREE = None

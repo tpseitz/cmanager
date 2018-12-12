@@ -1,63 +1,34 @@
 #!/usr/bin/env python3
 # Encoding: UTF-8
 import json, sys, os
-import database, objects, hypertext, web
-CONFIG_FILES = [
-  '~/.config/computer_manager.json',
-  '/etc/cmanager/config.json',
-  '/etc/computer_manager.json',
-  os.sep.join(os.path.realpath(__file__).split(os.sep)[:-2]) \
-    + '/computer_manager.json']
+import database, objects, hypertext, sykeit, web
 
-LANG = 'en'
-AVAILABLE_LANGUAGES = { 'en', 'fi' }
 FLOORPLAN, VIEWBOX = None, [0, 0, 100, 100]
 _SHIFTS = {}
 
 lang = {}
 log = web.log
-database.log = log
 objects.log = log
-hypertext.log = log
 
 def init():
-  global CONFIG_FILES, LANG, FLOORPLAN, VIEWBOX, _SHIFTS, lang
+  global FLOORPLAN, VIEWBOX, _SHIFTS, lang
 
-  if 'CONFIG_FILE' in os.environ:
-    CONFIG_FILES = [os.environ['CONFIG_FILE']] + CONFIG_FILES
-
-  conf = {}
-  for ffn in CONFIG_FILES:
-    if os.path.exists(os.path.expanduser(ffn)):
-      with open(ffn, 'r') as f: conf = json.loads(f.read())
-      break
-  if not conf: log(0, 'No config file')
+  conf = sykeit.init()
 
   FLOORPLAN = conf.get('floorplan', FLOORPLAN)
   VIEWBOX = conf.get('viewbox', VIEWBOX)
   objects.SHIFT_PROPERTIES = conf.get('shift_names', objects.SHIFT_NAMES)
   objects.DIRECTORY = conf.get('data_directory', objects.DIRECTORY)
-  LANG = web.GET.get('lang') or web.COOKIES.get('lang') \
-    or web.SESSION or conf.get('lang') or LANG
-  hypertext.LAYOUT_DIRECTORY = conf.get('layout_directory', objects.DIRECTORY)
-  web.SESSION_DIRECTORY = conf.get('session_directory', web.SESSION_DIRECTORY)
 
   objects.SHIFT_NAMES = [nm for nm, mx in objects.SHIFT_PROPERTIES]
 
   hypertext.GLOBALS['floorplan'] = floorplan
-  hypertext.GLOBALS['menu'] = [
-    { 'title': '{{lang.COMPUTER_MANAGEMENT}}',
-      'path': conf.get('path_computers',hypertext.PATH_COMPUTERS) },
-    { 'title': '{{lang.ACCOUNT_MANAGEMENT}}',
-      'path': conf.get('path_admin', hypertext.PATH_ADMIN) } ]
   hypertext.GLOBALS['submenu'] = [
     { 'title': '{{lang.COMPUTERS}}', 'path': 'computers' },
     { 'title': '{{lang.USERS}}', 'path': 'users' },
     { 'title': '{{lang.MAP}}', 'path': 'floorplan' }]
   for nm in objects.SHIFT_NAMES: hypertext.GLOBALS['submenu'].append({
     'title': nm, 'path': 'computers/' + nm })
-
-  database.configuration(conf)
 
   objects.SHIFTS = len(objects.SHIFT_NAMES)
   _SHIFTS = { objects.strip(nm): (i+1, nm)
@@ -66,14 +37,10 @@ def init():
   objects.DIRECTORY = os.path.expanduser(objects.DIRECTORY)
   hypertext.LAYOUT_DIRECTORY = os.path.expanduser(hypertext.LAYOUT_DIRECTORY)
 
-  if LANG not in AVAILABLE_LANGUAGES: log(0, 'Unknown language')
-
   fdn = os.path.split(os.path.realpath(__file__))[0]
-  lang = hypertext.loadLanguage(LANG)
 
+  lang = sykeit.lang
   objects.lang = lang
-  hypertext.lang = lang
-  web.lang = lang
 
   hypertext.GLOBALS['script'] = os.environ.get('SCRIPT_NAME', '')
 
@@ -371,6 +338,6 @@ def mainCGI():
     + hypertext.form('login', target='login') + '</div>'))
 
 if __name__ == '__main__':
-  if 'QUERY_STRING' in os.environ: mainCGI()
+  if 'PATH_INFO' in os.environ: mainCGI()
   else: main()
 

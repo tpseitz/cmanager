@@ -1,57 +1,24 @@
 #!/usr/bin/env python3
 # Encoding: UTF-8
-import datetime, json, os
-import hypertext, database, web
+import datetime, os
+import hypertext, database, sykeit, web
 
-CONFIG_FILES = [
-  '~/.config/computer_manager.json',
-  '/etc/cmanager/config.json',
-  '/etc/computer_manager.json',
-  os.path.split(os.path.realpath(__file__))[0] + '/computer_manager.json']
 USER_LEVELS = { 0: 'User', 50: 'Observer', 100: 'Master', 200: 'Admin' }
 
 lang = {}
 log = web.log
-database.log = log
-hypertext.log = log
 
 def init():
-  global CONFIG_FILES, USER_LEVELS, LANG, _SHIFTS, lang
+  global CONFIG_FILES, USER_LEVELS, lang
 
-  if 'CONFIG_FILE' in os.environ:
-    CONFIG_FILES = [os.environ['CONFIG_FILE']] + CONFIG_FILES
+  conf = sykeit.init()
+  lang = sykeit.lang
 
-  conf = {}
-  for ffn in CONFIG_FILES:
-    if os.path.exists(os.path.expanduser(ffn)):
-      with open(ffn, 'r') as f: conf = json.loads(f.read())
-      break
-  if not conf: raise Exception('No config file')
-
-  hypertext.LAYOUT_DIRECTORY = conf.get('layout_directory')
-  web.SESSION_DIRECTORY = conf.get('session_directory', web.SESSION_DIRECTORY)
   if 'user_levels' in conf:
     USER_LEVELS = { int(k): v for k, v in conf['user_levels'].items() }
 
-  hypertext.GLOBALS['menu'] = [
-    { 'title': '{{lang.COMPUTER_MANAGEMENT}}',
-      'path': conf.get('path_computers',hypertext.PATH_COMPUTERS) },
-    { 'title': '{{lang.ACCOUNT_MANAGEMENT}}',
-      'path': conf.get('path_admin', hypertext.PATH_ADMIN) } ]
-
-  hypertext.GLOBALS['submenu'] = False
-
-  lang = hypertext.loadLanguage(conf.get('lang', 'en'))
-  hypertext.GLOBALS['script'] = os.environ.get('SCRIPT_NAME', '')
-
-  hypertext.lang = lang
-  web.lang = lang
-
   hypertext.GLOBALS['list_roles'] = [
     (i, USER_LEVELS[i]) for i in sorted(USER_LEVELS)]
-  hypertext.FUNCTIONS['menu'] = {}
-
-  database.configuration(conf)
 
 def createUser():
   if web.SESSION.get('level', -1) < 200:
@@ -121,6 +88,6 @@ def mainCGI():
   web.outputPage('You shouldn\'t see this')
 
 if __name__ == '__main__':
-  if 'QUERY_STRING' in os.environ: mainCGI()
+  if 'PATH_INFO' in os.environ: mainCGI()
   else: web.outputPage('NO!')
 
