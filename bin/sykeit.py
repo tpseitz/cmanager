@@ -20,7 +20,7 @@ if 'PATH_INFO' in os.environ:
   hypertext.log = log
 
 def init():
-  global CONFIG_FILES, LANG, lang
+  global CONFIG_FILES, AVAILABLE_LANGUAGES, LANG, lang
 
   hypertext.GLOBALS['script'] = os.environ.get('SCRIPT_NAME', '')
 
@@ -37,17 +37,25 @@ def init():
   hypertext.LAYOUT_DIRECTORY = conf.get('layout_directory')
   web.SESSION_DIRECTORY = conf.get('session_directory', web.SESSION_DIRECTORY)
 
+  hypertext.LAYOUT_DIRECTORY = os.path.expanduser(hypertext.LAYOUT_DIRECTORY)
+
   hypertext.GLOBALS['menu'] = [
     { 'title': '{{lang.COMPUTER_MANAGEMENT}}',
       'path': conf.get('path_computers',hypertext.PATH_COMPUTERS) },
     { 'title': '{{lang.ACCOUNT_MANAGEMENT}}',
       'path': conf.get('path_admin', hypertext.PATH_ADMIN) } ]
+  hypertext.GLOBALS['script'] = os.environ.get('SCRIPT_NAME', '')
 
   LANG = web.GET.get('lang') or web.COOKIES.get('lang') \
     or web.SESSION or conf.get('lang') or LANG
-  if LANG not in AVAILABLE_LANGUAGES: log(0, 'Unknown language')
 
-  lang = hypertext.loadLanguage(conf.get('lang', 'en'))
+  if 'lang' in web.GET: web.COOKIES['lang'] = web.GET['lang']
+
+  if LANG not in AVAILABLE_LANGUAGES: log(0, 'Unknown language')
+  if not os.path.isdir(hypertext.LAYOUT_DIRECTORY):
+    log(0, 'Layout directory does not exist')
+
+  lang = hypertext.loadLanguage(LANG)
   hypertext.lang = lang
   web.lang = lang
 

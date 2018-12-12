@@ -35,14 +35,9 @@ def init():
     for i, nm in enumerate(objects.SHIFT_NAMES) }
 
   objects.DIRECTORY = os.path.expanduser(objects.DIRECTORY)
-  hypertext.LAYOUT_DIRECTORY = os.path.expanduser(hypertext.LAYOUT_DIRECTORY)
-
-  fdn = os.path.split(os.path.realpath(__file__))[0]
 
   lang = sykeit.lang
   objects.lang = lang
-
-  hypertext.GLOBALS['script'] = os.environ.get('SCRIPT_NAME', '')
 
   objects.loadData()
 
