@@ -236,7 +236,8 @@ def floorplan(shift=None, selected=None):
         else: tmp['status'] = 'reserved'
       else: tmp['status'] = len(tmp['users']) and 'reserved' or 'vacant'
       if selected is not None and cpu.cid == selected:
-        x, y = cpu.location
+        x, y = 0, 0
+        if cpu.location: x, y = cpu.location
         tmp['status'] = 'selected'
       data['computers'].append(tmp)
   if selected is not None:
