@@ -50,9 +50,6 @@ def init():
 
   if 'lang' in web.GET: web.COOKIES['lang'] = web.GET['lang']
 
-  if not os.path.isdir(hypertext.LAYOUT_DIRECTORY):
-    log(0, 'Layout directory does not exist')
-
 def runCommand(cmd, *argv):
   argv = list(argv)
   if cmd == 'list':
