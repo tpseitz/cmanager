@@ -1,17 +1,20 @@
 # Encoding: UTF-8
-import crypt, hmac, time, re
+import datetime, crypt, hmac, time, re
 import MySQLdb
 HOSTNAME, USERNAME, PASSWORD, DATABASE = 'localhost', None, None, None
-MAX_TRIES = 5
+LOG_TIME_FORMAT, MAX_TRIES = '%Y-%m-%d %H:%M:%S ', 5
+LEVELS = ['ERR', 'WAR', 'NFO', 'NFO', 'DBG']
 
 REGEX_USERNAME = re.compile(r'^[a-z][a-z\d]+$')
 #REGEX_FULLNAME = re.compile(r'^[A-Z][a-z]+( [A-Z][a-z]*){,3}$')
 REGEX_FULLNAME = re.compile(r'^[^\d"\';\\]+$')
 REGEX_ESCAPE = re.compile(r'["\';\\]')
 
-def log(lvl, message, *extra):
-  print(message)
-  for e in extra: print('  %s' % (e,))
+def log(lvl, message, extra=None):
+  timestamp = datetime.datetime.now().strftime(LOG_TIME_FORMAT)
+  if lvl >= len(LEVELS): lvl = len(LEVELS) - 1
+  print('%s[%s] %s' % (timestamp, LEVELS[lvl], message))
+  if extra is not None: print('  %r' % (extra,))
 
 def configuration(conf):
   global HOSTNAME, USERNAME, PASSWORD, DATABASE

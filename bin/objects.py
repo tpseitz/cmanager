@@ -4,7 +4,6 @@ DIRECTORY = None
 ROOMS, SHIFT_NAMES, SHIFTS = [], [], 0
 SHIFT_PROPERTIES = []
 
-LEVELS = ['ERR', 'WAR', 'NFO', 'NFO', 'DBG']
 REGEX_STRIP = re.compile(r'[^A-Za-z\d]')
 
 lang = {}
@@ -12,10 +11,8 @@ lang = {}
 def strip(message):
   return REGEX_STRIP.sub('', message.lower())
 
-def log(lvl, message, extra=None):
-  if lvl >= len(LEVELS): lvl = len(LEVELS) - 1
-  print('[%s] %s' % (LEVELS[lvl], message))
-  if extra is not None: print('  %r' % (extra,))
+def log(lvl, message, *extra):
+  print(message)
 
 class Computer(object):
   _COMPUTERS = {}
