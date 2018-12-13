@@ -14,7 +14,7 @@ lang = {}
 
 def log(lvl, msg, *extra): print(msg)
 
-if 'PATH_INFO' in os.environ:
+if 'SERVER_ADDR' in os.environ:
   log = web.log
   database.log = log
   hypertext.log = log

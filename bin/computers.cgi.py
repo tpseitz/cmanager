@@ -151,23 +151,6 @@ def formData():
 
 web.handleForm = formData
 
-def printDebugData():
-  global CONFIG_FILES
-
-  html = ''
-  for key in sorted(os.environ):
-    html += "%s = %r<br>\n" % (key, os.environ[key])
-  html += '<hr>\n'
-  for t in web.GET.items(): html += "%s = %r<br>\n" % t
-  html += '<hr>\n'
-  for t in web.COOKIES.items(): html += "%s = %r<br>\n" % t
-  html += '<hr>\n'
-  for k in sorted(web.SESSION): html += "%s = %r<br>\n" % (k, web.SESSION[k])
-  html += '<hr>\n'
-  for fn in CONFIG_FILES: html += '%s<br>\n' % (os.path.expanduser(fn),)
-
-  web.outputPage(html)
-
 BORDERS = 100
 def floorplan(shift=None, selected=None):
   data = { 'computers': [] }
@@ -215,8 +198,6 @@ def mainCGI():
   path = web.startCGI(init)
   if len(path) == 0: path = ['computers']
   usr_lvl = web.SESSION.get('level', -1)
-
-  if path[0] == 'debug' and usr_lvl >= 200: printDebugData()
 
   hypertext.GLOBALS['session'] = web.SESSION
 
@@ -330,6 +311,6 @@ def mainCGI():
     + hypertext.form('login', target='login') + '</div>'))
 
 if __name__ == '__main__':
-  if 'PATH_INFO' in os.environ: mainCGI()
+  if 'SERVER_ADDR' in os.environ: mainCGI()
   else: main()
 

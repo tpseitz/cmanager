@@ -88,6 +88,6 @@ def mainCGI():
   web.outputPage('You shouldn\'t see this')
 
 if __name__ == '__main__':
-  if 'PATH_INFO' in os.environ: mainCGI()
-  else: web.outputPage('NO!')
+  if 'SERVER_ADDR' in os.environ: mainCGI()
+  else: log(0, 'This must be run as CGI-script')
 

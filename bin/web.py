@@ -201,6 +201,23 @@ def handlePOST():
       if isinstance(POST[key], list): POST[key].append(val)
       else: POST[key] = [POST[key], val]
 
+def printDebugData():
+  global CONFIG_FILES
+
+  html = ''
+  for key in sorted(os.environ):
+    html += "%s = %r<br>\n" % (key, os.environ[key])
+  html += '<hr>\n'
+  for t in web.GET.items(): html += "%s = %r<br>\n" % t
+  html += '<hr>\n'
+  for t in web.COOKIES.items(): html += "%s = %r<br>\n" % t
+  html += '<hr>\n'
+  for k in sorted(web.SESSION): html += "%s = %r<br>\n" % (k, web.SESSION[k])
+  html += '<hr>\n'
+  for fn in sykeit.CONFIG_FILES: html += '%s<br>\n' % (os.path.expanduser(fn),)
+
+  web.outputPage(html)
+
 def startCGI(init=None):
   global HTTP, COOKIES, SESSION, GET, STATIC_FILES
 
@@ -229,6 +246,7 @@ def startCGI(init=None):
     elif form in ('login','minilogin'): login()
     elif path[0] == 'logout': destroySession()
     elif path[0] == 'form': handleForm()
+    elif path[0] == 'debug' and usr_lvl >= 200: printDebugData()
 
   return path
 
