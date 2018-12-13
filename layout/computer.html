@@ -12,6 +12,7 @@
     <td class="reserved">{{lang.RESERVED}}</td>{{/$3}}{{/presence}}
   </tr>{{/computer.users}}
 </table>
-{{#floorplan}}-1,{{computer.cid}}{{/floorplan}}<br>
+{{#computer.x}}{{#floorplan}}-1,{{computer.cid}}{{/floorplan}}<br>
+{{/computer.x}}
 <a href="{{script}}/delete/{{computer.cid}}" class="delete">{{lang.DELETE_COMPUTER}}</a><br>
 <a href="{{script}}/computers">{{lang.BACK}}</a>
