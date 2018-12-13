@@ -1,18 +1,37 @@
 # Encoding: UTF-8
 import json, re, os
+import database
 DIRECTORY = None
-ROOMS, SHIFT_NAMES, SHIFTS = [], [], 0
-SHIFT_PROPERTIES = []
+_SHIFTS, _SHIFTS_PER_ORD, _SHIFTS_PER_UID = [], {}, {}
 
 REGEX_STRIP = re.compile(r'[^A-Za-z\d]')
+REGEX_INTEGER = re.compile(r'^\s*-?\s*\d+\s*$')
 
 lang = {}
+
+def log(lvl, message, *extra):
+  print(message)
 
 def strip(message):
   return REGEX_STRIP.sub('', message.lower())
 
-def log(lvl, message, *extra):
-  print(message)
+def listShifts():
+  global _SHIFTS
+
+  if not _SHIFTS:
+    _SHIFTS = database.select('shifts', order='ord')
+    _SHIFTS_PER_ORD = { s['ord']: s for s in _SHIFTS }
+    _SHIFTS_PER_UID = { strip(s['name']): s for s in _SHIFTS }
+
+  return _SHIFTS
+
+def getShift(search):
+  if isinstance(search, str) and REGEX_INTEGER.match(search):
+    search = int(search)
+
+  if   isinstance(search, int): return _SHIFTS_PER_ORD.get(search)
+  elif isinstance(search, str): return _SHIFTS_PER_UID.get(search)
+  else: raise TypeError('Illegal type for shift search: %r' % type(search))
 
 class Computer(object):
   _COMPUTERS = {}
@@ -227,5 +246,4 @@ def delete(name):
     del User._USERS[nm]
     return name
   return None
-
 

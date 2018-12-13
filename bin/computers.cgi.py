@@ -4,35 +4,25 @@ import json, sys, os
 import database, objects, hypertext, sykeit, web
 
 FLOORPLAN, VIEWBOX = None, [0, 0, 100, 100]
-_SHIFTS = {}
 
 lang = {}
 log = web.log
 objects.log = log
 
 def init():
-  global FLOORPLAN, VIEWBOX, _SHIFTS, lang
+  global FLOORPLAN, VIEWBOX, lang
 
   conf = sykeit.init()
 
   FLOORPLAN = conf.get('floorplan', FLOORPLAN)
   VIEWBOX = conf.get('viewbox', VIEWBOX)
-  objects.SHIFT_PROPERTIES = conf.get('shift_names', objects.SHIFT_NAMES)
   objects.DIRECTORY = conf.get('data_directory', objects.DIRECTORY)
-
-  objects.SHIFT_NAMES = [nm for nm, mx in objects.SHIFT_PROPERTIES]
 
   hypertext.GLOBALS['floorplan'] = floorplan
   hypertext.GLOBALS['submenu'] = [
     { 'title': '{{lang.COMPUTERS}}', 'path': 'computers' },
     { 'title': '{{lang.USERS}}', 'path': 'users' },
     { 'title': '{{lang.MAP}}', 'path': 'floorplan' }]
-  for nm in objects.SHIFT_NAMES: hypertext.GLOBALS['submenu'].append({
-    'title': nm, 'path': 'computers/' + nm })
-
-  objects.SHIFTS = len(objects.SHIFT_NAMES)
-  _SHIFTS = { objects.strip(nm): (i+1, nm)
-    for i, nm in enumerate(objects.SHIFT_NAMES) }
 
   objects.DIRECTORY = os.path.expanduser(objects.DIRECTORY)
 
@@ -43,9 +33,7 @@ def init():
 
   hypertext.GLOBALS['list_days'] = enumerate(lang['WORKDAYS'])
   hypertext.GLOBALS['list_shifts'] \
-    = [(i+1, d) for i, d in enumerate(objects.SHIFT_NAMES)]
-  hypertext.GLOBALS['list_rooms'] \
-    = [(i, r['name']) for i, r in enumerate(objects.ROOMS)]
+    = [(s['ord'], s['name']) for s in objects.listShifts()]
   hypertext.GLOBALS['viewbox'] = ' '.join(map(str, VIEWBOX))
 
   if 'lang' in web.GET: web.COOKIES['lang'] = web.GET['lang']
@@ -174,7 +162,8 @@ def floorplan(shift=None, selected=None):
       tmp['lines'] = max(cnt - 1, 2.5)
       if shift is None:
         if   len(tmp['users']) == 0: tmp['status'] = 'vacant'
-        elif len(tmp['users']) < objects.SHIFTS: tmp['status'] = 'partly'
+        elif len(tmp['users']) < len(objects.listShifts()):
+          tmp['status'] = 'partly'
         else: tmp['status'] = 'reserved'
       else: tmp['status'] = len(tmp['users']) and 'reserved' or 'vacant'
       if selected is not None and cpu.cid == selected:
@@ -193,13 +182,31 @@ def floorplan(shift=None, selected=None):
   return hypertext.frame('floorplan', data, svg)
 
 def mainCGI():
-  global FLOORPLAN, _SHIFTS
+  global FLOORPLAN
 
   path = web.startCGI(init)
   if len(path) == 0: path = ['computers']
   usr_lvl = web.SESSION.get('level', -1)
 
   hypertext.GLOBALS['session'] = web.SESSION
+
+  data = {}
+
+  # Compile shift status list
+  data['shift_users'] = []
+  for shf in objects.listShifts():
+    shf = shf.copy()
+    user_count = len([u for u in objects.User._USERS.values()
+      if u.shift == shf['ord']])
+    computers_used = len([u for u in objects.User._USERS.values()
+      if u.shift == i + 1 and u.computer])
+    shf['shift_name'] = shf['name']
+    shf['user_count'] = user_count
+    shf['computers_used'] = computers_used
+    if   user_count  < shf['max_users']: shf['status'] = 'space'
+    elif user_count == shf['max_users']: shf['status'] = 'full'
+    else: shf['status'] = 'overflow'
+    data['shift_users'].append(shf)
 
   if usr_lvl >= 50:
     if path[0] == 'user' and len(path) == 2 and path[1] in objects.User._USERS:
@@ -208,26 +215,14 @@ def mainCGI():
     elif path[0] == 'computer' and len(path) == 2 \
       and path[1] in objects.Computer._COMPUTERS:
         cpu = objects.Computer._COMPUTERS[path[1]]
-        data = cpu.toDict()
-        data['users'] = [u.toDict() for u in cpu.users]
-        web.outputPage(hypertext.frame('computer', { 'computer': data }))
+        data['computer'] = cpu.toDict()
+        data['computer']['users'] = [u.toDict() for u in cpu.users]
+        web.outputPage(hypertext.frame('computer', data))
     elif path[0] == 'computers':
       cls, shift = [], 0
-      scnt = []
-      for i, (nm, mx) in enumerate(objects.SHIFT_PROPERTIES):
-        scnt.append({ 'shift_name': nm, 'max_users': mx,
-          'user_count': len([u for u in objects.User._USERS.values()
-            if u.shift == i+1]),
-          'computers_used': len([u for u in objects.User._USERS.values()
-            if u.shift == i+1 and u.computer])})
-        for s in scnt:
-          uc, mu = s.get('user_count'), s.get('max_users')
-          if   uc  < mu: s['status'] = 'space'
-          elif uc == mu: s['status'] = 'full'
-          else: s['status'] = 'overflow'
-      if len(path) > 1:
-        sid = objects.strip(path[1])
-        if sid in _SHIFTS: shift = _SHIFTS[sid][0]
+
+      if len(path) > 1: shift = objects.getShift(path[1])
+
       shfs = { i+1: { 'shift_name': shf['shift_name'],
         'presence': 5 * [(None, None, True)],
         'name': shf['status']=="space" and '{{lang.VACANT}}' or '{{lang.FULL}}',
@@ -244,12 +239,14 @@ def mainCGI():
             cpu['users'] = []
           else:
             cpu['user'] =  uls.pop(1)
-            cpu['users'] = [uls[i] for i in range(2, objects.SHIFTS+1)]
+            cpu['users'] = [uls[i] for i in range(2, len(objects.listShifts()))]
           cls.append(cpu)
       cls = sorted(cls, key=lambda c: c['name'])
-      data = { 'shift_count': shift and 1 or objects.SHIFTS,
-        'computers': cls, 'shift_users': scnt, 'shift': shift,
-        'shift_name': objects.SHIFT_NAMES[shift - 1] }
+      data['shift_count'] = shift and 1 or len(objects.listShifts())
+      data['computers'] = cls
+      if shift:
+        data['shift'] = shift['ord']
+        data['shift_name'] = shift['name']
       web.outputPage(hypertext.frame('computers', data))
     elif path[0] == 'users':
       uls = sorted(objects.User._USERS.values(), key=lambda u: u.name.lower())

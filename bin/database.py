@@ -39,12 +39,35 @@ def _cursor():
   return __CONNECTION.cursor()
 
 def close():
-  global HOSTNAME, USERNAME, PASSWORD, DATABASE, __CONNECTION
+  global __CONNECTION
 
   if __CONNECTION:
     __CONNECTION.commit()
     __CONNECTION.close()
   __CONNECTION = None
+
+def select(table, columns=None, where=None, order=None):
+  #TODO Check table for illegal names
+  if columns is not None:
+    columns = ','.join(columns)
+    #TODO Check columns for illegal names
+  else: columns = '*'
+  query = 'SELECT %s FROM %s' % (table, columns)
+  data = []
+  if where is not None:
+    #TODO Check where clause for illegal names
+    pass #TODO
+  if order is not None:
+    if not isinstance(order, (list, tuple)): order = tuple(order)
+    #TODO Check order fields for illegal names
+    query += 'ORDERED BY %s' % ','.join(order)
+
+  cur = _cursor()
+  if not data: cur.execute(query)
+  else: cur.execute(query, data)
+  rows = cur.fetchall()
+
+  return [ dict(zip(names, row)) for row in rows ]
 
 def listAccounts():
   cur = _cursor()
