@@ -43,7 +43,25 @@ def createUser():
 
   rc = database.createUser(username, fullname, level, password)
   if rc: web.redirect(web.POST.get('next', ''), 1, lang['MSG_USER_CREATED'])
-  else: log(0, 'Could not create user')
+  else: log(0, 'ERR_USER_NOT_CREATED')
+
+def changePassword():
+  if web.SESSION.get('level', -1) <= 0:
+    log(0, lang['ERR_NOT_LOGGED_IN'])
+    return
+
+  username = web.SESSION.get('username')
+  oldpass  = web.POST.get('oldpass')
+  newpass  = web.POST.get('newpass')
+  passchk  = web.POST.get('passchk')
+
+  if password != passchk:
+    log(0, 'ERR_PASSWORD_MISMATCH')
+    return
+
+  rc = database.updatePassword(username, newpass, oldpass)
+  if rc: web.redirect(web.POST.get('next', ''), 1, lang['MSG_USER_CREATED'])
+  else: log(0, 'ERR_PASSWORD_CHANGE')
 
 def handleForm():
   if web.SESSION.get('level', -1) < 100: return

@@ -82,17 +82,17 @@ def listAccounts():
 def createUser(username, fullname, level, password):
   username = username.lower()
   if not REGEX_USERNAME.match(username):
-    log(0, 'Illegal username: %s' % (username,))
+    log(0, 'ERR_ILLEGAL_USERNAME', username)
     return False
 
   if not REGEX_FULLNAME.match(fullname):
-    log(0, 'Illegal username: %s' % (fullname,))
+    log(0, 'ERR_ILLEGAL_FULLNAME', fullname)
     return False
 
   level = int(level)
 
   if len(password) < 3:
-    log(0, 'Password too short')
+    log(0, 'ERR_PASSWORD_TOO_SHORT')
     return False
   password = crypt.crypt(password)
 
@@ -100,7 +100,7 @@ def createUser(username, fullname, level, password):
   query = 'SELECT id FROM users WHERE username = %s'
   cur.execute(query, (username,))
   if len(cur.fetchall()) > 0:
-    log(0, 'User allready in database')
+    log(0, 'ERR_USER_ALLREADY_EXISTS', username)
     return False
 
   cur = _cursor()
@@ -116,11 +116,29 @@ def createUser(username, fullname, level, password):
 
   return False
 
+def updatePassword(username, newpass, oldpass=None):
+  cur = _cursor()
+  query = 'SELECT password FROM users WHERE username = %s'
+  cur.execute(query, (username,))
+  rows = cur.fetchall()
+  if len(rows) != 1:
+    log(0, 'ERR_USER_DOES_NOT_EXIST', username)
+    return False
+
+  uid, pwhash = rows[0]
+  if oldpass is not None:
+    hsh = crypt.crypt(password, pwhash)
+    if not hmac.compare_digest(hsh, pwhash):
+    log(2, 'Wrong password')
+    return False
+
+  #TODO Update password
+
 def removeUser(username):
   if not username: return False
 
   cur = _cursor()
-  query = 'DELETE FROM users WHERE username = %s'
+  query = 'DELETE FROM id, users WHERE username = %s'
   cur.execute(query, (username,))
   close()
 
@@ -140,7 +158,6 @@ def checkPassword(username, password):
 
   if len(rows) != 1:
     if len(rows) > 1: log(0, 'Database error: More than one result')
-    else: log(2, 'Wrong username')
     return { 'username': None, 'level': -1, '_error': 'MSG_LOGIN_FAILED' }
   uid, pwhash, tries, username, level, fullname, lastlogin = rows[0]
 
