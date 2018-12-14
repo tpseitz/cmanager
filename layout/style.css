@@ -59,8 +59,9 @@ table.userinfo th { border: solid 1px #444; padding: 3px 10px; }
 table.userinfo td.reserved { background: #aaa; color: #666; }
 table.userinfo td.active   { background: #6d6; color: #222; }
 /* Style for SVG */
-svg.area { width: 200pt; }
+svg.area { width: 200pt; border: solid 1pt #aaa; }
 circle { fill: none; }
+text.h1 { font-size: 18pt; font-weight: bold; }
 .selected circle { stroke: #a00; stroke-width: 2pt; }
 .computer { font-family: Sans-Serif; font-size: 8pt; cursor: move; }
 .computer path {

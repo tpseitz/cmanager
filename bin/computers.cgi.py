@@ -142,19 +142,19 @@ web.handleForm = formData
 BORDERS = 100
 def floorplan(shift=None, selected=None):
   data = { 'computers': [] }
-  if shift is not None: shift = int(shift or -1)
-  if shift is not None and shift <= 0: shift = None
-  data['shift'] = shift
-  yy = 4
+  if shift is not None:
+    shift = objects.getShift(shift)
+    if shift is not None: data['shift_name'] = shift['name']
+  yy = 30
   for cid, cpu in \
     sorted(objects.Computer._COMPUTERS.items(), key=lambda t: t[0]):
       tmp = cpu.toDict()
       if not cpu.location:
-        tmp['x'], tmp['y'] = 4, yy
+        tmp['x'], tmp['y'] = 15, yy
         yy += 32
       tmp['users'], cnt = [], 2
       for usr in sorted(cpu.users, key=lambda u: u.shift):
-        if shift is not None and usr.shift != shift: continue
+        if shift is not None and usr.shift != shift['ord']: continue
         usr = usr.toDict()
         usr['line'] = cnt
         cnt += 1.5
@@ -193,20 +193,38 @@ def mainCGI():
   data = {}
 
   # Compile shift status list
+  data['shift_count'] = len(objects.listShifts())
   data['shift_users'] = []
   for shf in objects.listShifts():
     shf = shf.copy()
     user_count = len([u for u in objects.User._USERS.values()
       if u.shift == shf['ord']])
-    computers_used = len([u for u in objects.User._USERS.values()
-      if u.shift == i + 1 and u.computer])
+    seated_users = len([u for u in objects.User._USERS.values()
+      if u.shift == shf['ord'] and u.computer])
     shf['shift_name'] = shf['name']
     shf['user_count'] = user_count
-    shf['computers_used'] = computers_used
+    shf['seated_users'] = seated_users
     if   user_count  < shf['max_users']: shf['status'] = 'space'
     elif user_count == shf['max_users']: shf['status'] = 'full'
     else: shf['status'] = 'overflow'
     data['shift_users'].append(shf)
+
+  # List computers and shifts under them with user info
+  sidls = [s['ord'] for s in objects.listShifts()]
+  nousr = { 'shift_name': shf['shift_name'], 'ord': shf['ord'],
+    'presence': 5 * [(None, None, True)],
+    'name': shf['status']=="space" and '{{lang.VACANT}}' or '{{lang.FULL}}',
+    'status': shf['status'] == "space" and 'free' or 'full' }
+  data['computers'] = []
+  for cpu in sorted(objects.Computer._COMPUTERS.values(), key=lambda c: c.cid):
+    tmp, uls = cpu.toDict(), {}
+    for u in cpu.users: uls[u.shift] = u.toDict()
+    tmp['users'] = [uls.get(o) or nousr for o in sidls]
+    data['computers'].append(tmp)
+
+  # List users
+  data['users'] = [usr.toDict() for usr in
+    sorted(objects.User._USERS.values(), key=lambda u: u.name.lower())]
 
   if usr_lvl >= 50:
     if path[0] == 'user' and len(path) == 2 and path[1] in objects.User._USERS:
@@ -219,44 +237,41 @@ def mainCGI():
         data['computer']['users'] = [u.toDict() for u in cpu.users]
         web.outputPage(hypertext.frame('computer', data))
     elif path[0] == 'computers':
-      cls, shift = [], 0
+      cls, shift = [], None
+      if len(path) > 1: shift = objects.getShift(objects.strip(path[1]))
 
-      if len(path) > 1: shift = objects.getShift(path[1])
-
-      shfs = { i+1: { 'shift_name': shf['shift_name'],
-        'presence': 5 * [(None, None, True)],
-        'name': shf['status']=="space" and '{{lang.VACANT}}' or '{{lang.FULL}}',
-        'status': shf['status'] == "space" and 'free' or 'full' }
-          for i, shf in enumerate(scnt) }
-      for cpu in map(objects.Computer.toDict,
-        objects.Computer._COMPUTERS.values()):
-          uls = shfs.copy()
-          for u in objects.User._USERS.values():
-            if u.computer is None or u.computer.cid != cpu['cid']: continue
-            uls[u.shift] = u.toDict()
-          if shift > 0:
-            cpu['user'] = uls.get(shift)
-            cpu['users'] = []
-          else:
-            cpu['user'] =  uls.pop(1)
-            cpu['users'] = [uls[i] for i in range(2, len(objects.listShifts()))]
-          cls.append(cpu)
-      cls = sorted(cls, key=lambda c: c['name'])
-      data['shift_count'] = shift and 1 or len(objects.listShifts())
-      data['computers'] = cls
-      if shift:
-        data['shift'] = shift['ord']
+      for cpu in data['computers']:
+        if shift is not None:
+          cpu['user'] = \
+            { u['ord']: u for u in cpu['users'] }.get(shift['ord'], nousr)
+          cpu['users'] = []
+        else:
+          cpu['user'] = cpu['users'].pop(1)
+      if shift is not None:
         data['shift_name'] = shift['name']
+        data['shift'] = shift['ord']
+        data['shift_count'] = 1
+
+      data['subsubmenu'] = [
+        {'title': s['name'], 'path': 'computers/%s' % objects.strip(s['name'])}
+        for s in objects.listShifts()]
+
       web.outputPage(hypertext.frame('computers', data))
     elif path[0] == 'users':
-      uls = sorted(objects.User._USERS.values(), key=lambda u: u.name.lower())
-      data = { 'users': [usr.toDict() for usr in uls] }
       web.outputPage(hypertext.frame('users', data))
     elif path[0] == 'floorplan':
-      html, data = '{{floorplan}}', {}
+      html = '{{floorplan}}'
+
       data['scripts'] = [{ 'filename': 'svg_draw.js' }]
+
       if len(path) > 1:
-        html = '{{floorplan:%s}}' % (_SHIFTS[objects.strip(path[1])][0],)
+        shift = objects.getShift(path[1])
+        html = '{{floorplan:%s}}' % (objects.strip(shift['name']),)
+
+      data['subsubmenu'] = [
+        {'title': s['name'], 'path': 'floorplan/%s' % objects.strip(s['name'])}
+        for s in objects.listShifts()]
+
       web.outputPage(hypertext.frame(html, data, 'imgframe'))
 
   if usr_lvl >= 100:

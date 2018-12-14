@@ -16,7 +16,7 @@ def strip(message):
   return REGEX_STRIP.sub('', message.lower())
 
 def listShifts():
-  global _SHIFTS
+  global _SHIFTS, _SHIFTS_PER_ORD, _SHIFTS_PER_UID
 
   if not _SHIFTS:
     _SHIFTS = database.select('shifts', order='ord')
@@ -26,6 +26,8 @@ def listShifts():
   return _SHIFTS
 
 def getShift(search):
+  listShifts()
+
   if isinstance(search, str) and REGEX_INTEGER.match(search):
     search = int(search)
 
@@ -83,8 +85,8 @@ class User(object):
     self.uid = REGEX_STRIP.sub('', self.name.lower())
     self.computer = computer
 
-    if not 0 <= self.shift <= SHIFTS:
-      log(0, lang['ERR_ILLEGAL_SHIFT'] % self.shift, (SHIFT_NAMES, SHIFTS))
+    if getShift(self.shift) is None:
+      log(0, lang['ERR_ILLEGAL_SHIFT'] % (self.shift,))
       self.shift, self.days = 0, []
     elif self.days and (min(self.days) < 0 or max(self.days) > 4):
       log(0, lang['ERR_ILLEGAL_DAYS'] % (self.days,))
@@ -103,14 +105,15 @@ class User(object):
     if self.shift and self.computer:
       if (self.shift, self.computer) in User._CONNECTIONS:
         log(0, lang['ERR_DUPLICATE_SEAT'] \
-          % (SHIFT_NAMES[self.shift-1], self.computer))
+          % (_SHIFT_PER_ORD[self.shift], self.computer))
       else:
         self.computer.users.append(self)
         User._CONNECTIONS.add((self.shift, self.computer.cid))
 
   def assignShift(self, shift, days):
     days = sorted(set(days))
-    if not 0 < shift <= SHIFTS:
+    shf = getShift(shift)
+    if shf is None:
       log(0, lang['ERR_ILLEGAL_SHIFT'] % (shift,))
       return False
     if min(days) < 0 or max(days) > 4:
@@ -149,7 +152,7 @@ class User(object):
 
   def __str__(self):
     if self.shift and self.days:
-      return '%s: %s (%s) %s' % (self.name, SHIFT_NAMES[self.shift - 1],
+      return '%s: %s (%s) %s' % (self.name, getShift(self.shift)['name'],
         ' '.join([lang['WORKDAYS'][i] for i in self.days]),
         self.computer and self.computer.name or lang['NO_SEAT'])
     else:
@@ -160,6 +163,7 @@ class User(object):
       'computer':  self.computer and self.computer.cid or None }
 
   def toDict(self):
+    shift = getShift(self.shift)
     tmp = self.toDictBare()
     tmp.update({ 'uid': self.uid, 'username': self.name,
       'day_names': [lang['WORKDAYS'][d] for d in self.days],
@@ -167,7 +171,7 @@ class User(object):
         for d in range(5)],
       'status': self.computer and 'active' or None,
       'computer_name': self.computer and self.computer.name or None,
-      'shift_name': SHIFT_NAMES[self.shift-1] })
+      'shift_name': shift['name'], 'ord': shift['ord'] })
     return tmp
 
 def loadData():
@@ -205,8 +209,6 @@ def printData():
     if usr.computer: continue
     print(usr)
 
-#  for sh, cpu in User._CONNECTIONS: print('%8s %s' % (SHIFT_NAMES[sh-1], cpu))
-
 def addShift(usr, shift, days):
   usr = REGEX_STRIP.sub('', usr.lower())
   if usr not in User._USERS:
@@ -214,10 +216,10 @@ def addShift(usr, shift, days):
     return
   usr = User._USERS[usr]
 
-  if shift not in SHIFT_NAMES:
+  shift = getShift(shift)
+  if shift is None:
     log(0, lang['ERR_UNKNOWN_SHIFT'] % (shift,))
     return
-  shift = { v: i for i, v in enumerate(SHIFT_NAMES) }[shift]
 
   if len(days) == 1 and ',' in days[0]: days = days[0].split(',')
   for d in days:
@@ -227,9 +229,9 @@ def addShift(usr, shift, days):
   tmp = { v: i for i, v in enumerate(lang['WORKDAYS']) }
   days = sorted(set([tmp[d] for d in days]))
 
-  log(2, lang['MSG_ADD_SHIFT'] % (usr, SHIFT_NAMES[shift],
+  log(2, lang['MSG_ADD_SHIFT'] % (usr, shift['name'],
     ', '.join([lang['WORKDAYS'][d] for d in days])))
-  usr.assignShift(shift + 1, days)
+  usr.assignShift(shift['ord'], days)
 
   saveData()
 

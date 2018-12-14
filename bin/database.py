@@ -52,28 +52,28 @@ def select(table, columns=None, where=None, order=None):
     columns = ','.join(columns)
     #TODO Check columns for illegal names
   else: columns = '*'
-  query = 'SELECT %s FROM %s' % (table, columns)
+  query = 'SELECT %s FROM %s' % (columns, table)
   data = []
   if where is not None:
     #TODO Check where clause for illegal names
     pass #TODO
   if order is not None:
-    if not isinstance(order, (list, tuple)): order = tuple(order)
+    if not isinstance(order, (list, tuple)): order = [order]
     #TODO Check order fields for illegal names
-    query += 'ORDERED BY %s' % ','.join(order)
+    query += ' ORDER BY %s' % ','.join(order)
 
   cur = _cursor()
   if not data: cur.execute(query)
   else: cur.execute(query, data)
   rows = cur.fetchall()
 
-  return [ dict(zip(names, row)) for row in rows ]
+  names = [c[0] for c in cur.description]
+  return [dict(zip(names, row)) for row in rows]
 
 def listAccounts():
   cur = _cursor()
   names = ['id','tries','username','level','fullname','lastlogin']
-  query = 'SELECT id,tries,username,level,fullname,lastlogin' \
-    + ' FROM users;'
+  query = 'SELECT %s FROM users;' % ','.join(names)
   cur.execute(query)
   rows = cur.fetchall()
 
