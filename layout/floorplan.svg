@@ -1,10 +1,9 @@
 {{#computers}}
 <g id="{{cid}}" class="computer {{status}}" transform="translate({{x}}, {{y}})">
   <circle cx="8" cy="7" r="20" />
-  <rect x="2.5" y="3.5" width="11" height="7" fill="#44d" />
-  <!-- Breezeicons-devices-16-computer.svg -->
-  <path d="M 2 3 L 2 11 L 7 11 L 7 12 L 5 12 L 5 13 L 11 13 L 11 12 L 9 12
-    L 9 11 L 14 11 L 14 3 L 2 3 z M 3 4 L 13 4 L 13 10 L 3 10 L 3 4 z" />
+  <rect x="1.5" y="2.5" width="13" height="9" fill="#44d"
+    stroke="#444" stroke-width="1.2" />
+  <line x1="4" y1="14" x2="12" y2="14" stroke="#444" stroke-width="2" />
   <text x="8" y="24" style="text-anchor: middle;">{{name}}</text>
   <g class="info">
     <rect x="8" y="0.5em" width="100pt" height="{{lines}}em" />

@@ -64,13 +64,11 @@ circle { fill: none; }
 text.h1 { font-size: 18pt; font-weight: bold; }
 .selected circle { stroke: #a00; stroke-width: 2pt; }
 .computer { font-family: Sans-Serif; font-size: 8pt; cursor: move; }
-.computer path {
-  fill: currentColor; fill-opacity: 1; stroke: none; color: #4d4d4d; }
 .computer text { text-anchor: middle; }
-rect { fill: #44a; stroke-width: 0; }
-.vacant rect { fill: #0a0; stroke-width: 0; }
-.partly rect { fill: #f80; stroke-width: 0; }
-.reserved rect { fill: #a00; stroke-width: 0; }
+rect { fill: #44a; }
+.vacant rect { fill: #0a0; }
+.partly rect { fill: #f80; }
+.reserved rect { fill: #a00; }
 .computer g.info { display: none; }
 .computer:hover g.info { display: block; }
 .computer g.info rect {
