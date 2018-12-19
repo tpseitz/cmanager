@@ -11,6 +11,15 @@ and linking or aliasing them to server. With Apache this can be done using
 SciptAlias directive of mod_alias. The two CGI scripts are admin.cgi.py and
 computer.cgi.py
 
+Initial database
+----------------
+
+Default database script creates two shifts and temporary superuser with
+username "admin" and password "temporary". It is recommend to delete this
+account when real superusers have been created. New users can also be directly
+inserted into database on creation time. Passwords are encrypted using pyhons
+crypt method of crypt module.
+
 Configuration file
 ------------------
 
