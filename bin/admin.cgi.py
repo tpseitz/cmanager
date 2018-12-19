@@ -45,28 +45,13 @@ def createUser():
   if rc: web.redirect(web.POST.get('next', ''), 1, lang['MSG_USER_CREATED'])
   else: log(0, 'ERR_USER_NOT_CREATED')
 
-def changePassword():
-  if web.SESSION.get('level', -1) <= 0:
-    log(0, lang['ERR_NOT_LOGGED_IN'])
-    return
-
-  username = web.SESSION.get('username')
-  oldpass  = web.POST.get('oldpass')
-  newpass  = web.POST.get('newpass')
-  passchk  = web.POST.get('passchk')
-
-  if password != passchk:
-    log(0, 'ERR_PASSWORD_MISMATCH')
-    return
-
-  rc = database.updatePassword(username, newpass, oldpass)
-  if rc: web.redirect(web.POST.get('next', ''), 1, lang['MSG_USER_CREATED'])
-  else: log(0, 'ERR_PASSWORD_CHANGE')
-
 def handleForm():
+  form = web.POST.get('_form', '')
+
+  if form == 'newpass': web.changePassword()
+
   if web.SESSION.get('level', -1) < 100: return
 
-  form = web.POST.get('_form', '')
   if form == 'addaccount': createUser()
   elif form in ('login', 'minilogin'): web.login()
   else: log(0, 'Unknown form: %s' % (form,))
@@ -79,11 +64,15 @@ def mainCGI():
 
   level = web.SESSION.get('level', -1)
   if level <= 0:
-    web.outputPage(hypertext.frame('<div class="form">' \
-      + hypertext.form('login', target='login') + '</div>'))
-  elif level < 200:
+    web.outputPage(hypertext.frame('<div class="form">\n' \
+      + hypertext.form('login', target='login') + '\n</div>'))
+
+  if len(path) == 0 or path[0] == 'profile':
+    data = { 'session': web.SESSION, 'languages': sykeit.listLanguages() }
+    web.outputPage(hypertext.frame('profile', data))
+
+  if level < 200:
     log(0, lang['ERR_ACCESS_DENIED'])
-    return
   elif len(path) == 2 and path[0] == 'delete':
     if path[1] == web.SESSION['username']:
       web.redirect(os.environ.get('SCRIPT_NAME'), 1, lang['ERR_DELETE_SELF'])
@@ -91,7 +80,7 @@ def mainCGI():
       rc = database.removeUser(path[1])
       web.redirect(os.environ.get('SCRIPT_NAME'), 1,
         lang['MSG_USER_DELETED'] % (path[1],))
-  else:
+  elif len(path) == 1 and path[0] == 'users':
     accounts = database.listAccounts()
     for acc in accounts:
       for lvl in sorted(USER_LEVELS):
@@ -103,7 +92,7 @@ def mainCGI():
     data = { 'accounts': accounts }
     web.outputPage(hypertext.frame('accounts', data))
 
-  web.outputPage('You shouldn\'t see this')
+  web.error404()
 
 if __name__ == '__main__':
   if 'SERVER_ADDR' in os.environ: mainCGI()

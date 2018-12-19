@@ -118,21 +118,29 @@ def createUser(username, fullname, level, password):
 
 def updatePassword(username, newpass, oldpass=None):
   cur = _cursor()
-  query = 'SELECT password FROM users WHERE username = %s'
+  query = 'SELECT id, password FROM users WHERE username = %s'
   cur.execute(query, (username,))
   rows = cur.fetchall()
   if len(rows) != 1:
-    log(0, 'ERR_USER_DOES_NOT_EXIST', username)
-    return False
+    log(2, 'User %s does not exist' % username)
+    return { '_error': ('ERR_USER_DOES_NOT_EXIST', (username,)) }
 
   uid, pwhash = rows[0]
   if oldpass is not None:
-    hsh = crypt.crypt(password, pwhash)
+    hsh = crypt.crypt(newpass, pwhash)
     if not hmac.compare_digest(hsh, pwhash):
-    log(2, 'Wrong password')
-    return False
+      log(2, 'Wrong password')
+      return { '_error': 'ERR_WRONG_PASSWORD' }
 
-  #TODO Update password
+  if len(password) < 3:
+    log(2, 'Password too short')
+    return { '_error': 'ERR_PASSWORD_TOO_SHORT' }
+  password = crypt.crypt(newpass)
+
+  query = 'UPDATE users SET password = %s, tries = %s WHERE id = %s'
+  cur.execute(query, (password, 0, uid))
+  close()
+  return {}
 
 def removeUser(username):
   if not username: return False
@@ -170,8 +178,8 @@ def checkPassword(username, password):
     query = 'UPDATE users SET lastlogin = %s, tries = %s WHERE id = %s'
     cur.execute(query, (int(time.time()), 0, uid))
     close()
-    return {'username': username, 'level': level,
-      'fullname': fullname, 'lastlogin': lastlogin}
+    return { 'username': username, 'level': level,
+      'fullname': fullname, 'lastlogin': lastlogin }
   else:
     query = 'UPDATE users SET tries = %s WHERE id = %s'
     cur.execute(query, (tries + 1, uid))

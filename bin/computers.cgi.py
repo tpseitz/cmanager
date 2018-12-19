@@ -262,7 +262,7 @@ def mainCGI():
     elif path[0] == 'floorplan':
       html = '{{floorplan}}'
 
-      data['scripts'] = [{ 'filename': 'svg_draw.js' }]
+      hypertext.GLOBALS['scripts'] += [{ 'filename': 'svg_draw.js' }]
 
       if len(path) > 1:
         shift = objects.getShift(path[1])

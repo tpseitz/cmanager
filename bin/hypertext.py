@@ -2,7 +2,7 @@
 import collections, json, re, os
 LAYOUT_DIRECTORY = '~/layout'
 FORMS, FUNCTIONS = {}, {}
-GLOBALS = { 'menu': None, 'submenu': None }
+GLOBALS = { 'menu': None, 'submenu': None, 'scripts': [] }
 PATH_ADMIN, PATH_COMPUTERS = '/admin', '/konehallinta'
 
 HTML_CELL_FREE = None
@@ -173,6 +173,8 @@ def mustache(html, data={}, default=None, *outside):
     else:
       for k in key.split('.'):
         for dt in (val,) + outside + (_BASE_DATA,):
+          if not isinstance(dt, dict):
+            log(0, "Parent is not dict: %s = %r" % (key, dt))
           val = dt.get(k, '{{}}')
           if val != '{{}}': break
         if val ==  '{{}}':

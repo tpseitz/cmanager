@@ -27,12 +27,27 @@ HTML_REDIRECT = '''<!DOCTYPE html><html>
   </body>
 </html>
 '''
+HTML_404 = '''<!DOCTYPE html>
+<html>
+  <head>
+    <title>404 - Not Found</title>
+  </head>
+  <body>
+    <h1>404 - Not Found</h1>
+  </body>
+</html>
+'''
 
 _messages, lang = [], {}
 
 def handleForm(): log(0, 'No subroutine')
 
-def log(lvl, message, extra=None):
+def error404():
+  sys.stdout.write('Status: 404 Not Found\r\nContent-Type: text/html\r\n\r\n')
+  sys.stdout.write(HTML_404)
+  sys.exit(0)
+
+def log(lvl, message, *extra):
   global LOG_BUFFER, _messages
 
   _messages.append((lvl, message, extra))
@@ -170,6 +185,27 @@ def login():
     redirect(POST.get('source') or POST['_next'], 3, 'MSG_LOGGED_IN')
   else: redirect('', 5, 'MSG_LOGIN_FAILED')
 
+def changePassword():
+  if SESSION.get('level', -1) <= 0:
+    log(0, lang['ERR_NOT_LOGGED_IN'])
+    return
+
+  username = SESSION.get('username')
+  oldpass  = POST.get('oldpass')
+  newpass  = POST.pop('newpass')
+  passchk  = POST.pop('passchk')
+
+  if newpass != passchk:
+    log(0, 'ERR_PASSWORD_MISMATCH')
+    return
+
+  res = database.updatePassword(username, newpass, oldpass)
+  if res.get('_error') is not None:
+    err = res['_error']
+    if isinstance(err, tuple): log(0, err[0] % err[1])
+
+  redirect(POST.get('next', ''), 3, 'MSG_PASSWORD_CHANGED')
+
 def handlePOST():
   global POST
 
@@ -237,6 +273,7 @@ def startCGI(init=None):
   readSession(COOKIES['sessid'])
 
   path = os.environ.get('PATH_INFO', '/')
+  if path.endswith('.php'): error404()
   path = [d for d in path.split('/') if d]
 
   if len(path) > 0:
