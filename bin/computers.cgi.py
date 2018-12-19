@@ -119,20 +119,24 @@ def formData():
     if u in objects.User._USERS.values():
       log(2, lang['MSG_ADD_USER'] % (str(u),))
       objects.saveData()
-    web.redirect('users', 3)
+      web.redirect('users', 3, lang['MSG_ADD_USER'] % (str(u),))
+    else:
+      web.redirect('users', 3, lang['ERR_ADD_USER'] % (str(u),))
   elif name == 'updateuser':
     u = objects.User._USERS[web.POST['uid']]
     rc = u.assignShift(int(web.POST['shift']), map(int, web.POST['days']))
     if web.POST.get('cid', '') in objects.Computer._COMPUTERS:
       u.assignComputer(web.POST['cid'])
-    objects.saveData()
-    web.redirect('user/%s' % web.POST['uid'], 3)
+      objects.saveData()
+    web.redirect('user/%s' % web.POST['uid'], 1, 'MSG_DATA_UPDATED')
   elif name == 'addcomputer':
     c = objects.Computer(web.POST['name'])
     if c in objects.Computer._COMPUTERS.values():
-      log(2, lang['MSG_ADD_COMPUTER'] % (str(c),))
+      log(2, 'Added computer %s into database' % (str(c),))
       objects.saveData()
-    web.redirect('computers', 3)
+      web.redirect('computers', 3, lang['MSG_ADD_COMPUTER'] % (str(c),))
+    else:
+      web.redirect('computers', 3, 'ERR_ADD_COMPUTER')
   else: log(0, 'Unknown form: %s' % (name,))
 
   web.redirect(web.POST.get('_next', ''), 3)
