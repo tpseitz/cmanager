@@ -204,8 +204,8 @@ def mainCGI():
     shf['shift_name'] = shf['name']
     shf['user_count'] = user_count
     shf['seated_users'] = seated_users
-    if   user_count  < shf['max_users']: shf['status'] = 'space'
-    elif user_count == shf['max_users']: shf['status'] = 'full'
+    if   seated_users  < shf['max_users']: shf['status'] = 'space'
+    elif seated_users == shf['max_users']: shf['status'] = 'full'
     else: shf['status'] = 'overflow'
     data['shift_users'].append(shf)
 
