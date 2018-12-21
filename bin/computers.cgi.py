@@ -221,7 +221,6 @@ def mainCGI():
     tmp = cpu.toDict()
     uls = { u.shift: u.toDict() for u in cpu.users }
     tmp['users'] = [s.copy() for s in shifts]
-    tmp['users'][0]['name'] = cpu.name
     for shf in tmp['users']:
       u = uls.get(shf['ord'])
       if u is not None: shf.update(u)
