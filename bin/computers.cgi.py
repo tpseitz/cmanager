@@ -195,6 +195,7 @@ def mainCGI():
   # Compile shift status list
   data['shift_count'] = len(objects.listShifts())
   data['shift_users'] = []
+  shifts = []
   for shf in objects.listShifts():
     shf = shf.copy()
     user_count = len([u for u in objects.User._USERS.values()
@@ -209,18 +210,23 @@ def mainCGI():
     else: shf['status'] = 'overflow'
     data['shift_users'].append(shf)
 
+    shifts.append({ 'shift_name': shf['shift_name'], 'ord': shf['ord'],
+      'presence': 5 * [(None, None, True)],
+      'name': shf['status']=="space" and '{{lang.VACANT}}' or '{{lang.FULL}}',
+      'status': shf['status'] == "space" and 'free' or 'full' })
+
   # List computers and shifts under them with user info
-  sidls = [s['ord'] for s in objects.listShifts()]
-  nousr = { 'shift_name': shf['shift_name'], 'ord': shf['ord'],
-    'presence': 5 * [(None, None, True)],
-    'name': shf['status']=="space" and '{{lang.VACANT}}' or '{{lang.FULL}}',
-    'status': shf['status'] == "space" and 'free' or 'full' }
-  data['computers'] = []
+  data['computers'], computers = [], {}
   for cpu in sorted(objects.Computer._COMPUTERS.values(), key=lambda c: c.cid):
-    tmp, uls = cpu.toDict(), {}
-    for u in cpu.users: uls[u.shift] = u.toDict()
-    tmp['users'] = [uls.get(o) or nousr for o in sidls]
+    tmp = cpu.toDict()
+    uls = { u.shift: u.toDict() for u in cpu.users }
+    tmp['users'] = [s.copy() for s in shifts]
+    tmp['users'][0]['name'] = cpu.name
+    for shf in tmp['users']:
+      u = uls.get(shf['ord'])
+      if u is not None: shf.update(u)
     data['computers'].append(tmp)
+    computers[cpu.cid] = tmp
 
   # List users
   data['users'] = [usr.toDict() for usr in
@@ -230,11 +236,8 @@ def mainCGI():
     if path[0] == 'user' and len(path) == 2 and path[1] in objects.User._USERS:
       web.outputPage(hypertext.frame('user',
         { 'user': objects.User._USERS[path[1]].toDict() }))
-    elif path[0] == 'computer' and len(path) == 2 \
-      and path[1] in objects.Computer._COMPUTERS:
-        cpu = objects.Computer._COMPUTERS[path[1]]
-        data['computer'] = cpu.toDict()
-        data['computer']['users'] = [u.toDict() for u in cpu.users]
+    elif path[0] == 'computer' and len(path) == 2 and path[1] in computers:
+        data['computer'] = computers[path[1]]
         web.outputPage(hypertext.frame('computer', data))
     elif path[0] == 'computers':
       cls, shift = [], None
@@ -246,7 +249,7 @@ def mainCGI():
             { u['ord']: u for u in cpu['users'] }.get(shift['ord'], nousr)
           cpu['users'] = []
         else:
-          cpu['user'] = cpu['users'].pop(1)
+          cpu['user'] = cpu['users'].pop(0)
       if shift is not None:
         data['shift_name'] = shift['name']
         data['shift'] = shift['ord']
