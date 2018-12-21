@@ -244,8 +244,7 @@ def mainCGI():
 
       for cpu in data['computers']:
         if shift is not None:
-          cpu['user'] = \
-            { u['ord']: u for u in cpu['users'] }.get(shift['ord'], nousr)
+          cpu['user'] = [u for u in cpu['users'] if u['ord']==shift['ord']][0]
           cpu['users'] = []
         else:
           cpu['user'] = cpu['users'].pop(0)
