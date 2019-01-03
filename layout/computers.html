@@ -7,6 +7,7 @@
     <td align="right">{{seated_users}} /</td>
 <!--    <td align="right">{{user_count}} /</td>-->
     <td>{{max_users}}</td>
+    <td><div class="shift{{ord}}" style="width: 1em; height: 1em;"></div>
   </tr>
 {{/shift_users}}
 </table>
@@ -22,7 +23,7 @@
     <th>{{lang.DELETE}}</th>
   </tr>
 {{#computers}}
-  <tr>
+  <tr class="shift{{user.ord}}">
     <td rowspan="{{shift_count}}">
       <a href="{{script}}/computer/{{cid}}">{{name}}</a></td>
     <td>{{user.shift_name}}</td>
@@ -34,7 +35,7 @@
     </td>
   </tr>
 {{#users}}
-  <tr>
+  <tr class="shift{{ord}}">
     <td>{{shift_name}}</td>
 {{#presence}}{{#$3}}
     <td class="{{status}}">{{name}}</td>{{^$3}}

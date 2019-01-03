@@ -63,13 +63,19 @@ table.list a { text-decoration: none; font-weight: bold; color: #002; }
 table.list a:hover { color: #00a; }
 table.list th { border: solid 1pt #444; padding: 3pt 10pt; background: #eee; }
 table.list td.free     { background: #6d6; color: #666; }
-table.list td.reserved { background: #aaa; color: #666; }
+table.list td.reserved { background: #888; color: #666; }
 table.list td.active   { background: #d66; color: #222; }
+table.lines td div { border: solid 1pt #444; }
+tr.shift1 td { border-top: solid 2pt #222; }
+tr.shift1 td.active,div.shift1 { background: #a68; fill: #a68; }
+tr.shift2 td.active,div.shift2 { background: #a84; fill: #c64; }
+tr.shift3 td.active,div.shift3 { background: #e54; fill: #e66; }
 table.userinfo { border-collapse: collapse; margin: 3pt; }
 table.userinfo td { border: solid 1pt #444; padding: 3pt 10pt; }
 table.userinfo th { border: solid 1pt #444; padding: 3pt 10pt; }
 table.userinfo td.reserved { background: #aaa; color: #666; }
 table.userinfo td.active   { background: #6d6; color: #222; }
+
 /* Style for SVG */
 svg.area { width: 200pt; border: solid 1pt #aaa; }
 circle { fill: none; }
