@@ -1,26 +1,25 @@
+/* Main layout style */
 body { font-family: Sans-Serif; }
 .header { width: 800pt; }
 article { width: 800pt; }
 a { text-decoration: none; font-weight: bold; color: #008; }
 a:hover { text-decoration: underline; color: #66d; }
+
 li#menu { display: table; border: 1pt solid #888; background: #ddd;
   width: 100%; margin: 3pt; }
 li#menu ul { display: table-cell; padding: 3pt 10pt; }
 li#submenu { display: table; border: 1pt solid #888; background: #ddd;
   width: 100%; margin: 3pt; }
 li#submenu ul { display: table-cell; padding: 3pt 10pt; }
+
 div.select { border: solid 1pt #888; background: #eee;
   min-width: 200pt; max-width: 400pt; margin: 5pt; padding: 0pt; }
 div.select p:first-child { background: #ddd; border: solid 0pt #444;
   padding: 3pt 7pt; margin: 0pt; text-align: left;
   border-width: 0pt 0pt 1pt 0pt; text-align: left; display: block; }
 div.select p { padding: 3pt 7pt; }
-/*
-div.select p { padding: 3pt 7pt; display: none; }
-div.select input { display: none; }
-div.select:hover p { display: block; }
-div.select:hover input { display: inline; }
-*/
+
+/* Side panel with minilogin */
 div#panel { float: right; }
 div.minilogin { border: solid 1pt #888; background: #eee; min-width: 150pt; }
 div.minilogin p { padding: 3pt 0pt; margin: 0pt; text-align: center; }
@@ -29,6 +28,8 @@ div.minilogin a { font-size: 12pt; }
 div.minilogin input { width: 85%; }
 div.minilogin input[type=submit] { border: 0; background: none;
   text-align: right; font-size: 12pt; }
+
+/* Forms and login panel */
 div.login { border: solid 1pt #888; background: #eee; }
 div.form { border: solid 1pt #888; background: #eee; text-align: right;
   min-width: 200pt; max-width: 400pt; margin: 5pt; padding: 0pt; }
@@ -43,8 +44,8 @@ input[type=submit] { border: solid 1pt #888; border-width: 1pt;
   color: #000; background: #ddd; font-size: 18pt; margin: 3pt 7pt; }
 p.checklist { display: table-row; }
 p.checklist input { display: table-cell; margin: 3pt 7pt; }
-table.list td.delete a, a.delete { color: #a00; }
-table.list td.delete a:hover, a.delete:hover { background: #f88; }
+
+/* Legend box */
 table.lines { border-collapse: collapse; margin: 3pt; margin: 5pt; }
 table.lines th { border: solid 1pt #444; padding: 3pt 10pt;
   text-align: left; border-width: 0pt 0pt 1pt 0pt; }
@@ -53,30 +54,48 @@ table.lines tr.full { background: #888; }
 table.lines tr.overflow { background: #f00; }
 table.lines td { border: solid 1pt #444; padding: 3pt 10pt;
   text-align: right; border-width: 0pt 0pt 1pt 0pt; }
+table.lines td div { border: solid 1pt #444; }
+
+/*
+ * Computer and user list tables 
+ */
+table.list td.delete a, a.delete { color: #a00; }
+table.list td.delete a:hover, a.delete:hover { background: #f88; }
 table.list { border-collapse: collapse; margin: 3pt; margin: 5pt; }
-table.list td { border: solid 1pt #444; padding: 3pt 10pt;
+table.list th { border: solid 1pt #444; padding: 3pt 10pt; background: #ccc; }
+table.list td { border: solid 1pt #444; padding: 3pt 10pt; background: #eee;
   vertical-align: top; }
-table.list td.missing { background: #fdd; }
-table.list td.present { background: #dfd; }
-table.list td.full { background: #666; }
+table.list tr.shift1 td { border-top: solid 2pt #222; }
 table.list a { text-decoration: none; font-weight: bold; color: #002; }
 table.list a:hover { color: #00a; }
-table.list th { border: solid 1pt #444; padding: 3pt 10pt; background: #eee; }
-table.list td.free     { background: #6d6; color: #666; }
-table.list td.reserved { background: #888; color: #666; }
+/* User list status colors */
+table.list td.missing { background: #fdd; }
+table.list td.present { background: #dfd; }
+/* Computer list user status colors */
+table.list td.free     { background: #4e4; color: #020; }
+table.list td.full     { background: #444; color: #222; }
+table.list td.reserved { background: #777; color: #444; }
 table.list td.active   { background: #d66; color: #222; }
-table.lines td div { border: solid 1pt #444; }
-tr.shift1 td { border-top: solid 2pt #222; }
-tr.shift1 td.active,div.shift1 { background: #a68; fill: #a68; }
-tr.shift2 td.active,div.shift2 { background: #a84; fill: #c64; }
-tr.shift3 td.active,div.shift3 { background: #e54; fill: #e66; }
+/* Per shift seat status colors */
+tr.shift1 td.active,div.shift1 { background: #99e; }
+tr.shift2 td.active,div.shift2 { background: #9eb; }
+tr.shift3 td.active,div.shift3 { background: #e9b; }
+tr.shift1 td.reserved { background: #667; }
+tr.shift2 td.reserved { background: #676; }
+tr.shift3 td.reserved { background: #766; }
+
+/*
+ * User timetable
+ */
 table.userinfo { border-collapse: collapse; margin: 3pt; }
 table.userinfo td { border: solid 1pt #444; padding: 3pt 10pt; }
 table.userinfo th { border: solid 1pt #444; padding: 3pt 10pt; }
 table.userinfo td.reserved { background: #aaa; color: #666; }
 table.userinfo td.active   { background: #6d6; color: #222; }
 
-/* Style for SVG */
+/*
+ * Floorplan SVG image
+ */
 svg.area { width: 200pt; border: solid 1pt #aaa; }
 circle { fill: none; }
 text.h1 { font-size: 18pt; font-weight: bold; }
@@ -89,10 +108,8 @@ rect { fill: #44a; }
 .reserved rect { fill: #a00; }
 .computer g.info { display: none; }
 .computer:hover g.info { display: block; }
-.computer g.info rect {
-  fill: #fff; stroke: #888; stroke-width: 1;
-  width: 3cm; height: 2em;
-}
+.computer g.info rect { fill: #fff; stroke: #888; stroke-width: 1;
+  width: 3cm; height: 2em; }
 .computer g.info text { fill: #000; text-anchor: start; }
 .computer g.info text tspan { display: block; clear: both; }
 
