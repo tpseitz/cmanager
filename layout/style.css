@@ -77,12 +77,18 @@ table.list td.full     { background: #444; color: #222; }
 table.list td.reserved { background: #777; color: #444; }
 table.list td.active   { background: #d66; color: #222; }
 /* Per shift seat status colors */
-tr.shift1 td.active,div.shift1 { background: #99e; }
-tr.shift2 td.active,div.shift2 { background: #9eb; }
-tr.shift3 td.active,div.shift3 { background: #e9b; }
+tr.shift1 td.active,div.shift1 { background: #55c; }
+tr.shift2 td.active,div.shift2 { background: #5c5; }
+tr.shift3 td.active,div.shift3 { background: #c55; }
 tr.shift1 td.reserved { background: #667; }
 tr.shift2 td.reserved { background: #676; }
 tr.shift3 td.reserved { background: #766; }
+tr.shift1 td.free { background: #4e6; }
+tr.shift2 td.free { background: #4e4; }
+tr.shift3 td.free { background: #6e4; }
+tr.shift1 td.full { background: #445; }
+tr.shift2 td.full { background: #454; }
+tr.shift3 td.full { background: #544; }
 
 /*
  * User timetable
