@@ -42,7 +42,7 @@ def createUser():
     return
 
   rc = database.createUser(username, fullname, level, password)
-  if rc: web.redirect(web.POST.get('next', ''), 1, lang['MSG_USER_CREATED'])
+  if rc: web.redirect(web.POST.get('next', ''), 3, 'MSG_USER_CREATED')
   else: log(0, 'ERR_USER_NOT_CREATED')
 
 def handleForm():
@@ -75,10 +75,10 @@ def mainCGI():
     log(0, lang['ERR_ACCESS_DENIED'])
   elif len(path) == 2 and path[0] == 'delete':
     if path[1] == web.SESSION['username']:
-      web.redirect(os.environ.get('SCRIPT_NAME'), 1, lang['ERR_DELETE_SELF'])
+      web.redirect(os.environ.get('SCRIPT_NAME'), 5, 'ERR_DELETE_SELF')
     else:
       rc = database.removeUser(path[1])
-      web.redirect(os.environ.get('SCRIPT_NAME'), 1,
+      web.redirect(os.environ.get('SCRIPT_NAME'), 3,
         lang['MSG_USER_DELETED'] % (path[1],))
   elif len(path) == 1 and path[0] == 'users':
     accounts = database.listAccounts()

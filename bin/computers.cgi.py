@@ -113,29 +113,34 @@ def formData():
   if web.SESSION.get('level', -1) < 100: return
 
   name = web.POST.get('_form', '')
+  message = 'ERR_UNKNOWN_FORM'
   if name == 'adduser':
     u = objects.User(web.POST['name'], int(web.POST['shift']),
       map(int, web.POST.get('days', '')))
     if u in objects.User._USERS.values():
-      log(2, lang['MSG_ADD_USER'] % (str(u),))
+      log(2, 'Created user %s' % (str(u),))
       objects.saveData()
-    web.redirect('users', 3)
+      web.redirect('users', 3, lang['MSG_ADD_USER'] % (str(u),))
+    else:
+      web.redirect('users', 3, lang['ERR_ADD_USER'] % (str(u),))
   elif name == 'updateuser':
     u = objects.User._USERS[web.POST['uid']]
     rc = u.assignShift(int(web.POST['shift']), map(int, web.POST['days']))
     if web.POST.get('cid', '') in objects.Computer._COMPUTERS:
       u.assignComputer(web.POST['cid'])
-    objects.saveData()
-    web.redirect('user/%s' % web.POST['uid'], 3)
+      objects.saveData()
+    web.redirect('user/%s' % web.POST['uid'], 1, 'MSG_DATA_UPDATED')
   elif name == 'addcomputer':
     c = objects.Computer(web.POST['name'])
     if c in objects.Computer._COMPUTERS.values():
-      log(2, lang['MSG_ADD_COMPUTER'] % (str(c),))
+      log(2, 'Added computer %s into database' % (str(c),))
       objects.saveData()
-    web.redirect('computers', 3)
+      web.redirect('computers', 3, lang['MSG_ADD_COMPUTER'] % (str(c),))
+    else:
+      web.redirect('computers', 3, 'ERR_ADD_COMPUTER')
   else: log(0, 'Unknown form: %s' % (name,))
 
-  web.redirect(web.POST.get('_next', ''), 3)
+  web.redirect(web.POST.get('_next', '', message), 3)
 
 web.handleForm = formData
 
@@ -263,7 +268,8 @@ def mainCGI():
     elif path[0] == 'floorplan':
       html = '{{floorplan}}'
 
-      hypertext.GLOBALS['scripts'] += [{ 'filename': 'svg_draw.js' }]
+      if usr_lvl >= 100:
+        hypertext.GLOBALS['scripts'] += [{ 'filename': 'svg_draw.js' }]
 
       if len(path) > 1:
         shift = objects.getShift(path[1])
