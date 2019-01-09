@@ -1,10 +1,12 @@
-/* Main layout style */
+/*
+ * Main layout style
+ */
 body { font-family: Sans-Serif; }
 .header { width: 800pt; }
 article { width: 800pt; }
 a { text-decoration: none; font-weight: bold; color: #008; }
 a:hover { text-decoration: underline; color: #66d; }
-
+/* Menu */
 li#menu { display: table; border: 1pt solid #888; background: #ddd;
   width: 100%; margin: 3pt; }
 li#menu ul { display: table-cell; padding: 3pt 10pt; }
@@ -18,7 +20,6 @@ div.select p:first-child { background: #ddd; border: solid 0pt #444;
   padding: 3pt 7pt; margin: 0pt; text-align: left;
   border-width: 0pt 0pt 1pt 0pt; text-align: left; display: block; }
 div.select p { padding: 3pt 7pt; }
-
 /* Side panel with minilogin */
 div#panel { float: right; }
 div.minilogin { border: solid 1pt #888; background: #eee; min-width: 150pt; }
@@ -29,7 +30,9 @@ div.minilogin input { width: 85%; }
 div.minilogin input[type=submit] { border: 0; background: none;
   text-align: right; font-size: 12pt; }
 
-/* Forms and login panel */
+/*
+ * Forms and login panel
+ */
 div.login { border: solid 1pt #888; background: #eee; }
 div.form { border: solid 1pt #888; background: #eee; text-align: right;
   min-width: 200pt; max-width: 400pt; margin: 5pt; padding: 0pt; }
@@ -45,7 +48,9 @@ input[type=submit] { border: solid 1pt #888; border-width: 1pt;
 p.checklist { display: table-row; }
 p.checklist input { display: table-cell; margin: 3pt 7pt; }
 
-/* Legend box */
+/*
+ * Computer list status box
+ */
 table.lines { border-collapse: collapse; margin: 3pt; margin: 5pt; }
 table.lines th { border: solid 1pt #444; padding: 3pt 10pt;
   text-align: left; border-width: 0pt 0pt 1pt 0pt; }
@@ -77,9 +82,9 @@ table.list td.full     { background: #444; color: #222; }
 table.list td.reserved { background: #777; color: #444; }
 table.list td.active   { background: #d66; color: #222; }
 /* Per shift seat status colors */
-tr.shift1 td.active,div.shift1 { background: #55c; }
-tr.shift2 td.active,div.shift2 { background: #5c5; }
-tr.shift3 td.active,div.shift3 { background: #c55; }
+tr.shift1 td.active,div.shift1 { background: #33a; }
+tr.shift2 td.active,div.shift2 { background: #3a3; }
+tr.shift3 td.active,div.shift3 { background: #a33; }
 tr.shift1 td.reserved { background: #667; }
 tr.shift2 td.reserved { background: #676; }
 tr.shift3 td.reserved { background: #766; }
