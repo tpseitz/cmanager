@@ -113,11 +113,12 @@ def formData():
   if web.SESSION.get('level', -1) < 100: return
 
   name = web.POST.get('_form', '')
+  message = 'ERR_UNKNOWN_FORM'
   if name == 'adduser':
     u = objects.User(web.POST['name'], int(web.POST['shift']),
       map(int, web.POST.get('days', '')))
     if u in objects.User._USERS.values():
-      log(2, lang['MSG_ADD_USER'] % (str(u),))
+      log(2, 'Created user %s' % (str(u),))
       objects.saveData()
       web.redirect('users', 3, lang['MSG_ADD_USER'] % (str(u),))
     else:
@@ -139,7 +140,7 @@ def formData():
       web.redirect('computers', 3, 'ERR_ADD_COMPUTER')
   else: log(0, 'Unknown form: %s' % (name,))
 
-  web.redirect(web.POST.get('_next', ''), 3)
+  web.redirect(web.POST.get('_next', '', message), 3)
 
 web.handleForm = formData
 
