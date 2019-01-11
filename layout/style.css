@@ -82,7 +82,7 @@ table.list td.full     { background: #444; color: #222; }
 table.list td.reserved { background: #777; color: #444; }
 table.list td.active   { background: #d66; color: #222; }
 /* Per shift seat status colors */
-tr.shift1 td.active,div.shift1 { background: #33a; }
+tr.shift1 td.active,div.shift1 { background: #33a; color: #aac; }
 tr.shift2 td.active,div.shift2 { background: #3a3; }
 tr.shift3 td.active,div.shift3 { background: #a33; }
 tr.shift1 td.reserved { background: #667; }
