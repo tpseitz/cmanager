@@ -99,6 +99,13 @@ def outputFile(full_filename, replace=False):
   sys.stdout.buffer.write(data)
   sys.exit(0)
 
+def outputJSON(data):
+  sys.stdout.write(
+    'Content-Type: application/json; charset=%s\r\n\r\n' % (ENCODING,))
+  sys.stdout.flush()
+  sys.output.buffer.write(json.puts().encode(ENCODING))
+  sys.exit(0)
+
 def redirect(url, delay=None, *msg):
   global SESSION, _messages, lang
 

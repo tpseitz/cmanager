@@ -325,6 +325,11 @@ def mainCGI():
         cid, x, y = path[1], int(path[2]), int(path[3])
         objects.Computer._COMPUTERS[cid].location = (x, y)
         objects.saveData()
+        web.output.JSON({ '_errors': [], 'success': True })
+
+  if usr_lvl >= 200:
+    if path[0] == 'config':
+      pass #TODO
 
   web.outputPage(hypertext.frame('<div class="form">' \
     + hypertext.form('login', target='login') + '</div>'))
