@@ -97,10 +97,14 @@ def createUser(username, fullname, level, password):
   password = crypt.crypt(password)
 
   cur = _cursor()
-  query = 'SELECT id FROM users WHERE username = %s'
-  cur.execute(query, (username,))
+  cur.execute('SELECT id FROM users WHERE username = %s', (username,))
   if len(cur.fetchall()) > 0:
     log(0, 'ERR_USER_ALLREADY_EXISTS', username)
+    return False
+
+  cur.execute('SELECT id FROM users WHERE fullname = %s', (fullname,))
+  if len(cur.fetchall()) > 0:
+    log(0, 'ERR_USER_ALLREADY_EXISTS', fullname)
     return False
 
   cur = _cursor()
@@ -146,7 +150,7 @@ def removeUser(username):
   if not username: return False
 
   cur = _cursor()
-  query = 'DELETE FROM id, users WHERE username = %s'
+  query = 'DELETE FROM users WHERE username = %s'
   cur.execute(query, (username,))
   close()
 
