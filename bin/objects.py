@@ -180,22 +180,44 @@ def loadData():
     with open(ffn, 'r') as f: ROOMS = json.loads(f.read())
 
   ffn = os.path.join(DIRECTORY, 'computers.json')
-  if os.path.isfile(ffn):
-    with open(ffn, 'r') as f:
-      for dt in json.loads(f.read()): Computer.fromDict(dt)
+  if not os.path.isfile(ffn): ffn += '.old'
+  try:
+    if os.path.isfile(ffn):
+      with open(ffn, 'r') as f:
+        for dt in json.loads(f.read()): Computer.fromDict(dt)
+  except json.JSONDecodeError as jde:
+    os.unlink(ffn)
+    ffn += '.old'
+    if os.path.isfile(ffn):
+      with open(ffn, 'r') as f:
+        for dt in json.loads(f.read()): Computer.fromDict(dt)
 
   ffn = os.path.join(DIRECTORY, 'users.json')
-  if os.path.isfile(ffn):
-    with open(ffn, 'r') as f:
-      for dt in json.loads(f.read()): User.fromDict(dt)
+  if not os.path.isfile(ffn): ffn += '.old'
+  try:
+    if os.path.isfile(ffn):
+      with open(ffn, 'r') as f:
+        for dt in json.loads(f.read()): User.fromDict(dt)
+  except json.JSONDecodeError as jde:
+    os.unlink(ffn)
+    ffn += '.old'
+    if os.path.isfile(ffn):
+      with open(ffn, 'r') as f:
+        for dt in json.loads(f.read()): User.fromDict(dt)
 
 def saveData():
   ffn = os.path.join(DIRECTORY, 'computers.json')
   data = json.dumps(list(map(Computer.toDict, Computer._COMPUTERS.values())))
+  if os.path.isfile(ffn):
+    if os.path.isfile(ffn + '.old'): os.unlink(ffn + '.old')
+    os.rename(ffn, ffn + '.old')
   with open(ffn, 'w') as f: f.write(data)
 
   ffn = os.path.join(DIRECTORY, 'users.json')
   data = json.dumps(list(map(User.toDict, User._USERS.values())))
+  if os.path.isfile(ffn):
+    if os.path.isfile(ffn + '.old'): os.unlink(ffn + '.old')
+    os.rename(ffn, ffn + '.old')
   with open(ffn, 'w') as f: f.write(data)
 
 def printData():
