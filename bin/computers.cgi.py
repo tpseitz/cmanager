@@ -16,7 +16,6 @@ def init():
 
   FLOORPLAN = conf.get('floorplan', FLOORPLAN)
   VIEWBOX = conf.get('viewbox', VIEWBOX)
-  objects.DIRECTORY = conf.get('data_directory', objects.DIRECTORY)
 
   hypertext.GLOBALS['floorplan'] = floorplan
   hypertext.GLOBALS['submenu'] = [
@@ -24,12 +23,8 @@ def init():
     { 'title': '{{lang.USERS}}', 'path': 'users' },
     { 'title': '{{lang.MAP}}', 'path': 'floorplan' }]
 
-  objects.DIRECTORY = os.path.expanduser(objects.DIRECTORY)
-
   lang = sykeit.lang
   objects.lang = lang
-
-  objects.loadData()
 
   hypertext.GLOBALS['list_days'] = enumerate(lang['WORKDAYS'])
   hypertext.GLOBALS['list_shifts'] \
@@ -151,31 +146,31 @@ def floorplan(shift=None, selected=None):
     shift = objects.getShift(shift)
     if shift is not None: data['shift_name'] = shift['name']
   yy = 30
-  for cid, cpu in \
-    sorted(objects.Computer._COMPUTERS.items(), key=lambda t: t[0]):
-      tmp = cpu.toDict()
-      if not cpu.location:
-        tmp['x'], tmp['y'] = 15, yy
-        yy += 32
-      tmp['users'], cnt = [], 2
-      for usr in sorted(cpu.users, key=lambda u: u.shift):
-        if shift is not None and usr.shift != shift['ord']: continue
-        usr = usr.toDict()
-        usr['line'] = cnt
-        cnt += 1.5
-        tmp['users'].append(usr)
-      tmp['lines'] = max(cnt - 1, 2.5)
-      if shift is None:
-        if   len(tmp['users']) == 0: tmp['status'] = 'vacant'
-        elif len(tmp['users']) < len(objects.listShifts()):
-          tmp['status'] = 'partly'
-        else: tmp['status'] = 'reserved'
-      else: tmp['status'] = len(tmp['users']) and 'reserved' or 'vacant'
-      if selected is not None and cpu.cid == selected:
-        x, y = 0, 0
-        if cpu.location: x, y = cpu.location
-        tmp['status'] = 'selected'
-      data['computers'].append(tmp)
+  for cpu in objects.listComputers():
+    tmp = cpu.copy()
+    if not cpu['x']:
+      tmp['x'], tmp['y'] = 15, yy
+      yy += 32
+    tmp['users'], cnt = [], 2
+    for usr in sorted(objects.listUsers(computer_id=cpu['cid']),
+        key=lambda u: u['shift_ord']):
+      if shift is not None and usr.shift != shift['ord']: continue
+      usr = usr.copy()
+      usr['line'] = cnt
+      cnt += 1.5
+      tmp['users'].append(usr)
+    tmp['lines'] = max(cnt - 1, 2.5)
+    if shift is None:
+      if   len(tmp['users']) == 0: tmp['status'] = 'vacant'
+      elif len(tmp['users']) < len(objects.listShifts()):
+        tmp['status'] = 'partly'
+      else: tmp['status'] = 'reserved'
+    else: tmp['status'] = len(tmp['users']) and 'reserved' or 'vacant'
+    if selected is not None and cpu.cid == selected:
+      x, y = 0, 0
+      if cpu.location: x, y = cpu.location
+      tmp['status'] = 'selected'
+    data['computers'].append(tmp)
   if selected is not None:
     data['viewbox'] = ' '.join(map(str,
       [x - BORDERS, y - BORDERS, 2 * BORDERS, 2 * BORDERS]))
@@ -203,10 +198,9 @@ def mainCGI():
   shifts = []
   for shf in objects.listShifts():
     shf = shf.copy()
-    user_count = len([u for u in objects.User._USERS.values()
-      if u.shift == shf['ord']])
-    seated_users = len([u for u in objects.User._USERS.values()
-      if u.shift == shf['ord'] and u.computer])
+    user_count = len([u for u in objects.listUsers() if u['shift_id']])
+    seated_users = len([u for u in objects.listUsers()
+      if u['shift_id'] and u['computer_id']])
     shf['shift_name'] = shf['name']
     shf['user_count'] = user_count
     shf['seated_users'] = seated_users
@@ -222,19 +216,20 @@ def mainCGI():
 
   # List computers and shifts under them with user info
   data['computers'], computers = [], {}
-  for cpu in sorted(objects.Computer._COMPUTERS.values(), key=lambda c: c.cid):
-    tmp = cpu.toDict()
-    uls = { u.shift: u.toDict() for u in cpu.users }
+  for cpu in sorted(objects.listComputers(),
+      key=lambda c: objects.strip(c['name'])):
+    tmp = cpu.copy()
+    uls = { u['shift_id']: u.copy() for u in objects.listUsers()
+      if u['computer_id'] == tmp['cid'] }
     tmp['users'] = [s.copy() for s in shifts]
     for shf in tmp['users']:
       u = uls.get(shf['ord'])
       if u is not None: shf.update(u)
     data['computers'].append(tmp)
-    computers[cpu.cid] = tmp
+    computers[tmp['cid']] = tmp
 
   # List users
-  data['users'] = [usr.toDict() for usr in
-    sorted(objects.User._USERS.values(), key=lambda u: u.name.lower())]
+  data['users'] = [usr.copy() for usr in objects.listUsers()]
 
   if usr_lvl >= 50:
     if path[0] == 'user' and len(path) == 2 and path[1] in objects.User._USERS:

@@ -72,7 +72,7 @@ def select(table, columns=None, where=None, order=None):
 
 def listAccounts():
   cur = _cursor()
-  names = ['id','tries','username','level','fullname','lastlogin']
+  names = ['uid','tries','username','level','fullname','lastlogin']
   query = 'SELECT %s FROM users;' % ','.join(names)
   cur.execute(query)
   rows = cur.fetchall()
@@ -97,12 +97,12 @@ def createUser(username, fullname, level, password):
   password = crypt.crypt(password)
 
   cur = _cursor()
-  cur.execute('SELECT id FROM users WHERE username = %s', (username,))
+  cur.execute('SELECT uid FROM users WHERE username = %s', (username,))
   if len(cur.fetchall()) > 0:
     log(0, 'ERR_USER_ALLREADY_EXISTS', username)
     return False
 
-  cur.execute('SELECT id FROM users WHERE fullname = %s', (fullname,))
+  cur.execute('SELECT uid FROM users WHERE fullname = %s', (fullname,))
   if len(cur.fetchall()) > 0:
     log(0, 'ERR_USER_ALLREADY_EXISTS', fullname)
     return False
@@ -122,7 +122,7 @@ def createUser(username, fullname, level, password):
 
 def updatePassword(username, newpass, oldpass=None):
   cur = _cursor()
-  query = 'SELECT id, password FROM users WHERE username = %s'
+  query = 'SELECT uid, password FROM users WHERE username = %s'
   cur.execute(query, (username,))
   rows = cur.fetchall()
   if len(rows) != 1:
@@ -141,7 +141,7 @@ def updatePassword(username, newpass, oldpass=None):
     return { '_error': 'ERR_PASSWORD_TOO_SHORT' }
   password = crypt.crypt(newpass)
 
-  query = 'UPDATE users SET password = %s, tries = %s WHERE id = %s'
+  query = 'UPDATE users SET password = %s, tries = %s WHERE uid = %s'
   cur.execute(query, (password, 0, uid))
   close()
   return {}
@@ -163,7 +163,7 @@ def checkPassword(username, password):
     return { 'username': None, 'level': -1, '_error': 'MSG_ILLEGA_USERNAME' }
 
   cur = _cursor()
-  query = 'SELECT id, password, tries, username, level, fullname, lastlogin' \
+  query = 'SELECT uid, password, tries, username, level, fullname, lastlogin' \
     + ' FROM users WHERE username = %s'
   cur.execute(query, (username,))
   rows = cur.fetchall()
@@ -179,13 +179,13 @@ def checkPassword(username, password):
 
   hsh = crypt.crypt(password, pwhash)
   if hmac.compare_digest(hsh, pwhash):
-    query = 'UPDATE users SET lastlogin = %s, tries = %s WHERE id = %s'
+    query = 'UPDATE users SET lastlogin = %s, tries = %s WHERE uid = %s'
     cur.execute(query, (int(time.time()), 0, uid))
     close()
     return { 'username': username, 'level': level,
       'fullname': fullname, 'lastlogin': lastlogin }
   else:
-    query = 'UPDATE users SET tries = %s WHERE id = %s'
+    query = 'UPDATE users SET tries = %s WHERE uid = %s'
     cur.execute(query, (tries + 1, uid))
     log(2, 'Wrong password')
     close()
