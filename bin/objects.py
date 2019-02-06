@@ -1,7 +1,6 @@
 # Encoding: UTF-8
 import re
 import database
-_SHIFTS, _SHIFTS_PER_ORD, _SHIFTS_PER_SID = [], {}, {}
 
 REGEX_STRIP = re.compile(r'[^A-Za-z\d]')
 REGEX_INTEGER = re.compile(r'^\s*-?\s*\d+\s*$')
@@ -14,13 +13,15 @@ def strip(message):
 def log(lvl, message, *extra):
   print(message)
 
+_SHIFTS, _SHIFTS_PER_ORD, _SHIFTS_PER_SID, _SHIFTS_PER_NM = [], {}, {}, {}
 def listShifts():
-  global _SHIFTS, _SHIFTS_PER_ORD, _SHIFTS_PER_SID
+  global _SHIFTS, _SHIFTS_PER_ORD, _SHIFTS_PER_SID, _SHIFTS_PER_NM
 
   if not _SHIFTS:
     _SHIFTS = database.select('shifts', order='ord')
     _SHIFTS_PER_ORD = { s['ord']: s for s in _SHIFTS }
     _SHIFTS_PER_SID = { s['sid']: s for s in _SHIFTS }
+    _SHIFTS_PER_NM  = { strip(s['name']): s for s in _SHIFTS }
 
   return _SHIFTS
 
@@ -30,8 +31,8 @@ def getShift(search):
   if isinstance(search, str) and REGEX_INTEGER.match(search):
     search = int(search)
 
-  if   isinstance(search, int): return _SHIFTS_PER_ORD.get(search)
-  elif isinstance(search, str): return _SHIFTS_PER_SID.get(search)
+  if   isinstance(search, int): return _SHIFTS_PER_SID.get(search)
+  elif isinstance(search, str): return _SHIFTS_PER_NM.get(search)
   else: raise TypeError('Illegal type for shift search: %r' % type(search))
 
 _COMPUTERS, _COMPUTERS_PER_CID = [], {}
@@ -44,9 +45,19 @@ def listComputers():
 
   return _COMPUTERS
 
-_PERSONS = []
+def getComputer(search):
+  listComputers()
+
+  if isinstance(search, str) and REGEX_INTEGER.match(search):
+    search = int(search)
+
+  if   isinstance(search, int): return _COMPUTERS_PER_CID.get(search)
+  elif isinstance(search, str): return _COMPUTERS_PER_CID.get(search)
+  else: raise TypeError('Illegal type for computer search: %r' % type(search))
+
+_PERSONS, _PERSONS_PER_PID = [], {}
 def listUsers(computer_id=None, shift_id=None):
-  global _PERSONS
+  global _PERSONS, _PERSONS_PER_PID
 
   if not _PERSONS:
     listShifts()
@@ -57,10 +68,10 @@ def listUsers(computer_id=None, shift_id=None):
       p['presence'], p['day_names'] = [], []
       for di, dn in enumerate(lang['WORKDAYS']):
         if p['day_%d' % di]:
-          p['presence'].append(True)
+          p['presence'].append((di, lang['DAY_NAMES'][di], True))
           p['day_names'].append(dn)
         else:
-          p['presence'].append(False)
+          p['presence'].append((di, lang['DAY_NAMES'][di], False))
       if p['computer_id'] is None:
         p.update({ 'status': None, 'computer_name': None })
       else:
@@ -73,10 +84,27 @@ def listUsers(computer_id=None, shift_id=None):
         s = _SHIFTS_PER_SID[p['shift_id']]
         p.update({ 'shift_name': s['name'], 'shift_ord': s['ord'] })
 
+      if p['computer_id'] is not None:
+        p['computer'] = _COMPUTERS_PER_CID[p['computer_id']]['name']
+
+    _PERSONS_PER_PID = { p['pid']: p for p in _PERSONS}
+
   pl = _PERSONS
 
   if computer_id is not None:
-    return [p for p in pl if p['computer_id'] == computer_id]
+    pl = [p for p in pl if p['computer_id'] == computer_id]
+  if shift_id is not None:
+    pl = [p for p in pl if p['shift_id'] == shift_id]
 
   return pl
+
+def getUser(search):
+  listUsers()
+
+  if isinstance(search, str) and REGEX_INTEGER.match(search):
+    search = int(search)
+
+  if   isinstance(search, int): return _PERSONS_PER_PID.get(search)
+  elif isinstance(search, str): return _PERSONS_PER_PID.get(search)
+  else: raise TypeError('Illegal type for user search: %r' % type(search))
 

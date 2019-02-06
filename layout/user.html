@@ -1,7 +1,7 @@
 <h2>{{lang.USER}}: {{user.name}}</h2>
 <form id="update_user" action="{{script}}/form" method="post" enctype="multipart/form-data">
   <input type="hidden" name="_form" value="updateuser">
-  <input type="hidden" name="uid" value="{{user.uid}}">
+  <input type="hidden" name="pid" value="{{user.pid}}">
   <p>{{lang.SHIFT}}:
     <select name="shift" required="true">{{#list_shifts}}
       <option value="{{$1}}"{{#$1=user.shift}} selected="true"{{/$1}}>
@@ -13,8 +13,8 @@
   <p>{{lang.COMPUTER}}:{{#user.computer}}
     <input type="hidden" name="cid" value="{{user.computer}}">
     {{user.computer_name}}
-    <a href="{{script}}/assign/{{user.uid}}/NULL">{{lang.DELETE}}</a>{{^user.computer}}
-    <a href="{{script}}/assign/{{user.uid}}">{{lang.NO_SEAT}}</a>{{/user.computer}}
+    <a href="{{script}}/assign/{{user.pid}}/NULL">{{lang.DELETE}}</a>{{^user.computer}}
+    <a href="{{script}}/assign/{{user.pid}}">{{lang.NO_SEAT}}</a>{{/user.computer}}
   </p>
   <table class="userinfo">
     <tr>{{#lang.DAY_NAMES}}<th>{{_}}</th>{{/lang.DAY_NAMES}}</tr>

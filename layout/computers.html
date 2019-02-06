@@ -27,11 +27,12 @@
     <td rowspan="{{shift_count}}">
       <a href="{{script}}/computer/{{cid}}">{{name}}</a></td>
     <td>{{user.shift_name}}</td>
+<!-- {{user.presence}} -->
 {{#user.presence}}{{#$3}}
     <td class="{{user.status}}">{{user.name}}</td>{{^$3}}
     <td class="reserved">{{lang.RESERVED}}</td>{{/$3}}{{/user.presence}}
     <td rowspan="{{shift_count}}" class="delete">
-      <a href="{{script}}/delete/{{cid}}">{{lang.DELETE}}</a>
+      <a href="{{script}}/delete/computer/{{cid}}">{{lang.DELETE}}</a>
     </td>
   </tr>
 {{#users}}

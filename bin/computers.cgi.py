@@ -141,6 +141,7 @@ web.handleForm = formData
 
 BORDERS = 100
 def floorplan(shift=None, selected=None):
+  if isinstance(selected, str): selected = int(selected)
   data = { 'computers': [] }
   if shift is not None:
     shift = objects.getShift(shift)
@@ -152,9 +153,9 @@ def floorplan(shift=None, selected=None):
       tmp['x'], tmp['y'] = 15, yy
       yy += 32
     tmp['users'], cnt = [], 2
-    for usr in sorted(objects.listUsers(computer_id=cpu['cid']),
+    sid = shift and shift['sid'] or None
+    for usr in sorted(objects.listUsers(computer_id=cpu['cid'], shift_id=sid),
         key=lambda u: u['shift_ord']):
-      if shift is not None and usr.shift != shift['ord']: continue
       usr = usr.copy()
       usr['line'] = cnt
       cnt += 1.5
@@ -166,9 +167,9 @@ def floorplan(shift=None, selected=None):
         tmp['status'] = 'partly'
       else: tmp['status'] = 'reserved'
     else: tmp['status'] = len(tmp['users']) and 'reserved' or 'vacant'
-    if selected is not None and cpu.cid == selected:
+    if selected is not None and cpu['cid'] == selected:
       x, y = 0, 0
-      if cpu.location: x, y = cpu.location
+      if cpu['x']: x, y = cpu['x'], cpu['y']
       tmp['status'] = 'selected'
     data['computers'].append(tmp)
   if selected is not None:
@@ -198,9 +199,9 @@ def mainCGI():
   shifts = []
   for shf in objects.listShifts():
     shf = shf.copy()
-    user_count = len([u for u in objects.listUsers() if u['shift_id']])
-    seated_users = len([u for u in objects.listUsers()
-      if u['shift_id'] and u['computer_id']])
+    uls = objects.listUsers(shift_id=shf['sid'])
+    user_count = len([u for u in uls])
+    seated_users = len([u for u in uls if u['computer_id']])
     shf['shift_name'] = shf['name']
     shf['user_count'] = user_count
     shf['seated_users'] = seated_users
@@ -209,8 +210,8 @@ def mainCGI():
     else: shf['status'] = 'overflow'
     data['shift_users'].append(shf)
 
-    shifts.append({ 'shift_name': shf['shift_name'], 'ord': shf['ord'],
-      'presence': 5 * [(None, None, True)],
+    shifts.append({ 'shift_name': shf['shift_name'], 'sid': shf['sid'],
+      'ord': shf['ord'], 'presence': 5 * [(None, None, True)],
       'name': shf['status']=="space" and '{{lang.VACANT}}' or '{{lang.FULL}}',
       'status': shf['status'] == "space" and 'free' or 'full' })
 
@@ -223,7 +224,7 @@ def mainCGI():
       if u['computer_id'] == tmp['cid'] }
     tmp['users'] = [s.copy() for s in shifts]
     for shf in tmp['users']:
-      u = uls.get(shf['ord'])
+      u = uls.get(shf['sid'])
       if u is not None: shf.update(u)
     data['computers'].append(tmp)
     computers[tmp['cid']] = tmp
@@ -232,15 +233,20 @@ def mainCGI():
   data['users'] = [usr.copy() for usr in objects.listUsers()]
 
   if usr_lvl >= 50:
-    if path[0] == 'user' and len(path) == 2 and path[1] in objects.User._USERS:
-      web.outputPage(hypertext.frame('user',
-        { 'user': objects.User._USERS[path[1]].toDict() }))
-    elif path[0] == 'computer' and len(path) == 2 and path[1] in computers:
-        data['computer'] = computers[path[1]]
-        web.outputPage(hypertext.frame('computer', data))
+    if path[0] == 'user' and len(path) == 2 \
+        and objects.REGEX_INTEGER.match(path[1]):
+      data['user'] = objects.getUser(path[1])
+      web.outputPage(hypertext.frame('user', data))
+    elif path[0] == 'computer' and len(path) == 2 \
+        and objects.REGEX_INTEGER.match(path[1]):
+      cid = int(path[1])
+      data['computer'] = objects.getComputer(cid)
+      data['computer']['users'] = objects.listUsers(computer_id=cid)
+      web.outputPage(hypertext.frame('computer', data))
     elif path[0] == 'computers':
       cls, shift = [], None
-      if len(path) > 1: shift = objects.getShift(objects.strip(path[1]))
+      if len(path) == 2: shift = objects.getShift(objects.strip(path[1]))
+#      raise Exception(objects._SHIFTS_PER_NM) #XXX
 
       for cpu in data['computers']:
         if shift is not None:
@@ -305,16 +311,17 @@ def mainCGI():
         web.outputPage(hypertext.frame(hypertext.mustache(
           hypertext.layout('assign'), dt)))
       else: log(0, lang['ERR_GENERIC'] + ' :: '+ ', '.join(path)) #XXX
-    elif path[0] == 'delete' and len(path) == 2:
-      if path[1] in objects.User._USERS: rd = 'users'
-      elif path[1] in objects.Computer._COMPUTERS: rd ='computers'
-      else: rd = ''
-      nm = objects.delete(path[1])
-      if nm:
-        objects.saveData()
-        web.redirect(rd, 3, lang['MSG_DEL'] % (nm,))
+    elif path[0] == 'delete' and len(path) == 3 \
+        and path[1] in ('computer', 'user') \
+        and objects.REGEX_INTEGER.match(path[2]):
+      if path[1] == 'user': rc = objects.deleteUser(int(path[2]))
+      elif path[1] =='computer': rc = objects.deleteComputer(int(path[2]))
+      else: rc = False
+
+      if rc: web.redirect(rd, 3, 'MSG_DELETE')
       else:
-        log(0, lang['ERR_UNKNOWN_UNIT'] % path[1])
+        log(0, lang['ERR_UNKNOWN_UNIT'] % path[2])
+        web.redirect(rd, 3, 'ERR_DELETE')
     elif path[0] == 'update' and len(path) == 4 \
       and path[1] in objects.Computer._COMPUTERS:
         cid, x, y = path[1], int(path[2]), int(path[3])

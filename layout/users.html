@@ -7,13 +7,14 @@
   </tr>
 {{#users}}
   <tr>
-    <td><a href="{{script}}/user/{{uid}}">{{name}}</a></td>
+    <td><a href="{{script}}/user/{{pid}}">{{name}}</a></td>
     <td>{{day_names}}</td>
-{{#computer}}    <td class="present">{{computer}}</td>
+{{#computer}}    <td class="present">
+      <a href="{{script}}/computer/{{computer_id}}">{{computer}}</a></td>
 {{^computer}}    <td class="missing">
-      <a href="{{script}}/assign/{{uid}}">{{lang.NO_SEAT}}</a></td>
+      <a href="{{script}}/assign/{{pid}}">{{lang.NO_SEAT}}</a></td>
 {{/computer}}
     <td>{{shift_name}}</td>
-    <td class="delete"><a href="{{script}}/delete/{{uid}}">{{lang.DELETE}}</a></td>
+    <td class="delete"><a href="{{script}}/delete/user/{{pid}}">{{lang.DELETE}}</a></td>
   </tr>{{/users}}
 </table>
