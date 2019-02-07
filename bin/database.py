@@ -70,6 +70,61 @@ def select(table, columns=None, where=None, order=None):
   names = [c[0] for c in cur.description]
   return [dict(zip(names, row)) for row in rows]
 
+def insert(table, values):
+  if len(values) == 0: return False
+
+  data, cn = [], []
+  for k, v in values.items():
+    cn.append(k)
+    data.append(v)
+
+  query = 'INSERT INTO %s (%s)' % (table, ', '.join(cn))
+  query += ' VALUES (%s)' % ', '.join(['%s' for i in range(len(data))])
+
+  cur = _cursor()
+  cur.execute(query, data)
+
+  return __CONNECTION.insert_id()
+
+def update(table, values, where):
+  if len(values) == 0 or len(where) == 0: return False
+
+  data, dr, wr = [], [], []
+  for k, v in values.items():
+    dr.append('%s = %%s' % (k,))
+    data.append(v)
+  for k, v in where.items():
+    wr.append('%s = %%s' % (k,))
+    data.append(v)
+
+  query = 'UPDATE %s' % (table,)
+  query += ' SET ' + ', '.join(dr)
+  query += ' WHERE ' + ' AND '.join(wr)
+
+#  raise Exception('%s <= %r' % (query, data)) #XXX
+
+  cur = _cursor()
+  cur.execute(query, data)
+
+  return True
+
+def delete(table, where):
+  if not isinstance(where, dict) or len(where) == 0: return False
+
+  #TODO Check table and fields for illegal names
+
+  data, wc = [], []
+  for k, v in where.items():
+    wc.append('%s = %%s' % (k,))
+    data.append(v)
+  query = 'DELETE FROM %s' % (table,)
+  query += ' WHERE ' + ' AND '.join(wc)
+
+  cur = _cursor()
+  cur.execute(query, data)
+
+  return True
+
 def listAccounts():
   cur = _cursor()
   names = ['uid','tries','username','level','fullname','lastlogin']

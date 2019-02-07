@@ -110,21 +110,22 @@ def formData():
   name = web.POST.get('_form', '')
   message = 'ERR_UNKNOWN_FORM'
   if name == 'adduser':
-    u = objects.User(web.POST['name'], int(web.POST['shift']),
-      map(int, web.POST.get('days', '')))
-    if u in objects.User._USERS.values():
-      log(2, 'Created user %s' % (str(u),))
-      objects.saveData()
-      web.redirect('users', 3, lang['MSG_ADD_USER'] % (str(u),))
-    else:
+    usr = objects.createPerson(web.POST['name'], int(web.POST['shift']),
+      list(map(int, web.POST.get('days', []))))
+    if usr is None:
       web.redirect('users', 3, lang['ERR_ADD_USER'] % (str(u),))
+    else:
+      log(2, 'Created user %r' % (usr,))
+      objects.saveData()
+      web.redirect('user/%d' % usr['pid'], 1,
+        lang['MSG_ADD_USER'] % (usr['name'],))
   elif name == 'updateuser':
-    u = objects.User._USERS[web.POST['uid']]
-    rc = u.assignShift(int(web.POST['shift']), map(int, web.POST['days']))
-    if web.POST.get('cid', '') in objects.Computer._COMPUTERS:
-      u.assignComputer(web.POST['cid'])
+    usr = objects.getPerson(web.POST['pid'])
+    rc = objects.assignShift(usr['pid'],
+      int(web.POST['shift']), map(int, web.POST['days']))
+    if web.POST.get('cid'): objects.assignComputer(usr['pid'], web.POST['cid'])
     objects.saveData()
-    web.redirect('user/%s' % web.POST['uid'], 1, 'MSG_DATA_UPDATED')
+    web.redirect('user/%s' % web.POST['pid'], 1, 'MSG_DATA_UPDATED')
   elif name == 'addcomputer':
     c = objects.Computer(web.POST['name'])
     if c in objects.Computer._COMPUTERS.values():
@@ -154,7 +155,7 @@ def floorplan(shift=None, selected=None):
       yy += 32
     tmp['users'], cnt = [], 2
     sid = shift and shift['sid'] or None
-    for usr in sorted(objects.listUsers(computer_id=cpu['cid'], shift_id=sid),
+    for usr in sorted(objects.listPersons(computer_id=cpu['cid'], shift_id=sid),
         key=lambda u: u['shift_ord']):
       usr = usr.copy()
       usr['line'] = cnt
@@ -199,7 +200,7 @@ def mainCGI():
   shifts = []
   for shf in objects.listShifts():
     shf = shf.copy()
-    uls = objects.listUsers(shift_id=shf['sid'])
+    uls = objects.listPersons(shift_id=shf['sid'])
     user_count = len([u for u in uls])
     seated_users = len([u for u in uls if u['computer_id']])
     shf['shift_name'] = shf['name']
@@ -220,7 +221,7 @@ def mainCGI():
   for cpu in sorted(objects.listComputers(),
       key=lambda c: objects.strip(c['name'])):
     tmp = cpu.copy()
-    uls = { u['shift_id']: u.copy() for u in objects.listUsers()
+    uls = { u['shift_id']: u.copy() for u in objects.listPersons()
       if u['computer_id'] == tmp['cid'] }
     tmp['users'] = [s.copy() for s in shifts]
     for shf in tmp['users']:
@@ -230,18 +231,19 @@ def mainCGI():
     computers[tmp['cid']] = tmp
 
   # List users
-  data['users'] = [usr.copy() for usr in objects.listUsers()]
+  data['users'] = [usr.copy() for usr in objects.listPersons()]
 
   if usr_lvl >= 50:
     if path[0] == 'user' and len(path) == 2 \
         and objects.REGEX_INTEGER.match(path[1]):
-      data['user'] = objects.getUser(path[1])
+      data['user'] = objects.getPerson(path[1])
+      if data['user'] is None: web.redirect('users', 3, 'NO_USER')
       web.outputPage(hypertext.frame('user', data))
     elif path[0] == 'computer' and len(path) == 2 \
         and objects.REGEX_INTEGER.match(path[1]):
       cid = int(path[1])
       data['computer'] = objects.getComputer(cid)
-      data['computer']['users'] = objects.listUsers(computer_id=cid)
+      data['computer']['users'] = objects.listPersons(computer_id=cid)
       web.outputPage(hypertext.frame('computer', data))
     elif path[0] == 'computers':
       cls, shift = [], None
@@ -284,44 +286,35 @@ def mainCGI():
 
   if usr_lvl >= 100:
     if path[0] == 'assign':
-      if len(path) == 3 \
-        and path[1] in objects.User._USERS \
-        and path[2] in objects.Computer._COMPUTERS:
-          objects.User._USERS[path[1]].assignComputer(path[2])
-          objects.saveData()
-          message = lang['MSG_ASSIGN_COMPUTER'] % (
-            objects.Computer._COMPUTERS[path[2]].name,
-            objects.User._USERS[path[1]].name)
-          log(2, message)
-          web.redirect('users', 3, message)
-      if len(path) == 3 \
-        and path[1] in objects.User._USERS \
-        and path[2] in (None, 'NULL'):
-          objects.User._USERS[path[1]].assignComputer(None)
-          objects.saveData()
-          message = lang['MSG_UNASSIGN_COMPUTER'] \
-            % (objects.User._USERS[path[1]].name,)
-          log(2, message)
-          web.redirect('users', 3, message)
-      elif len(path) == 2 and path[1] in objects.User._USERS:
-        usr = objects.User._USERS[path[1]]
-        dt = { 'user': usr.toDict(), 'computers':
-          [{ 'id': cpu.cid, 'name': cpu.name }
-            for cpu in computersVacant(usr.shift)] }
+      if len(path) == 3:
+        usr = objects.getPerson(path[1])
+        if usr is None: web.redirect('users', 3, 'NO_USER')
+        rc = objects.assignComputer(*path[1:])
+        if len(rc) == 2: message = lang['MSG_ASSIGN_COMPUTER'] % rc
+        elif len(rc) == 1: message = lang['MSG_UNASSIGN_COMPUTER'] % rc
+        else: web.redirect('user/%d' % usr['pid'], 3, 'ERR_ASSIGN')
+        log(2, message)
+        objects.saveData()
+        web.redirect('user/%d' % usr['pid'], 1, message)
+      elif len(path) == 2:
+        usr = objects.getPerson(path[1])
+        if usr is None: web.redirect('users', 3, 'ERR_NO_PERSON')
+        dt = { 'user': usr, 'computers': objects.listVacant(usr['shift_id']) }
         web.outputPage(hypertext.frame(hypertext.mustache(
           hypertext.layout('assign'), dt)))
-      else: log(0, lang['ERR_GENERIC'] + ' :: '+ ', '.join(path)) #XXX
     elif path[0] == 'delete' and len(path) == 3 \
         and path[1] in ('computer', 'user') \
         and objects.REGEX_INTEGER.match(path[2]):
-      if path[1] == 'user': rc = objects.deleteUser(int(path[2]))
+      if path[1] == 'user': rc = objects.deletePerson(int(path[2]))
       elif path[1] =='computer': rc = objects.deleteComputer(int(path[2]))
       else: rc = False
 
-      if rc: web.redirect(rd, 3, 'MSG_DELETE')
+      if rc:
+        objects.saveData()
+        web.redirect('', 3, 'MSG_DELETE')
       else:
         log(0, lang['ERR_UNKNOWN_UNIT'] % path[2])
-        web.redirect(rd, 3, 'ERR_DELETE')
+        web.redirect('', 3, 'ERR_DELETE')
     elif path[0] == 'update' and len(path) == 4 \
       and path[1] in objects.Computer._COMPUTERS:
         cid, x, y = path[1], int(path[2]), int(path[3])

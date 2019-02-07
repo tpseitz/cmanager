@@ -1,5 +1,5 @@
 # Encoding: UTF-8
-import re
+import collections, re
 import database
 
 REGEX_STRIP = re.compile(r'[^A-Za-z\d]')
@@ -55,8 +55,13 @@ def getComputer(search):
   elif isinstance(search, str): return _COMPUTERS_PER_CID.get(search)
   else: raise TypeError('Illegal type for computer search: %r' % type(search))
 
+def listVacant(shift):
+  els = set([u['computer_id'] for u in listPersons(shift_id=shift)])
+  cls = [c for c in listComputers() if c['cid'] not in els]
+  return cls
+
 _PERSONS, _PERSONS_PER_PID = [], {}
-def listUsers(computer_id=None, shift_id=None):
+def listPersons(computer_id=None, shift_id=None):
   global _PERSONS, _PERSONS_PER_PID
 
   if not _PERSONS:
@@ -98,8 +103,8 @@ def listUsers(computer_id=None, shift_id=None):
 
   return pl
 
-def getUser(search):
-  listUsers()
+def getPerson(search):
+  listPersons()
 
   if isinstance(search, str) and REGEX_INTEGER.match(search):
     search = int(search)
@@ -107,4 +112,61 @@ def getUser(search):
   if   isinstance(search, int): return _PERSONS_PER_PID.get(search)
   elif isinstance(search, str): return _PERSONS_PER_PID.get(search)
   else: raise TypeError('Illegal type for user search: %r' % type(search))
+
+def createPerson(name, shift=None, days=[]):
+  #TODO Check person name for illegal characters
+  shift = int(shift)
+  days = set(map(int, days))
+
+  data = collections.OrderedDict((('name', name), ('shift_id', shift)))
+  for i in range(len(lang['WORKDAYS'])): data['day_%d' % i] = i in days
+
+  uid = database.insert('persons', data)
+
+  if uid: return getPerson(uid)
+  else: return None
+
+def deletePerson(search):
+  usr = getPerson(search)
+
+  if usr is None: return False
+
+  rc = database.delete('persons', { 'pid': usr['pid'] })
+
+  return rc
+
+def assignShift(person, shift=None, days=[]):
+  person = int(person)
+  shift = int(shift)
+  days = set(map(int, days))
+
+  data = collections.OrderedDict((('shift_id', shift),))
+  for i in range(len(lang['WORKDAYS'])): data['day_%d' % i] = i in days
+
+  return database.update('persons', data, { 'pid': person })
+
+def assignComputer(person, computer=None):
+  usr = getPerson(person)
+  if usr is None: return ()
+
+  if computer is not None:
+    for cu in listPersons(computer, usr['shift_id']):
+      if cu is not None:
+        if cu['pid'] == usr['pid']: return True
+        else: return False
+
+  if computer is None or computer == 'NULL':
+    cpu, cid = None, None
+  else:
+    cpu = getComputer(computer)
+    if cpu is None: return ()
+    cid = cpu['cid']
+
+  database.update('persons', { 'computer_id': cid }, { 'pid': usr['pid'] })
+
+  if cpu is not None: return cpu['name'],  usr['name']
+  else: return (usr['name'],)
+
+def saveData():
+  database.close()
 

@@ -1,9 +1,9 @@
-<h2>Assign computer</h2>
+<h2>{{lang.ASSIGN_COMPUTER}}</h2>
 <p>User: {{user.name}}</p>
 {{#user.computer}}<p>Current computer: {{user.computer}}</p>
-{{^user.computer}}<p>No current computer</p>
+{{^user.computer}}<p>{{lang.NO_COMPUTER}}</p>
 {{/user.computer}}
 <li>{{#computers}}
-  <ul><a href="{{user.uid}}/{{id}}">{{name}}</a></ul>{{^computers}}
-  <ul>No computers available</ul>{{/computers}}
+  <ul><a href="{{user.pid}}/{{cid}}">{{name}}</a></ul>{{^computers}}
+  <ul>{{lang.NO_COMPUTERS}}</ul>{{/computers}}
 </li>
