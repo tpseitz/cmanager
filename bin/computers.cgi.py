@@ -28,7 +28,7 @@ def init():
 
   hypertext.GLOBALS['list_days'] = enumerate(lang['WORKDAYS'])
   hypertext.GLOBALS['list_shifts'] \
-    = [(s['ord'], s['name']) for s in objects.listShifts()]
+    = [(s['sid'], s['name']) for s in objects.listShifts()]
   hypertext.GLOBALS['viewbox'] = ' '.join(map(str, VIEWBOX))
 
   if 'lang' in web.GET: web.COOKIES['lang'] = web.GET['lang']

@@ -4,7 +4,7 @@
   <input type="hidden" name="pid" value="{{user.pid}}">
   <p>{{lang.SHIFT}}:
     <select name="shift" required="true">{{#list_shifts}}
-      <option value="{{$1}}"{{#$1=user.shift}} selected="true"{{/$1}}>
+      <option value="{{$1}}"{{#$1=user.shift_id}} selected{{/$1}}>
         {{$2}}
       </option>{{/list_shifts}}
     </select>

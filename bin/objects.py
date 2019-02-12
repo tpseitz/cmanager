@@ -114,7 +114,7 @@ def listPersons(computer_id=None, shift_id=None):
       if p['shift_id'] is None:
         p.update({ 'shift_name': None, 'shift_ord': None })
       else:
-        s = _SHIFTS_PER_SID[p['shift_id']]
+        s = getShift(p['shift_id'])
         p.update({ 'shift_name': s['name'], 'shift_ord': s['ord'] })
 
       if p['computer_id'] is not None:
@@ -172,7 +172,12 @@ def assignShift(person, shift=None, days=[]):
   shift = int(shift)
   days = set(map(int, days))
 
-  data = collections.OrderedDict((('shift_id', shift),))
+  data = collections.OrderedDict()
+
+  shf = getShift(shift)
+  if shift is not None and shf is None: return False
+  data['shift_id'] = shf['sid']
+
   for i in range(len(lang['WORKDAYS'])): data['day_%d' % i] = i in days
 
   return database.update('persons', data, { 'pid': person })
