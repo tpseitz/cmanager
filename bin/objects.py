@@ -55,6 +55,34 @@ def getComputer(search):
   elif isinstance(search, str): return _COMPUTERS_PER_CID.get(search)
   else: raise TypeError('Illegal type for computer search: %r' % type(search))
 
+def moveComputer(search, x, y):
+  cpu = getComputer(search)
+  if cpu is None: return False
+
+  database.update('computers', { 'x': x, 'y': y }, { 'cid': cpu['cid'] })
+
+  return True
+
+def createComputer(name):
+  global _COMPUTERS, _COMPUTERS_PER_CID
+  _COMPUTERS, _COMPUTERS_PER_CID = [], {}
+
+  cid = database.insert('computers', { 'name': name })
+  if not cid: return None
+  return getComputer(cid)
+
+def deleteComputer(search):
+  cpu = getComputer(search)
+  if cpu is None: return 'ERR_NO_COMPUTER'
+
+  uls = listPersons(cpu['cid'])
+  if len(uls) > 0: return 'ERR_COMPUTER_HAS_USERS'
+
+  rc = database.delete('computers', { 'cid': cpu['cid'] })
+
+  if rc: return None
+  else: return 'ERR_DELETE'
+
 def listVacant(shift):
   els = set([u['computer_id'] for u in listPersons(shift_id=shift)])
   cls = [c for c in listComputers() if c['cid'] not in els]
@@ -114,6 +142,9 @@ def getPerson(search):
   else: raise TypeError('Illegal type for user search: %r' % type(search))
 
 def createPerson(name, shift=None, days=[]):
+  global _PERSONS, _PERSONS_PER_PID
+  _PERSONS, _PERSONS_PER_PID = [], {}
+
   #TODO Check person name for illegal characters
   shift = int(shift)
   days = set(map(int, days))
@@ -129,11 +160,12 @@ def createPerson(name, shift=None, days=[]):
 def deletePerson(search):
   usr = getPerson(search)
 
-  if usr is None: return False
+  if usr is None: return 'ERR_NO_PERSON'
 
   rc = database.delete('persons', { 'pid': usr['pid'] })
 
-  return rc
+  if rc: return None
+  else: return 'ERR_DELETE'
 
 def assignShift(person, shift=None, days=[]):
   person = int(person)

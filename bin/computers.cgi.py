@@ -127,13 +127,16 @@ def formData():
     objects.saveData()
     web.redirect('user/%s' % web.POST['pid'], 1, 'MSG_DATA_UPDATED')
   elif name == 'addcomputer':
-    c = objects.Computer(web.POST['name'])
-    if c in objects.Computer._COMPUTERS.values():
-      log(2, 'Added computer %s into database' % (str(c),))
-      objects.saveData()
-      web.redirect('computers', 3, lang['MSG_ADD_COMPUTER'] % (str(c),))
-    else:
+    if objects.getComputer(web.POST['name']) is not None:
+      web.redirect('computers', 3, 'ERR_DUPLICATE_COMPUTER')
+    cpu = objects.createComputer(web.POST['name'])
+    if cpu is None:
       web.redirect('computers', 3, 'ERR_ADD_COMPUTER')
+    else:
+      log(2, 'Added computer %s into database' % (cpu['name'],))
+      objects.saveData()
+      web.redirect('computer/%d' % cpu['cid'],
+        1, lang['MSG_ADD_COMPUTER'] % (cpu['name'],))
   else: log(0, 'Unknown form: %s' % (name,))
 
   web.redirect(web.POST.get('_next', '', message), 3)
@@ -305,21 +308,24 @@ def mainCGI():
     elif path[0] == 'delete' and len(path) == 3 \
         and path[1] in ('computer', 'user') \
         and objects.REGEX_INTEGER.match(path[2]):
-      if path[1] == 'user': rc = objects.deletePerson(int(path[2]))
-      elif path[1] =='computer': rc = objects.deleteComputer(int(path[2]))
-      else: rc = False
+      if path[1] == 'user': err = objects.deletePerson(int(path[2]))
+      elif path[1] == 'computer': err = objects.deleteComputer(int(path[2]))
+      else: err = 'ERR_UNKNOWN_TYPE'
 
-      if rc:
+      if err is None:
         objects.saveData()
-        web.redirect('', 3, 'MSG_DELETE')
+        if path[1] == 'user': web.redirect('users', 1, 'MSG_DELETE')
+        elif path[1] == 'computer': web.redirect('computers', 1, 'MSG_DELETE')
+        else: web.redirect('', 1, 'MSG_DELETE')
       else:
-        log(0, lang['ERR_UNKNOWN_UNIT'] % path[2])
-        web.redirect('', 3, 'ERR_DELETE')
-    elif path[0] == 'update' and len(path) == 4 \
-      and path[1] in objects.Computer._COMPUTERS:
-        cid, x, y = path[1], int(path[2]), int(path[3])
-        objects.Computer._COMPUTERS[cid].location = (x, y)
-        objects.saveData()
+        log(1, 'Could not delete unit: %s %s' % (path[1], path[2]))
+        if path[1] == 'user': web.redirect('users', 3, err)
+        elif path[1] == 'computer': web.redirect('computers', 3, err)
+        else: web.redirect('', 3, err)
+    elif path[0] == 'update' and len(path) == 4:
+      cid, x, y = path[1], int(path[2]), int(path[3])
+      objects.moveComputer(cid, x, y)
+      objects.saveData()
 
   web.outputPage(hypertext.frame('<div class="form">' \
     + hypertext.form('login', target='login') + '</div>'))

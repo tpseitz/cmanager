@@ -215,7 +215,7 @@ def checkPassword(username, password):
   username = username.lower()
   if not REGEX_USERNAME.match(username):
     log(1, 'Illegal username: %s' % (username,))
-    return { 'username': None, 'level': -1, '_error': 'MSG_ILLEGA_USERNAME' }
+    return { 'username': None, 'level': -1, '_error': 'MSG_ILLEGAL_USERNAME' }
 
   cur = _cursor()
   query = 'SELECT uid, password, tries, username, level, fullname, lastlogin' \
