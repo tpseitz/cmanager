@@ -15,7 +15,7 @@ def convertComputers(ffn):
   global COMPUTER_ID
 
   with open(ffn, 'r') as f: data = json.loads(f.read())
-  print('INSERT INTO computers (name, location_x, location_y) VALUES')
+  print('INSERT INTO computers (name, x, y) VALUES')
   rd = []
   for cpu in data:
     rd.append('("%s", %s, %s)'
