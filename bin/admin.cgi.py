@@ -104,7 +104,7 @@ def mainCGI():
       rc = database.removeUser(path[1])
       web.redirect(os.environ.get('SCRIPT_NAME'), 3,
         lang['MSG_USER_DELETED'] % (path[1],))
-  elif len(path) == 0 and path[0] == 'users':
+  elif len(path) == 0 or path[0] == 'users':
     accounts = database.listAccounts()
     for acc in accounts:
       for lvl in sorted(USER_LEVELS):
