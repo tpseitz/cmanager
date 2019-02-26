@@ -225,6 +225,10 @@ def mainCGI():
 
   data = {}
 
+  if usr_lvl <= 0:
+    web.outputPage(hypertext.frame('<div class="form">' \
+      + hypertext.form('login', target='login') + '</div>'))
+
   # Compile shift status list
   data['shift_count'] = len(objects.listShifts())
   data['shift_users'] = []
@@ -355,8 +359,7 @@ def mainCGI():
       objects.moveComputer(cid, x, y)
       objects.saveData()
 
-  web.outputPage(hypertext.frame('<div class="form">' \
-    + hypertext.form('login', target='login') + '</div>'))
+  web.error404()
 
 if __name__ == '__main__':
   if 'SERVER_ADDR' in os.environ: mainCGI()
