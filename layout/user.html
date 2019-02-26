@@ -11,7 +11,7 @@
   </p>
   <!-- {{user}} -->
   <p>{{lang.COMPUTER}}:{{#user.computer}}
-    <input type="hidden" name="cid" value="{{user.computer}}">
+    <input type="hidden" name="cid" value="{{user.computer_id}}">
     {{user.computer_name}}
     <a href="{{script}}/assign/{{user.pid}}/NULL">{{lang.DELETE}}</a>{{^user.computer}}
     <a href="{{script}}/assign/{{user.pid}}">{{lang.NO_SEAT}}</a>{{/user.computer}}
