@@ -27,7 +27,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import collections, re
+import collections, datetime, re
 import database
 
 REGEX_STRIP = re.compile(r'[^A-Za-z\d]')
@@ -116,6 +116,17 @@ def listVacant(shift):
   cls = [c for c in listComputers() if c['cid'] not in els]
   return cls
 
+_QUEUE = []
+def listQueue():
+  global _QUEUE
+
+  if not _QUEUE:
+    dt = datetime.date.today().toordinal()
+    where = [('start_date', '>', dt), 'or', ('start_date', 'null')]
+    _QUEUE = database.select('persons', where=where, order='created')
+
+  return _QUEUE
+
 _PERSONS, _PERSONS_PER_PID = [], {}
 def listPersons(computer_id=None, shift_id=None):
   global _PERSONS, _PERSONS_PER_PID
@@ -123,7 +134,9 @@ def listPersons(computer_id=None, shift_id=None):
   if not _PERSONS:
     listShifts()
     listComputers()
-    _PERSONS = database.select('persons', order='name')
+    dt = datetime.date.today().toordinal()
+    where = [('start_date', '<=', dt), 'and', ('end_date', '>=', dt)]
+    _PERSONS = database.select('persons', where=where, order='name')
     for p in _PERSONS:
       dn, pr = [], []
       p['presence'], p['day_names'] = [], []

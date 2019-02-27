@@ -40,6 +40,7 @@ Configuration file is JSON -formated file and it can hold following properties:
 | `db_username`       | database username                                     |
 | `db_password`       | database password                                     |
 | `db_database`       | database name on server                               |
+| `time_format`       | local time format in python strftime format style     |
 | `layout_directory`  | directory where layout files are located              |
 | `session_directory` | directory to store session files                      |
 | `lang`              | language code for default language                    |

@@ -28,28 +28,32 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import json, sys, os
+import datetime, json, sys, os
 import database, objects, hypertext, sykeit, web
 
 FLOORPLAN, VIEWBOX = None, [0, 0, 100, 100]
+FORMAT_TIME = '%Y-%m-%d'
 
 lang = {}
 log = web.log
 objects.log = log
 
 def init():
-  global FLOORPLAN, VIEWBOX, lang
+  global FLOORPLAN, VIEWBOX, FORMAT_TIME, lang
 
   conf = sykeit.init()
 
   FLOORPLAN = conf.get('floorplan', FLOORPLAN)
   VIEWBOX = conf.get('viewbox', VIEWBOX)
 
+  FORMAT_TIME = conf.get('time_format', FORMAT_TIME)
+
   hypertext.GLOBALS['floorplan'] = floorplan
   hypertext.GLOBALS['submenu'] = [
     { 'title': '{{lang.COMPUTERS}}', 'path': 'computers' },
     { 'title': '{{lang.USERS}}', 'path': 'users' },
-    { 'title': '{{lang.MAP}}', 'path': 'floorplan' }]
+    { 'title': '{{lang.MAP}}', 'path': 'floorplan' },
+    { 'title': '{{lang.QUEUE}}', 'path': 'queue' }]
 
   lang = sykeit.lang
   objects.lang = lang
@@ -268,6 +272,15 @@ def mainCGI():
   # List users
   data['users'] = [usr.copy() for usr in objects.listPersons()]
 
+  # List queue
+  data['queue'] = [usr.copy() for usr in objects.listQueue()]
+  count = 1
+  for usr in data['queue']:
+    usr['ord'] = count
+    if usr['start_date']: usr['start_date_string'] \
+      = datetime.date.fromordinal(usr['start_date']).strftime(FORMAT_TIME)
+    count += 1
+
   if usr_lvl >= 50:
     if path[0] == 'user' and len(path) == 2 \
         and objects.REGEX_INTEGER.match(path[1]):
@@ -303,6 +316,8 @@ def mainCGI():
       web.outputPage(hypertext.frame('computers', data))
     elif path[0] == 'users':
       web.outputPage(hypertext.frame('users', data))
+    elif path[0] == 'queue':
+      web.outputPage(hypertext.frame('queue', data))
     elif path[0] == 'floorplan':
       html = '{{floorplan}}'
 

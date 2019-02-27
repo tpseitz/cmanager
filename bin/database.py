@@ -74,6 +74,30 @@ def close():
     __CONNECTION.close()
   __CONNECTION = None
 
+def _createWhere(where, data):
+  wq, ao = '', True
+  for wd in where:
+    if   isinstance(wd, str) and wd.lower() in ('and','or'):
+      wq += ' %s ' % wd.upper()
+      ao = True
+    elif isinstance(wd, (tuple, list)) and len(wd) == 2 \
+        and wd[1].lower() in ('null','not null','!null'):
+      col, arg = wd
+      if arg == '!null': arg = 'not null'
+      wq += '%s IS %s' % (col, arg.upper())
+    elif isinstance(wd, (tuple, list)) and len(wd) == 3:
+      #TODO Check where clause for illegal names
+      col, opr, dt = wd
+      if opr not in ('==','<=','>=','<','>','!='): raise ValueError(
+        'Illegal comparison operator for where clause: %s' % (oper,))
+      if opr == '==': oper = '='
+      if not ao: wq += ' AND '
+      wq += '%s %s %%s' % (col, opr)
+      data.append(dt)
+      ao = False
+    else: raise ValueError('Unknown where statement: %r' % (wd,))
+  return ' WHERE ' + wq
+
 def select(table, columns=None, where=None, order=None):
   #TODO Check table for illegal names
   if columns is not None:
@@ -82,13 +106,13 @@ def select(table, columns=None, where=None, order=None):
   else: columns = '*'
   query = 'SELECT %s FROM %s' % (columns, table)
   data = []
-  if where is not None:
-    #TODO Check where clause for illegal names
-    pass #TODO
+  if where is not None: query += _createWhere(where, data)
   if order is not None:
     if not isinstance(order, (list, tuple)): order = [order]
     #TODO Check order fields for illegal names
     query += ' ORDER BY %s' % ','.join(order)
+
+#  if where is not None: raise Exception('%s <= %r' % (query, data)) #XXX
 
   cur = _cursor()
   if not data: cur.execute(query)

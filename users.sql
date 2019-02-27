@@ -41,6 +41,8 @@ CREATE TABLE persons (
   pid         INTEGER     NOT NULL AUTO_INCREMENT,
   created     DATETIME    DEFAULT NOW(),
   name        VARCHAR(64) UNIQUE NOT NULL,
+  start_date  INTEGER     NOT NULL,
+  end_date    INTEGER     NOT NULL,
   shift_id    INTEGER     DEFAULT NULL,
   day_0       BOOLEAN     DEFAULT FALSE,
   day_1       BOOLEAN     DEFAULT FALSE,
@@ -59,8 +61,4 @@ INSERT INTO users (username, fullname, level, password)
     "$6$xjUUbJX./EMVfyiU$NJ1Tt9zhIizzaU1lHffT8P4pxpZftmnoOzh9qYro8kBbePBbiz36cGvpxju.Sc3IHGmsc1lKWM244JaGL151D/");
 INSERT INTO shifts (ord, name, max_users)
   VALUES (1, "morning",  20), (2, "day", 10);
-
--- Database update commands from older versions in syke021R
-ALTER TABLE users CHANGE id uid INTEGER;
-ALTER TABLE shifts CHANGE id sid INTEGER;
 
