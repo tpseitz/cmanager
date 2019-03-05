@@ -32,21 +32,20 @@ import datetime, json, sys, os
 import database, objects, hypertext, sykeit, web
 
 FLOORPLAN, VIEWBOX = None, [0, 0, 100, 100]
-FORMAT_TIME = '%Y-%m-%d'
 
 lang = {}
 log = web.log
 objects.log = log
 
 def init():
-  global FLOORPLAN, VIEWBOX, FORMAT_TIME, lang
+  global FLOORPLAN, VIEWBOX, lang
 
   conf = sykeit.init()
 
+  lang = sykeit.lang
+
   FLOORPLAN = conf.get('floorplan', FLOORPLAN)
   VIEWBOX = conf.get('viewbox', VIEWBOX)
-
-  FORMAT_TIME = conf.get('time_format', FORMAT_TIME)
 
   hypertext.GLOBALS['floorplan'] = floorplan
   hypertext.GLOBALS['submenu'] = [
@@ -55,8 +54,8 @@ def init():
     { 'title': '{{lang.MAP}}', 'path': 'floorplan' },
     { 'title': '{{lang.QUEUE}}', 'path': 'queue' }]
 
-  lang = sykeit.lang
   objects.lang = lang
+  objects.FORMAT_DATE = hypertext.FORMAT_DATE
 
   hypertext.GLOBALS['list_days'] = enumerate(lang['WORKDAYS'])
   hypertext.GLOBALS['list_shifts'] \
@@ -277,8 +276,6 @@ def mainCGI():
   count = 1
   for usr in data['queue']:
     usr['ord'] = count
-    if usr['start_date']: usr['start_date_string'] \
-      = datetime.date.fromordinal(usr['start_date']).strftime(FORMAT_TIME)
     count += 1
 
   if usr_lvl >= 50:

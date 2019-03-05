@@ -28,7 +28,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import json, re, os
-import hypertext, database, web
+import hypertext, database, objects, web
 CONFIG_FILES = [
   '~/.config/computer_manager.json',
   '/etc/cmanager/config.json',
@@ -80,7 +80,10 @@ def init():
       break
   if not conf: raise Exception('No config file')
 
+  hypertext.JQUERY_UI_LOCATION = conf.get(
+    'jquery_iu_location', hypertext.JQUERY_UI_LOCATION)
   hypertext.LAYOUT_DIRECTORY = conf.get('layout_directory')
+  hypertext.FORMAT_DATE = conf.get('time_format', hypertext.FORMAT_DATE)
   web.SESSION_DIRECTORY = conf.get('session_directory', web.SESSION_DIRECTORY)
 
   hypertext.LAYOUT_DIRECTORY = os.path.expanduser(hypertext.LAYOUT_DIRECTORY)
@@ -91,7 +94,7 @@ def init():
     { 'title': '{{lang.ACCOUNT_MANAGEMENT}}',
       'path': conf.get('path_admin', hypertext.PATH_ADMIN) + '/users' },
     { 'title': '{{lang.PROFILE}}',
-      'path': conf.get('path_admin', hypertext.PATH_ADMIN) } ]
+      'path': conf.get('path_admin', hypertext.PATH_ADMIN) + '/profile' } ]
   hypertext.GLOBALS['script'] = os.environ.get('SCRIPT_NAME', '')
 
   LANG = web.GET.get('lang') or web.COOKIES.get('lang') \
@@ -109,7 +112,7 @@ def init():
   if not os.path.isdir(hypertext.LAYOUT_DIRECTORY):
     log(0, 'Layout directory does not exist')
 
-  lang = hypertext.loadLanguage(LANG)
+  lang = hypertext.init(LANG)
   hypertext.lang = lang
   web.lang = lang
 

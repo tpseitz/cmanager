@@ -1,5 +1,7 @@
 { "adduser": [["{{lang.ADD_USER}}", "{{lang.ADD}}", "users"],
     ["name",      "text",      "{{lang.NAME}}",           null],
+    ["start_day", "date",      "{{lang.START_DATE}}",     null],
+    ["end_day",   "date",      "{{lang.END_DATE}}",       90],
     ["shift",     "select",    "{{lang.SHIFT}}",          "{list_shifts}"],
     ["days",      "checklist", "{{lang.DAYS}}",           "{list_days}"]],
  "addcomputer": [["{{lang.ADD_COMPUTER}}", "{{lang.ADD}}", "computers"],

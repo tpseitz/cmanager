@@ -30,6 +30,8 @@
 import collections, datetime, re
 import database
 
+FORMAT_DATE = '%Y-%m-%d'
+
 REGEX_STRIP = re.compile(r'[^A-Za-z\d]')
 REGEX_INTEGER = re.compile(r'^\s*-?\s*\d+\s*$')
 
@@ -116,6 +118,39 @@ def listVacant(shift):
   cls = [c for c in listComputers() if c['cid'] not in els]
   return cls
 
+def _updatePerson(person):
+  global FORMAT_DATE
+
+  dn, pr = [], []
+  person['presence'], person['day_names'] = [], []
+  for di, dn in enumerate(lang['WORKDAYS']):
+    if person['day_%d' % di]:
+      person['presence'].append((di, lang['DAY_NAMES'][di], True))
+      person['day_names'].append(dn)
+    else:
+      person['presence'].append((di, lang['DAY_NAMES'][di], False))
+  if person['computer_id'] is None:
+    person.update({ 'status': None, 'computer_name': None })
+  else:
+    person.update({ 'status': 'active',
+      'computer_name': _COMPUTERS_PER_CID[person['computer_id']]['name'] })
+
+  if person['shift_id'] is None:
+    person.update({ 'shift_name': None, 'shift_ord': None })
+  else:
+    s = getShift(person['shift_id'])
+    person.update({ 'shift_name': s['name'], 'shift_ord': s['ord'] })
+
+  if person['computer_id'] is not None:
+    person['computer'] = _COMPUTERS_PER_CID[person['computer_id']]['name']
+
+  if person['start_date']: person['start_date_string'] \
+    = datetime.date.fromordinal(person['start_date']).strftime(FORMAT_DATE)
+  if person['end_date']: person['end_date_string'] \
+    = datetime.date.fromordinal(person['end_date']).strftime(FORMAT_DATE)
+
+  return person
+
 _QUEUE = []
 def listQueue():
   global _QUEUE
@@ -124,6 +159,11 @@ def listQueue():
     dt = datetime.date.today().toordinal()
     where = [('start_date', '>', dt), 'or', ('start_date', 'null')]
     _QUEUE = database.select('persons', where=where, order='created')
+    count = 1
+    for p in _QUEUE:
+      _updatePerson(p)
+      p['ord'] = count
+      count += 1
 
   return _QUEUE
 
@@ -137,29 +177,7 @@ def listPersons(computer_id=None, shift_id=None):
     dt = datetime.date.today().toordinal()
     where = [('start_date', '<=', dt), 'and', ('end_date', '>=', dt)]
     _PERSONS = database.select('persons', where=where, order='name')
-    for p in _PERSONS:
-      dn, pr = [], []
-      p['presence'], p['day_names'] = [], []
-      for di, dn in enumerate(lang['WORKDAYS']):
-        if p['day_%d' % di]:
-          p['presence'].append((di, lang['DAY_NAMES'][di], True))
-          p['day_names'].append(dn)
-        else:
-          p['presence'].append((di, lang['DAY_NAMES'][di], False))
-      if p['computer_id'] is None:
-        p.update({ 'status': None, 'computer_name': None })
-      else:
-        p.update({ 'status': 'active',
-          'computer_name': _COMPUTERS_PER_CID[p['computer_id']]['name'] })
-
-      if p['shift_id'] is None:
-        p.update({ 'shift_name': None, 'shift_ord': None })
-      else:
-        s = getShift(p['shift_id'])
-        p.update({ 'shift_name': s['name'], 'shift_ord': s['ord'] })
-
-      if p['computer_id'] is not None:
-        p['computer'] = _COMPUTERS_PER_CID[p['computer_id']]['name']
+    for p in _PERSONS: _updatePerson(p)
 
     _PERSONS_PER_PID = { p['pid']: p for p in _PERSONS}
 
