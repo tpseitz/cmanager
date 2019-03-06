@@ -141,10 +141,11 @@ def formData():
   name = web.POST.get('_form', '')
   message = 'ERR_UNKNOWN_FORM'
   if name == 'adduser':
-    usr = objects.createPerson(web.POST['name'], int(web.POST['shift']),
-      list(map(int, web.POST.get('days', []))))
+    usr = objects.createPerson(
+      web.POST['name'], web.POST['start_date'], web.POST['end_date'],
+      int(web.POST['shift']), list(map(int, web.POST.get('days', []))))
     if usr is None:
-      web.redirect('users', 3, lang['ERR_ADD_USER'] % (str(u),))
+      web.redirect('users', 3, lang['ERR_ADD_USER'] % (str(usr),))
     else:
       log(2, 'Created user %r' % (usr,))
       objects.saveData()

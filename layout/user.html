@@ -1,4 +1,5 @@
 <h2>{{lang.USER}}: {{user.name}}</h2>
+<!-- {{user}} -->
 <form id="update_user" action="{{script}}/form" method="post" enctype="multipart/form-data">
   <input type="hidden" name="_form" value="updateuser">
   <input type="hidden" name="pid" value="{{user.pid}}">
@@ -9,7 +10,12 @@
       </option>{{/list_shifts}}
     </select>
   </p>
-  <!-- {{user}} -->
+  <p>{{lang.START_DATE}}: {{user.start_date_string}}</p>
+  <p>{{lang.END_DATE}}: {{user.end_date_string}}</p>
+{{#user.days_to_start}}  <p>{{lang.TO_START}}: {{user.days_to_start}}</p>
+{{^user.days_to_start}}  <p>{{lang.TO_END}}: {{user.days_to_end}}</p>
+  <p>{{lang.TO_YEAR}}: {{user.days_to_year}}</p>
+{{/user.days_to_start}}
   <p>{{lang.COMPUTER}}:{{#user.computer}}
     <input type="hidden" name="cid" value="{{user.computer}}">
     {{user.computer_name}}

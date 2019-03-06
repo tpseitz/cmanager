@@ -2,16 +2,20 @@
 <table class="list">
   <tr>
     <th>{{lang.ORDER_NUM}}</th><th>{{lang.USER}}</th>
-    <th>{{lang.START_DAY}}</th><th>{{lang.COMMENTS}}</th>
+    <th>{{lang.START_DATE}}</th><th>{{lang.TO_START}}</th>
+    <th>{{lang.COMMENTS}}</th>
 <!--    <th>{{lang.DELETE_USER}}</th>-->
   </tr>
 {{#queue}}
-  <tr>
+  <tr{{#ended}} class="ended"{{/ended}}>
     <td>{{ord}}</td>
     <td>{{name}}</td>
 {{#start_date}}    <td>{{start_date_string}}</td>
 {{^start_date}}    <td>&nbsp;</td>
 {{/start_date}}
+{{#days_to_start}}    <td>{{days_to_start}}</td>
+{{^days_to_start}}    <td>&nbsp;</td>
+{{/days_to_start}}
 {{#comments}}    <td>{{comments}}</td>
 {{^comments}}    <td>&nbsp;</td>
 {{/comments}}

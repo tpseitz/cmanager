@@ -152,7 +152,7 @@ def _getValue(key, default, *values):
   global GLOBALS, FUNCTIONS
 
   if key in ('_', '.'): return default
-  if key.startswith('lang.'): return lang.get(key[5:], key)
+  if key.startswith('lang.'): return lang.get(key[5:], key[5:])
   if key in FUNCTIONS: return FUNCTIONS[key]
 
   for val in values + (FUNCTIONS, GLOBALS):

@@ -71,6 +71,7 @@ table.list th { border: solid 1pt #444; padding: 3pt 10pt; background: #ccc; }
 table.list td { border: solid 1pt #444; padding: 3pt 10pt; background: #eee;
   vertical-align: top; }
 table.list tr.shift1 td { border-top: solid 2pt #222; }
+table.list tr.ended td { background: #f88; }
 table.list a { text-decoration: none; font-weight: bold; color: #002; }
 table.list a:hover { color: #00a; }
 /* User list status colors */

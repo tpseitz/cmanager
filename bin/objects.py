@@ -144,10 +144,22 @@ def _updatePerson(person):
   if person['computer_id'] is not None:
     person['computer'] = _COMPUTERS_PER_CID[person['computer_id']]['name']
 
-  if person['start_date']: person['start_date_string'] \
-    = datetime.date.fromordinal(person['start_date']).strftime(FORMAT_DATE)
-  if person['end_date']: person['end_date_string'] \
-    = datetime.date.fromordinal(person['end_date']).strftime(FORMAT_DATE)
+  dt = datetime.date.today().toordinal()
+  person['ended'] = False
+  if person['start_date']:
+    person['start_date_string'] \
+      = datetime.date.fromordinal(person['start_date']).strftime(FORMAT_DATE)
+    person['days_to_start'] = person['start_date'] - dt
+    if person['days_to_start'] < 0: person['days_to_start'] = None
+  if person['end_date']:
+    person['end_date_string'] \
+      = datetime.date.fromordinal(person['end_date']).strftime(FORMAT_DATE)
+    if person['end_date'] < dt: person['ended'] = True
+
+    person['days_to_end']  = person['end_date']   - dt
+    person['days_to_year'] = person['start_date'] - dt + 365
+    if person['days_to_end'] < 0:  person['days_to_end'] = None
+    if person['days_to_year'] < 0: person['days_to_year'] = None
 
   return person
 
@@ -157,7 +169,8 @@ def listQueue():
 
   if not _QUEUE:
     dt = datetime.date.today().toordinal()
-    where = [('start_date', '>', dt), 'or', ('start_date', 'null')]
+    where = [('start_date', '>', dt), 'or', ('start_date', 'null'),
+      'or', ('end_date', '<', dt)]
     _QUEUE = database.select('persons', where=where, order='created')
     count = 1
     for p in _QUEUE:
@@ -196,19 +209,23 @@ def getPerson(search):
   if isinstance(search, str) and REGEX_INTEGER.match(search):
     search = int(search)
 
-  if   isinstance(search, int): return _PERSONS_PER_PID.get(search)
-  elif isinstance(search, str): return _PERSONS_PER_PID.get(search)
+  if isinstance(search, int): return _PERSONS_PER_PID.get(search)
   else: raise TypeError('Illegal type for user search: %r' % type(search))
 
-def createPerson(name, shift=None, days=[]):
+def createPerson(name, start_date, end_date, shift, days):
   global _PERSONS, _PERSONS_PER_PID
   _PERSONS, _PERSONS_PER_PID = [], {}
+
+  start_date = datetime.datetime.strptime(start_date, FORMAT_DATE).date()
+  end_date   = datetime.datetime.strptime(end_date, FORMAT_DATE).date()
 
   #TODO Check person name for illegal characters
   shift = int(shift)
   days = set(map(int, days))
 
-  data = collections.OrderedDict((('name', name), ('shift_id', shift)))
+  data = collections.OrderedDict((
+    ('name', name), ('start_date', start_date.toordinal()),
+    ('end_date', end_date.toordinal()), ('shift_id', shift)))
   for i in range(len(lang['WORKDAYS'])): data['day_%d' % i] = i in days
 
   uid = database.insert('persons', data)
