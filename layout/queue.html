@@ -7,9 +7,9 @@
 <!--    <th>{{lang.DELETE_USER}}</th>-->
   </tr>
 {{#queue}}
-  <tr{{#ended}} class="ended"{{/ended}}>
+  <tr class="{{#ended}}ended {{/ended}} {{#hilight}}hilight{{/hilight}}">
     <td>{{ord}}</td>
-    <td>{{name}}</td>
+    <td><a href="{{script}}/user/{{pid}}">{{name}}</a></td>
 {{#start_date}}    <td>{{start_date_string}}</td>
 {{^start_date}}    <td>&nbsp;</td>
 {{/start_date}}

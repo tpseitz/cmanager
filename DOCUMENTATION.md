@@ -44,6 +44,8 @@ Configuration file is JSON -formated file and it can hold following properties:
 | `layout_directory`   | directory where layout files are located             |
 | `session_directory`  | directory to store session files                     |
 | `lang`               | language code for default language                   |
+| `alert_days_start`   | highlight user for days before users perioid starts  |
+| `alert_days_end`     | highlight user for days before users perioid ends    |
 | `user_levels`        | list of user type translations as dictionary with    |
 |                      | level number as key and type name as value           |
 | `floorplan`          | full filename to SVG image of floorplan. This is not |

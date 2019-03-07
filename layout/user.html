@@ -1,27 +1,28 @@
-<h2>{{lang.USER}}: {{user.name}}</h2>
-<!-- {{user}} -->
 <form id="update_user" action="{{script}}/form" method="post" enctype="multipart/form-data">
-  <input type="hidden" name="_form" value="updateuser">
-  <input type="hidden" name="pid" value="{{user.pid}}">
-  <p>{{lang.SHIFT}}:
-    <select name="shift" required="true">{{#list_shifts}}
-      <option value="{{$1}}"{{#$1=user.shift_id}} selected{{/$1}}>
-        {{$2}}
-      </option>{{/list_shifts}}
-    </select>
-  </p>
-  <p>{{lang.START_DATE}}: {{user.start_date_string}}</p>
-  <p>{{lang.END_DATE}}: {{user.end_date_string}}</p>
-{{#user.days_to_start}}  <p>{{lang.TO_START}}: {{user.days_to_start}}</p>
-{{^user.days_to_start}}  <p>{{lang.TO_END}}: {{user.days_to_end}}</p>
-  <p>{{lang.TO_YEAR}}: {{user.days_to_year}}</p>
+  <div class="infobox">
+    <h2>{{lang.USER}}: {{user.name}}</h2>
+    <!-- {{user}} -->
+    <input type="hidden" name="_form" value="updateuser">
+    <input type="hidden" name="pid" value="{{user.pid}}">
+    <p>{{lang.SHIFT}}:
+      <select name="shift" required="true">{{#list_shifts}}
+        <option value="{{$1}}"{{#$1=user.shift_id}} selected{{/$1}}>
+          {{$2}}
+        </option>{{/list_shifts}}
+      </select>
+    </p>
+    <p>{{lang.START_DATE}}: <input type="text" name="start_date" id="start_date" value="{{user.start_date_string}}"></p>
+    <p>{{lang.END_DATE}}: <input type="text" name="end_date" id="end_date" value="{{user.end_date_string}}"></p>
+{{#user.days_to_start}}      <p{{#user.hilight}} class="hilight"{{/user.hilight}}>{{lang.TO_START}}: {{user.days_to_start}}</p>
+{{^user.days_to_start}}      <p{{#user.hilight}} class="hilight"{{/user.hilight}}>{{lang.DAYS_LEFT}}: ({{lang.MONTHS}}) {{user.days_to_end}}, ({{lang.YEAR}}) {{user.days_to_year}}</p>
 {{/user.days_to_start}}
-  <p>{{lang.COMPUTER}}:{{#user.computer}}
-    <input type="hidden" name="cid" value="{{user.computer}}">
-    {{user.computer_name}}
-    <a href="{{script}}/assign/{{user.pid}}/NULL">{{lang.DELETE}}</a>{{^user.computer}}
-    <a href="{{script}}/assign/{{user.pid}}">{{lang.NO_SEAT}}</a>{{/user.computer}}
-  </p>
+    <p>{{lang.COMPUTER}}:{{#user.computer}}
+      <input type="hidden" name="cid" value="{{user.computer}}">
+      {{user.computer_name}}
+      <a href="{{script}}/assign/{{user.pid}}/NULL">{{lang.DELETE}}</a>{{^user.computer}}
+      <a href="{{script}}/assign/{{user.pid}}">{{lang.NO_SEAT}}</a>{{/user.computer}}
+    </p>
+  </div>
   <table class="userinfo">
     <tr>{{#lang.DAY_NAMES}}<th>{{.}}</th>{{/lang.DAY_NAMES}}</tr>
     <tr>{{#user.presence}}
@@ -32,3 +33,7 @@
   <a class="delete" href="{{script}}/delete/user/{{user.pid}}">{{lang.DELETE_USER}}</a><br>
 </form>
 <a href="{{script}}/users">{{lang.BACK}}</a><br>
+<script>
+  $(function() { $("#start_date").datepicker(); });
+  $(function() { $("#end_date").datepicker(); });
+</script>

@@ -56,6 +56,8 @@ def init():
 
   objects.lang = lang
   objects.FORMAT_DATE = hypertext.FORMAT_DATE
+  objects.ALERT_DAYS_START=conf.get('alert_days_start',objects.ALERT_DAYS_START)
+  objects.ALERT_DAYS_END = conf.get('alert_days_end', objects.ALERT_DAYS_END)
 
   hypertext.GLOBALS['list_days'] = enumerate(lang['WORKDAYS'])
   hypertext.GLOBALS['list_shifts'] \
@@ -153,6 +155,9 @@ def formData():
         lang['MSG_ADD_USER'] % (usr['name'],))
   elif name == 'updateuser':
     usr = objects.getPerson(web.POST['pid'])
+    #TODO Do some error checking
+    objects.setDates(usr['pid'],
+      web.POST['start_date'], web.POST['end_date'])
     rc = objects.assignShift(usr['pid'],
       int(web.POST['shift']), map(int, web.POST['days']))
     if web.POST.get('cid'): objects.assignComputer(usr['pid'], web.POST['cid'])

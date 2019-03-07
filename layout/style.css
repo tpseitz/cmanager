@@ -62,6 +62,16 @@ table.lines td { border: solid 1pt #444; padding: 3pt 10pt;
 table.lines td div { border: solid 1pt #444; }
 
 /*
+ * Folder elements
+ */
+div.infobox { border: solid 1pt #888; background: #eee;
+  min-width: 200pt; max-width: 500pt; margin: 5pt; padding: 0pt; }
+div.infobox h2:first-child { background: #ddd; border: solid 0pt #444;
+  border-width: 0pt 0pt 1pt 0pt; padding: 5pt 10pt; margin: 0pt; }
+div.infobox p { padding: 3pt 10pt; margin: 0pt; }
+div.infobox p.hilight { background: #fcc; }
+
+/*
  * Computer and user list tables 
  */
 table.list td.delete a, a.delete { color: #a00; }
@@ -72,6 +82,7 @@ table.list td { border: solid 1pt #444; padding: 3pt 10pt; background: #eee;
   vertical-align: top; }
 table.list tr.shift1 td { border-top: solid 2pt #222; }
 table.list tr.ended td { background: #f88; }
+table.list tr.hilight td { background: #fcc; }
 table.list a { text-decoration: none; font-weight: bold; color: #002; }
 table.list a:hover { color: #00a; }
 /* User list status colors */

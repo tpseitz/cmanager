@@ -10,7 +10,7 @@
 <!--    <th>{{lang.DELETE_USER}}</th>-->
   </tr>
 {{#users}}
-  <tr>
+  <tr{{#hilight}} class="hilight"{{/hilight}}>
     <td><a href="{{script}}/user/{{pid}}">{{name}}</a></td>
     <td>{{days_to_end}}</td>
     <td>{{days_to_year}}</td>

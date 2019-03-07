@@ -31,6 +31,7 @@ import collections, datetime, re
 import database
 
 FORMAT_DATE = '%Y-%m-%d'
+ALERT_DAYS_START, ALERT_DAYS_END = 7, 7
 
 REGEX_STRIP = re.compile(r'[^A-Za-z\d]')
 REGEX_INTEGER = re.compile(r'^\s*-?\s*\d+\s*$')
@@ -119,7 +120,7 @@ def listVacant(shift):
   return cls
 
 def _updatePerson(person):
-  global FORMAT_DATE
+  global FORMAT_DATE, ALERT_DAYS_START, ALERT_DAYS_END
 
   dn, pr = [], []
   person['presence'], person['day_names'] = [], []
@@ -151,6 +152,8 @@ def _updatePerson(person):
       = datetime.date.fromordinal(person['start_date']).strftime(FORMAT_DATE)
     person['days_to_start'] = person['start_date'] - dt
     if person['days_to_start'] < 0: person['days_to_start'] = None
+    elif person['days_to_start'] < ALERT_DAYS_START: person['hilight'] = True
+
   if person['end_date']:
     person['end_date_string'] \
       = datetime.date.fromordinal(person['end_date']).strftime(FORMAT_DATE)
@@ -159,6 +162,7 @@ def _updatePerson(person):
     person['days_to_end']  = person['end_date']   - dt
     person['days_to_year'] = person['start_date'] - dt + 365
     if person['days_to_end'] < 0:  person['days_to_end'] = None
+    elif person['days_to_end'] < ALERT_DAYS_END: person['hilight'] = True
     if person['days_to_year'] < 0: person['days_to_year'] = None
 
   return person
@@ -178,6 +182,8 @@ def listQueue():
       p['ord'] = count
       count += 1
 
+    _PERSONS_PER_PID.update({ p['pid']: p for p in _QUEUE })
+
   return _QUEUE
 
 _PERSONS, _PERSONS_PER_PID = [], {}
@@ -192,7 +198,7 @@ def listPersons(computer_id=None, shift_id=None):
     _PERSONS = database.select('persons', where=where, order='name')
     for p in _PERSONS: _updatePerson(p)
 
-    _PERSONS_PER_PID = { p['pid']: p for p in _PERSONS}
+    _PERSONS_PER_PID.update({ p['pid']: p for p in _PERSONS })
 
   pl = _PERSONS
 
@@ -205,6 +211,7 @@ def listPersons(computer_id=None, shift_id=None):
 
 def getPerson(search):
   listPersons()
+  listQueue()
 
   if isinstance(search, str) and REGEX_INTEGER.match(search):
     search = int(search)
@@ -242,6 +249,15 @@ def deletePerson(search):
 
   if rc: return None
   else: return 'ERR_DELETE'
+
+def setDates(person, start_date, end_date):
+  person = int(person)
+  start_date = datetime.datetime.strptime(start_date, FORMAT_DATE).date()
+  end_date   = datetime.datetime.strptime(end_date, FORMAT_DATE).date()
+
+  data = collections.OrderedDict({
+    'start_date': start_date.toordinal(), 'end_date': end_date.toordinal() })
+  database.update('persons', data, { 'pid': person })
 
 def assignShift(person, shift=None, days=[]):
   person = int(person)
