@@ -136,6 +136,8 @@ def _updatePerson(person):
     person.update({ 'status': 'active',
       'computer_name': _COMPUTERS_PER_CID[person['computer_id']]['name'] })
 
+  if not person['comments']: person['comments'] = ''
+
   if person['shift_id'] is None:
     person.update({ 'shift_name': None, 'shift_ord': None })
   else:
@@ -145,8 +147,11 @@ def _updatePerson(person):
   if person['computer_id'] is not None:
     person['computer'] = _COMPUTERS_PER_CID[person['computer_id']]['name']
 
-  dt = datetime.date.today().toordinal()
+  person['start_date_string'], person['end_date_string'] = '', ''
+  person['days_to_start'], person['days_to_end'] = None, None
+  person['days_to_year'] = None
   person['ended'] = False
+  dt = datetime.date.today().toordinal()
   if person['start_date']:
     person['start_date_string'] \
       = datetime.date.fromordinal(person['start_date']).strftime(FORMAT_DATE)

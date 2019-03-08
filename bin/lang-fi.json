@@ -29,7 +29,7 @@
   "TO_START": "P\u00E4ivi\u00E4 aloitukseen",
   "TO_END": "P\u00E4ivi\u00E4 j\u00E4ljell\u00E4 (3kk)",
   "TO_YEAR": "P\u00E4ivi\u00E4 j\u00E4ljell\u00E4 (vuosi)",
-  "COMMENTS": "commentit",
+  "COMMENTS": "lis\u00E4tietoja",
   "WORKDAYS": ["ma", "ti", "ke", "to", "pe"],
   "DAY_NAMES": ["maanantai", "tiistai", "keskiviikko", "torstai", "perjantai"],
   "VACANT": "vapaa",
