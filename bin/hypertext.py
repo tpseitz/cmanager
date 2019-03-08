@@ -27,11 +27,14 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import collections, json, re, os
+import collections, datetime, json, re, os
 LAYOUT_DIRECTORY = '~/layout'
 FORMS, FUNCTIONS = {}, {}
-GLOBALS = { 'menu': None, 'submenu': None, 'scripts': [] }
+GLOBALS = { 'menu': None, 'submenu': None, 'stylesheets': [],
+  'scripts': [], 'js_init': '' }
 PATH_ADMIN, PATH_COMPUTERS = '/admin', '/konehallinta'
+FORMAT_DATE = '%Y-%m-%d'
+JQUERY_UI_LOCATION = None
 
 HTML_CELL_FREE = None
 HTML_CELL_RESERVED = None
@@ -44,15 +47,26 @@ REGEX_MUSTACHE_BLOCK_BARE = re.compile(r'\{\{[^\{\}]+\}\}')
 
 def log(lvl, msg): pass
 
-def loadLanguage(code):
+def init(lang_code):
   global GLOBALS, FORMS
 
   fdn = os.path.split(os.path.realpath(__file__))[0]
-  ffn = os.path.join(fdn, 'lang-%s.json' % code)
+  ffn = os.path.join(fdn, 'lang-%s.json' % lang_code)
   with open(ffn, 'r') as f: lang = json.loads(f.read())
   ffn = os.path.join(fdn, 'forms.json')
   with open(ffn, 'r') as f: FORMS = json.loads(f.read())
   GLOBALS['lang'] = lang
+
+  if JQUERY_UI_LOCATION:
+    GLOBALS['stylesheets'].append('%s/jquery-ui.min.css' \
+      % (JQUERY_UI_LOCATION,))
+    GLOBALS['scripts'].append('%s/external/jquery/jquery.js' \
+      % (JQUERY_UI_LOCATION,))
+    GLOBALS['scripts'].append('%s/jquery-ui.min.js' % (JQUERY_UI_LOCATION,))
+    GLOBALS['scripts'].append('%s/master/ui/i18n/datepicker-%s.js' \
+      % (JQUERY_UI_LOCATION, lang_code))
+    GLOBALS['js_init'] += \
+      '$.datepicker.setDefaults($.datepicker.regional["fi"]);\n'
 
   return lang
 
@@ -60,7 +74,11 @@ def link(path, text):
   if path and path[0] == '/': path = path[1:]
   return '<a href="%s/%s">%s</a>' % (GLOBALS['script'], path, text)
 
+DATEPICKER_ELEMENT = \
+  '  <script>$(function() { $("#%s").datepicker(); });</script>\n'
 def form(name, data={}, formdata=None, redirect=None, target=None):
+  global JQUERY_UI_LOCATION
+
   if name in FORMS: formdata = FORMS[name]
   elif formdata is None: return 'form(%s)' % (name,)
   title, button, redirect = formdata[0]
@@ -82,6 +100,13 @@ def form(name, data={}, formdata=None, redirect=None, target=None):
         % (iid, vls[0])
     elif tp == 'text':
       html += '  <p>%s<input type="text" name="%s" value=""></p>\n' % (nm, iid)
+    elif tp == 'date':
+      dt = datetime.date.today()
+      if vls and isinstance(vls, int): dt += datetime.timedelta(days=vls)
+      html += '  <p>%s<input type="text" name="%s" id="%s" value="%s"></p>\n' \
+        % (nm, iid, iid, dt.strftime(FORMAT_DATE))
+      if JQUERY_UI_LOCATION:
+        html += DATEPICKER_ELEMENT % (iid,)
     elif tp in ('select', 'select0'):
       iter(vls) # Test that vls is of iterable type
       html += '  <p>%s\n' % (nm,)
@@ -123,11 +148,32 @@ def frame(html, data={}, frame='frame'):
   start, end = layout(frame).split('{{content}}')
   return mustache(start + html + end, data)
 
-MAX_ITERATIONS, MAX_PAGE_SIZE = 15, 1048576
-MAX_BLOCK_LOOPS, MAX_VARIABLE_LOOPS = 10, 150
-_BASE_DATA = {}
+def _getValue(key, default, *values):
+  global GLOBALS, FUNCTIONS
+
+  if key in ('_', '.'): return default
+  if key.startswith('lang.'): return lang.get(key[5:], key[5:])
+  if key in FUNCTIONS: return FUNCTIONS[key]
+
+  for val in values + (FUNCTIONS, GLOBALS):
+    found = False
+    for k in key.split('.'):
+      if k in val:
+        val = val[k]
+        found = True
+      else:
+        found = False
+        break
+    if found: break
+
+  if not found: return '[%s]' % key
+
+  return val
+
+MAX_ITERATIONS, MAX_PAGE_SIZE = 25, 1048576
+MAX_BLOCK_LOOPS, MAX_VARIABLE_LOOPS = 15, 150
 def mustache(html, data={}, default=None, *outside):
-  global _BASE_DATA, GLOBALS
+  global GLOBALS
 
   # Check for max iterations
   if len(outside) > MAX_ITERATIONS: log(0, 'Stack overflow')
@@ -136,10 +182,6 @@ def mustache(html, data={}, default=None, *outside):
 
   if REGEX_LAYOUT_NAME.match(html): html = layout(html)
 
-  if not _BASE_DATA:
-    _BASE_DATA = FUNCTIONS.copy()
-    _BASE_DATA.update(GLOBALS)
-
   count = 0
   while count < MAX_BLOCK_LOOPS:
     count += 1
@@ -147,18 +189,12 @@ def mustache(html, data={}, default=None, *outside):
     if mt is None: break
 
     tag, key, compare = mt.group(0), mt.group(1), mt.group(2)
-    val = data
     i, l = html.find('{{/%s}}' % key), 5 + len(key)
     if i < 0: log(0, 'Layout error: No end tag for %s' % (tag,))
     start, blk, nblk, end = html[:mt.start()], html[mt.end():i], '', html[i+l:]
     if '{{^%s}}' % key in blk: blk, nblk = blk.split('{{^%s}}' % key, 1)
 
-    if key == '_': val = default
-    else:
-      for k in key.split('.'):
-        tmp = collections.ChainMap(val, *outside, GLOBALS, FUNCTIONS)
-        val = tmp.get(k)
-        if val is None: break
+    val = _getValue(key, default, data, *outside)
 
     if compare:
       cp = data
@@ -168,7 +204,7 @@ def mustache(html, data={}, default=None, *outside):
         if val is None: break
       val = val == cp
 
-    if not val:
+    if not val or val == '[%s]' % key:
       ht = mustache(nblk, data, *outside)
     elif isinstance(val, (tuple, list, set)):
       ht = ''
@@ -180,12 +216,17 @@ def mustache(html, data={}, default=None, *outside):
         ht += mustache(blk, dt, vv, data, *outside)
     elif callable(val):
       argv = mustache(blk, data, *outside).split(',')
-      ht = val(*argv)
+      try: #XXX
+        ht = val(*argv)
+      except TypeError as te: raise TypeError('%r' % (argv,)) #XXX
     else:
       dt = data
       if isinstance(val, dict): dt = val
       ht = mustache(blk, dt, val, data, *outside)
     html = start + ht + end
+
+  if count >= MAX_BLOCK_LOOPS:
+    raise Exception('Maximum loop count reached: %d' % count)
 
   count = 0
   while count < MAX_VARIABLE_LOOPS:
@@ -196,18 +237,7 @@ def mustache(html, data={}, default=None, *outside):
     tp, key, arg = mt.groups()
     tag, rep = mt.group(0), '[no data]'
 
-    val = data
-    if key == '_': val = default
-    else:
-      for k in key.split('.'):
-        for dt in (val,) + outside + (_BASE_DATA,):
-          if not isinstance(dt, dict):
-            log(0, "Parent is not dict: %s = %r" % (key, dt))
-          val = dt.get(k, '{{}}')
-          if val != '{{}}': break
-        if val ==  '{{}}':
-          val = '[%s]' % key
-          break
+    val = _getValue(key, default, data, *outside)
 
     if callable(val):
       argv = tuple()
@@ -219,6 +249,9 @@ def mustache(html, data={}, default=None, *outside):
       rep = str(val)
 
     html = html.replace(tag, rep)
+
+  if count >= MAX_VARIABLE_LOOPS:
+    raise Exception('Maximum loop count reached: %d' % count)
 
   return html
 

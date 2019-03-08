@@ -34,22 +34,27 @@ Configuration file is searched in this order
 
 Configuration file is JSON -formated file and it can hold following properties:
 
-| variable name       | description                                           |
-|---------------------|-------------------------------------------------------|
-| `db_hostname`       | database server hostname                              |
-| `db_username`       | database username                                     |
-| `db_password`       | database password                                     |
-| `db_database`       | database name on server                               |
-| `layout_directory`  | directory where layout files are located              |
-| `session_directory` | directory to store session files                      |
-| `lang`              | language code for default language                    |
-| `user_levels`       | list of user type translations as dictionary with     |
-|                     | level number as key and type name as value            |
-| `floorplan`         | full filename to SVG image of floorplan. This is not  |
-|                     | required for working installation                     |
-| `viewbox`           | SCG ViewBox properties for floorplan                  |
-| `path_admin`        | HTTP path of admin page ie `/admin`                   |
-| `path_computers`    | HTTP path of computer management page                 |
+| variable name        | description                                          |
+|----------------------|------------------------------------------------------|
+| `db_hostname`        | database server hostname                             |
+| `db_username`        | database username                                    |
+| `db_password`        | database password                                    |
+| `db_database`        | database name on server                              |
+| `time_format`        | local time format in python strftime format style    |
+| `layout_directory`   | directory where layout files are located             |
+| `session_directory`  | directory to store session files                     |
+| `lang`               | language code for default language                   |
+| `alert_days_start`   | highlight user for days before users perioid starts  |
+| `alert_days_end`     | highlight user for days before users perioid ends    |
+| `user_levels`        | list of user type translations as dictionary with    |
+|                      | level number as key and type name as value           |
+| `floorplan`          | full filename to SVG image of floorplan. This is not |
+|                      | required for working installation                    |
+| `viewbox`            | SCG ViewBox properties for floorplan                 |
+| `path_admin`         | HTTP path of admin page ie `/admin`                  |
+| `path_computers`     | HTTP path of computer management page                |
+| `jquery_iu_location` | Location of jQuery UI installation directory as      |
+|                      | seen by from the web browser                         |
 
 The values of `shift_names` and `user_levels` are supposed to be moved into
 database in future
@@ -65,6 +70,20 @@ Hard coded permissions are
 | 0     | User     | Logged in user                             |
 
 For users that are not logged in, user level is lover than zero.
+
+Using jQuery UI
+---------------
+
+Some parts of this application can use jQuery UI functionalities. The
+repository does not contain instance of the library but it can be installed
+separately. The configuration variable `jquery_iu_location` tells application
+where the installation is located. Regional files can also be installed and
+active one is selected based on language settings.
+
+If jQuery UI is in `jquery-ui` in the www-root directory of the web server,
+the `jquery_iu_location` should be set to `/jquery-ui`. Application will make
+paths for scripts to be used in pages and create init script based of the root
+directory the installation directory.
 
 Scripts and modules
 -------------------

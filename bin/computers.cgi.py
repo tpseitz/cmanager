@@ -28,7 +28,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import json, sys, os
+import datetime, json, sys, os
 import database, objects, hypertext, sykeit, web
 
 FLOORPLAN, VIEWBOX = None, [0, 0, 100, 100]
@@ -42,6 +42,8 @@ def init():
 
   conf = sykeit.init()
 
+  lang = sykeit.lang
+
   FLOORPLAN = conf.get('floorplan', FLOORPLAN)
   VIEWBOX = conf.get('viewbox', VIEWBOX)
 
@@ -49,10 +51,13 @@ def init():
   hypertext.GLOBALS['submenu'] = [
     { 'title': '{{lang.COMPUTERS}}', 'path': 'computers' },
     { 'title': '{{lang.USERS}}', 'path': 'users' },
-    { 'title': '{{lang.MAP}}', 'path': 'floorplan' }]
+    { 'title': '{{lang.MAP}}', 'path': 'floorplan' },
+    { 'title': '{{lang.QUEUE}}', 'path': 'queue' }]
 
-  lang = sykeit.lang
   objects.lang = lang
+  objects.FORMAT_DATE = hypertext.FORMAT_DATE
+  objects.ALERT_DAYS_START=conf.get('alert_days_start',objects.ALERT_DAYS_START)
+  objects.ALERT_DAYS_END = conf.get('alert_days_end', objects.ALERT_DAYS_END)
 
   hypertext.GLOBALS['list_days'] = enumerate(lang['WORKDAYS'])
   hypertext.GLOBALS['list_shifts'] \
@@ -138,10 +143,11 @@ def formData():
   name = web.POST.get('_form', '')
   message = 'ERR_UNKNOWN_FORM'
   if name == 'adduser':
-    usr = objects.createPerson(web.POST['name'], int(web.POST['shift']),
-      list(map(int, web.POST.get('days', []))))
+    usr = objects.createPerson(
+      web.POST['name'], web.POST['start_date'], web.POST['end_date'],
+      int(web.POST['shift']), list(map(int, web.POST.get('days', []))))
     if usr is None:
-      web.redirect('users', 3, lang['ERR_ADD_USER'] % (str(u),))
+      web.redirect('users', 3, lang['ERR_ADD_USER'] % (str(usr),))
     else:
       log(2, 'Created user %r' % (usr,))
       objects.saveData()
@@ -149,6 +155,9 @@ def formData():
         lang['MSG_ADD_USER'] % (usr['name'],))
   elif name == 'updateuser':
     usr = objects.getPerson(web.POST['pid'])
+    #TODO Do some error checking
+    objects.setDates(usr['pid'],
+      web.POST['start_date'], web.POST['end_date'])
     rc = objects.assignShift(usr['pid'],
       int(web.POST['shift']), map(int, web.POST['days']))
     if web.POST.get('cid'): objects.assignComputer(usr['pid'], web.POST['cid'])
@@ -268,6 +277,13 @@ def mainCGI():
   # List users
   data['users'] = [usr.copy() for usr in objects.listPersons()]
 
+  # List queue
+  data['queue'] = [usr.copy() for usr in objects.listQueue()]
+  count = 1
+  for usr in data['queue']:
+    usr['ord'] = count
+    count += 1
+
   if usr_lvl >= 50:
     if path[0] == 'user' and len(path) == 2 \
         and objects.REGEX_INTEGER.match(path[1]):
@@ -303,6 +319,8 @@ def mainCGI():
       web.outputPage(hypertext.frame('computers', data))
     elif path[0] == 'users':
       web.outputPage(hypertext.frame('users', data))
+    elif path[0] == 'queue':
+      web.outputPage(hypertext.frame('queue', data))
     elif path[0] == 'floorplan':
       html = '{{floorplan}}'
 

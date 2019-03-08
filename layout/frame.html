@@ -3,8 +3,13 @@
 <head>
   <title>Tietokonelistaus</title>
   <link rel="stylesheet" href="/computers.css">
-{{#scripts}}  <script type="text/javascript" src="{{filename}}"></script>
+{{#stylesheets}}  <link rel="stylesheet" href="{{.}}">
+{{/stylesheets}}
+{{#scripts}}  <script type="text/javascript" src="{{.}}"></script>
 {{/scripts}}
+{{#js_init}}  <script>
+{{.}}
+  </script>{{/js_init}}
 </head>
 <body>
 <div class="header">

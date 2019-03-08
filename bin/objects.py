@@ -27,8 +27,11 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import collections, re
+import collections, datetime, re
 import database
+
+FORMAT_DATE = '%Y-%m-%d'
+ALERT_DAYS_START, ALERT_DAYS_END = 7, 7
 
 REGEX_STRIP = re.compile(r'[^A-Za-z\d]')
 REGEX_INTEGER = re.compile(r'^\s*-?\s*\d+\s*$')
@@ -116,6 +119,78 @@ def listVacant(shift):
   cls = [c for c in listComputers() if c['cid'] not in els]
   return cls
 
+def _updatePerson(person):
+  global FORMAT_DATE, ALERT_DAYS_START, ALERT_DAYS_END
+
+  dn, pr = [], []
+  person['presence'], person['day_names'] = [], []
+  for di, dn in enumerate(lang['WORKDAYS']):
+    if person['day_%d' % di]:
+      person['presence'].append((di, lang['DAY_NAMES'][di], True))
+      person['day_names'].append(dn)
+    else:
+      person['presence'].append((di, lang['DAY_NAMES'][di], False))
+  if person['computer_id'] is None:
+    person.update({ 'status': None, 'computer_name': None })
+  else:
+    person.update({ 'status': 'active',
+      'computer_name': _COMPUTERS_PER_CID[person['computer_id']]['name'] })
+
+  if not person['comments']: person['comments'] = ''
+
+  if person['shift_id'] is None:
+    person.update({ 'shift_name': None, 'shift_ord': None })
+  else:
+    s = getShift(person['shift_id'])
+    person.update({ 'shift_name': s['name'], 'shift_ord': s['ord'] })
+
+  if person['computer_id'] is not None:
+    person['computer'] = _COMPUTERS_PER_CID[person['computer_id']]['name']
+
+  person['start_date_string'], person['end_date_string'] = '', ''
+  person['days_to_start'], person['days_to_end'] = None, None
+  person['days_to_year'] = None
+  person['ended'] = False
+  dt = datetime.date.today().toordinal()
+  if person['start_date']:
+    person['start_date_string'] \
+      = datetime.date.fromordinal(person['start_date']).strftime(FORMAT_DATE)
+    person['days_to_start'] = person['start_date'] - dt
+    if person['days_to_start'] < 0: person['days_to_start'] = None
+    elif person['days_to_start'] < ALERT_DAYS_START: person['hilight'] = True
+
+  if person['end_date']:
+    person['end_date_string'] \
+      = datetime.date.fromordinal(person['end_date']).strftime(FORMAT_DATE)
+    if person['end_date'] < dt: person['ended'] = True
+
+    person['days_to_end']  = person['end_date']   - dt
+    person['days_to_year'] = person['start_date'] - dt + 365
+    if person['days_to_end'] < 0:  person['days_to_end'] = None
+    elif person['days_to_end'] < ALERT_DAYS_END: person['hilight'] = True
+    if person['days_to_year'] < 0: person['days_to_year'] = None
+
+  return person
+
+_QUEUE = []
+def listQueue():
+  global _QUEUE
+
+  if not _QUEUE:
+    dt = datetime.date.today().toordinal()
+    where = [('start_date', '>', dt), 'or', ('start_date', 'null'),
+      'or', ('end_date', '<', dt)]
+    _QUEUE = database.select('persons', where=where, order='created')
+    count = 1
+    for p in _QUEUE:
+      _updatePerson(p)
+      p['ord'] = count
+      count += 1
+
+    _PERSONS_PER_PID.update({ p['pid']: p for p in _QUEUE })
+
+  return _QUEUE
+
 _PERSONS, _PERSONS_PER_PID = [], {}
 def listPersons(computer_id=None, shift_id=None):
   global _PERSONS, _PERSONS_PER_PID
@@ -123,32 +198,12 @@ def listPersons(computer_id=None, shift_id=None):
   if not _PERSONS:
     listShifts()
     listComputers()
-    _PERSONS = database.select('persons', order='name')
-    for p in _PERSONS:
-      dn, pr = [], []
-      p['presence'], p['day_names'] = [], []
-      for di, dn in enumerate(lang['WORKDAYS']):
-        if p['day_%d' % di]:
-          p['presence'].append((di, lang['DAY_NAMES'][di], True))
-          p['day_names'].append(dn)
-        else:
-          p['presence'].append((di, lang['DAY_NAMES'][di], False))
-      if p['computer_id'] is None:
-        p.update({ 'status': None, 'computer_name': None })
-      else:
-        p.update({ 'status': 'active',
-          'computer_name': _COMPUTERS_PER_CID[p['computer_id']]['name'] })
+    dt = datetime.date.today().toordinal()
+    where = [('start_date', '<=', dt), 'and', ('end_date', '>=', dt)]
+    _PERSONS = database.select('persons', where=where, order='name')
+    for p in _PERSONS: _updatePerson(p)
 
-      if p['shift_id'] is None:
-        p.update({ 'shift_name': None, 'shift_ord': None })
-      else:
-        s = getShift(p['shift_id'])
-        p.update({ 'shift_name': s['name'], 'shift_ord': s['ord'] })
-
-      if p['computer_id'] is not None:
-        p['computer'] = _COMPUTERS_PER_CID[p['computer_id']]['name']
-
-    _PERSONS_PER_PID = { p['pid']: p for p in _PERSONS}
+    _PERSONS_PER_PID.update({ p['pid']: p for p in _PERSONS })
 
   pl = _PERSONS
 
@@ -161,23 +216,28 @@ def listPersons(computer_id=None, shift_id=None):
 
 def getPerson(search):
   listPersons()
+  listQueue()
 
   if isinstance(search, str) and REGEX_INTEGER.match(search):
     search = int(search)
 
-  if   isinstance(search, int): return _PERSONS_PER_PID.get(search)
-  elif isinstance(search, str): return _PERSONS_PER_PID.get(search)
+  if isinstance(search, int): return _PERSONS_PER_PID.get(search)
   else: raise TypeError('Illegal type for user search: %r' % type(search))
 
-def createPerson(name, shift=None, days=[]):
+def createPerson(name, start_date, end_date, shift, days):
   global _PERSONS, _PERSONS_PER_PID
   _PERSONS, _PERSONS_PER_PID = [], {}
+
+  start_date = datetime.datetime.strptime(start_date, FORMAT_DATE).date()
+  end_date   = datetime.datetime.strptime(end_date, FORMAT_DATE).date()
 
   #TODO Check person name for illegal characters
   shift = int(shift)
   days = set(map(int, days))
 
-  data = collections.OrderedDict((('name', name), ('shift_id', shift)))
+  data = collections.OrderedDict((
+    ('name', name), ('start_date', start_date.toordinal()),
+    ('end_date', end_date.toordinal()), ('shift_id', shift)))
   for i in range(len(lang['WORKDAYS'])): data['day_%d' % i] = i in days
 
   uid = database.insert('persons', data)
@@ -194,6 +254,15 @@ def deletePerson(search):
 
   if rc: return None
   else: return 'ERR_DELETE'
+
+def setDates(person, start_date, end_date):
+  person = int(person)
+  start_date = datetime.datetime.strptime(start_date, FORMAT_DATE).date()
+  end_date   = datetime.datetime.strptime(end_date, FORMAT_DATE).date()
+
+  data = collections.OrderedDict({
+    'start_date': start_date.toordinal(), 'end_date': end_date.toordinal() })
+  database.update('persons', data, { 'pid': person })
 
 def assignShift(person, shift=None, days=[]):
   person = int(person)
