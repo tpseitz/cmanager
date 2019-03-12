@@ -325,7 +325,7 @@ def mainCGI():
       html = '{{floorplan}}'
 
       if usr_lvl >= 100:
-        hypertext.GLOBALS['scripts'] += [{ 'filename': 'svg_draw.js' }]
+        hypertext.GLOBALS['scripts'].append('svg_draw.js')
 
       if len(path) > 1:
         shift = objects.getShift(path[1])
