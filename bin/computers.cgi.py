@@ -57,7 +57,10 @@ def init():
   objects.lang = lang
   objects.FORMAT_DATE = hypertext.FORMAT_DATE
   objects.ALERT_DAYS_START=conf.get('alert_days_start',objects.ALERT_DAYS_START)
-  objects.ALERT_DAYS_END = conf.get('alert_days_end', objects.ALERT_DAYS_END)
+  objects.ALERT_DAYS_END \
+    = conf.get('alert_days_end_red', objects.ALERT_DAYS_END_RED)
+  objects.ALERT_DAYS_END \
+    = conf.get('alert_days_end_yellow', objects.ALERT_DAYS_END_YELLOW)
 
   hypertext.GLOBALS['list_days'] = enumerate(lang['WORKDAYS'])
   hypertext.GLOBALS['list_shifts'] \

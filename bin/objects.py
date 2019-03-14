@@ -31,7 +31,7 @@ import collections, datetime, re
 import database
 
 FORMAT_DATE = '%Y-%m-%d'
-ALERT_DAYS_START, ALERT_DAYS_END = 7, 7
+ALERT_DAYS_START, ALERT_DAYS_END_RED, ALERT_DAYS_END_YELLOW = 7, 14, 28
 
 REGEX_STRIP = re.compile(r'[^A-Za-z\d]')
 REGEX_INTEGER = re.compile(r'^\s*-?\s*\d+\s*$')
@@ -120,7 +120,8 @@ def listVacant(shift):
   return cls
 
 def _updatePerson(person):
-  global FORMAT_DATE, ALERT_DAYS_START, ALERT_DAYS_END
+  global FORMAT_DATE, ALERT_DAYS_START, \
+    ALERT_DAYS_END_RED, ALERT_DAYS_END_YELLOW
 
   dn, pr = [], []
   person['presence'], person['day_names'] = [], []
@@ -167,7 +168,10 @@ def _updatePerson(person):
     person['days_to_end']  = person['end_date']   - dt
     person['days_to_year'] = person['start_date'] - dt + 365
     if person['days_to_end'] < 0:  person['days_to_end'] = None
-    elif person['days_to_end'] < ALERT_DAYS_END: person['hilight'] = True
+    elif person['days_to_end'] < ALERT_DAYS_END_RED:
+      person['hilight'] = 'red'
+    elif person['days_to_end'] < ALERT_DAYS_END_YELLOW:
+      person['hilight'] = 'yellow'
     if person['days_to_year'] < 0: person['days_to_year'] = None
 
   return person
