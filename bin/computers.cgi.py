@@ -167,7 +167,7 @@ def formData():
     objects.saveData()
     web.redirect('user/%s' % web.POST['pid'], 1, 'MSG_DATA_UPDATED')
   elif name == 'addcomputer':
-    if objects.getComputer(web.POST['name']) is not None:
+    if objects.getComputer(web.POST['name'], True) is not None:
       web.redirect('computers', 3, 'ERR_DUPLICATE_COMPUTER')
     cpu = objects.createComputer(web.POST['name'])
     if cpu is None:

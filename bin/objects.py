@@ -76,10 +76,10 @@ def listComputers():
 
   return _COMPUTERS
 
-def getComputer(search):
+def getComputer(search, is_name=False):
   listComputers()
 
-  if isinstance(search, str) and REGEX_INTEGER.match(search):
+  if not is_name and isinstance(search, str) and REGEX_INTEGER.match(search):
     search = int(search)
 
   if   isinstance(search, int): return _COMPUTERS_PER_CID.get(search)
