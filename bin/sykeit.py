@@ -112,6 +112,15 @@ def init():
   if not os.path.isdir(hypertext.LAYOUT_DIRECTORY):
     log(0, 'Layout directory does not exist')
 
+  hypertext.GLOBALS['scripts'].append('sort.js')
+
+  web.STATIC_FILES.update({
+    'sort.js':
+      os.sep.join(os.path.realpath(__file__).split(os.sep)[:-1]+['sort.js']),
+    'sort-none.svg': hypertext.LAYOUT_DIRECTORY + os.sep + 'sort-none.svg',
+    'sort-asc.svg':  hypertext.LAYOUT_DIRECTORY + os.sep + 'sort-asc.svg',
+    'sort-desc.svg': hypertext.LAYOUT_DIRECTORY + os.sep + 'sort-desc.svg' })
+
   lang = hypertext.init(LANG)
   hypertext.lang = lang
   web.lang = lang

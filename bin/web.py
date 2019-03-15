@@ -287,6 +287,12 @@ def startCGI(init=None):
 
   HTTP = True
 
+  path = os.environ.get('PATH_INFO', '/')
+  if path.endswith('.php'): error404()
+  basename = path.split('/')[-1]
+  if basename in STATIC_FILES: outputFile(STATIC_FILES[basename])
+  path = [d for d in path.split('/') if d]
+
   GET = dict([('=' in o and o.split('=', 1) or (o, True))
     for o in os.environ.get('QUERY_STRING', '').split('&') if o])
 
@@ -299,10 +305,6 @@ def startCGI(init=None):
 
   if 'sessid' not in COOKIES: COOKIES['sessid'] = randomString(32)
   readSession(COOKIES['sessid'])
-
-  path = os.environ.get('PATH_INFO', '/')
-  if path.endswith('.php'): error404()
-  path = [d for d in path.split('/') if d]
 
   if len(path) > 0:
     form = POST.get('_form')

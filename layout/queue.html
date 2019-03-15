@@ -1,5 +1,5 @@
 <div class="form">{{form:adduser}}</div>
-<table class="list">
+<table class="list" id="queue">
   <tr>
     <th>{{lang.ORDER_NUM}}</th><th>{{lang.USER}}</th>
     <th>{{lang.START_DATE}}</th><th>{{lang.TO_START}}</th>
@@ -10,7 +10,7 @@
   <tr class="{{#ended}}ended {{/ended}} {{#hilight}}hilight{{/hilight}}">
     <td>{{ord}}</td>
     <td><a href="{{script}}/user/{{pid}}">{{name}}</a></td>
-{{#start_date}}    <td>{{start_date_string}}</td>
+{{#start_date}}    <td> <!--{{start_date}}-->{{start_date_string}}</td>
 {{^start_date}}    <td>&nbsp;</td>
 {{/start_date}}
 {{#days_to_start}}    <td>{{days_to_start}}</td>
@@ -22,3 +22,4 @@
 <!--    <td class="delete"><a href="{{script}}/delete/user/{{pid}}">{{lang.DELETE}}</a></td>-->
   </tr>{{/queue}}
 </table>
+<script>setupSort('queue', [0, 1, 2, 3]);</script>

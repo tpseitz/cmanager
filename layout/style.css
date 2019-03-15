@@ -2,8 +2,8 @@
  * Main layout style
  */
 body { font-family: Sans-Serif; }
-.header { width: 800pt; }
-article { width: 800pt; }
+.header { width: 900pt; }
+article { width: 900pt; }
 a { text-decoration: none; font-weight: bold; color: #008; }
 a:hover { text-decoration: underline; color: #66d; }
 /* Menu */
@@ -13,6 +13,7 @@ li#menu ul { display: table-cell; padding: 3pt 10pt; }
 li#submenu { display: table; border: 1pt solid #888; background: #ddd;
   width: 100%; margin: 3pt; }
 li#submenu ul { display: table-cell; padding: 3pt 10pt; }
+img.sort { width: 9pt; }
 
 div.select { border: solid 1pt #888; background: #eee;
   min-width: 200pt; max-width: 400pt; margin: 5pt; padding: 0pt; }
