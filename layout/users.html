@@ -2,8 +2,10 @@
 <table class="list" id="users">
   <tr>
     <th>{{lang.USER}} </th>
-    <th>{{lang.TO_END}} </th>
-    <th>{{lang.TO_YEAR}} </th>
+    <th>{{lang.START_DATE}} </th>
+    <th>{{lang.END_DATE}} </th>
+    <th>{{lang.TO_END_TR}} </th>
+    <th>{{lang.TO_YEAR_TR}} </th>
     <th>{{lang.SHIFT}} </th>
     <th>{{lang.DAYS}} </th>
     <th>{{lang.COMPUTER}} </th>
@@ -12,9 +14,11 @@
 {{#users}}
   <tr{{#hilight}} class="hilight"{{/hilight}}>
     <td><a href="{{script}}/user/{{pid}}">{{name}}</a></td>
+    <td><!--{{start_date}}-->{{start_date_string}}</td>
+    <td><!--{{end_date}}-->{{end_date_string}}</td>
     <td>{{days_to_end}}</td>
     <td>{{days_to_year}}</td>
-    <td>{{shift_name}}</td>
+    <td><!--{{shift_ord}}-->{{shift_name}}</td>
     <td>{{day_names}}</td>
 {{#computer}}    <td class="present">
       <a href="{{script}}/computer/{{computer_id}}">{{computer}}</a></td>
@@ -24,4 +28,4 @@
 <!--    <td class="delete"><a href="{{script}}/delete/user/{{pid}}">{{lang.DELETE}}</a></td>-->
   </tr>{{/users}}
 </table>
-<script>setupSort('users', [0, 1, 2, 5]);</script>
+<script>setupSort('users', [0, 1, 2, 3, 4, 5, 7]);</script>

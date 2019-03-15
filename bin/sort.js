@@ -38,11 +38,12 @@ function sortBy(vnt) {
 
       c1 = r1.getElementsByTagName('td')[col];
       c2 = r2.getElementsByTagName('td')[col];
+
       while (c1.firstElementChild) c1 = c1.firstElementChild;
       while (c2.firstElementChild) c2 = c2.firstElementChild;
-
       t1 = c1.innerHTML.toLowerCase();
       t2 = c2.innerHTML.toLowerCase();
+
       if (REGEX_NUMBER.test(t1) || REGEX_NUMBER.test(t2)) {
         if (REGEX_NUMBER.test(t1)) t1 = Number(t1);
         else t1 = 0;

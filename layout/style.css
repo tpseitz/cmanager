@@ -2,8 +2,8 @@
  * Main layout style
  */
 body { font-family: Sans-Serif; }
-.header { width: 800pt; }
-article { width: 800pt; }
+.header { width: 900pt; }
+article { width: 900pt; }
 a { text-decoration: none; font-weight: bold; color: #008; }
 a:hover { text-decoration: underline; color: #66d; }
 /* Menu */
