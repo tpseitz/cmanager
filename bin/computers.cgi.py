@@ -162,7 +162,7 @@ def formData():
     objects.setDates(usr['pid'],
       web.POST['start_date'], web.POST['end_date'])
     rc = objects.assignShift(usr['pid'],
-      int(web.POST['shift']), map(int, web.POST['days']))
+      int(web.POST['shift']), map(int, web.POST.get('days', [])))
     if web.POST.get('cid'): objects.assignComputer(usr['pid'], web.POST['cid'])
     objects.saveData()
     web.redirect('user/%s' % web.POST['pid'], 1, 'MSG_DATA_UPDATED')
