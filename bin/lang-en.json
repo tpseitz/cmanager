@@ -41,6 +41,7 @@
   "DELETE": "delete",
   "DELETE_COMPUTER": "delete computer",
   "DELETE_USER": "delete user",
+  "LAST_DAY": "Last day",
   "ADD": "add",
   "ADD_USER": "add user",
   "ADD_COMPUTER": "Add computer",
