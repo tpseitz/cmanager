@@ -71,6 +71,8 @@ div.infobox h2:first-child { background: #ddd; border: solid 0pt #444;
   border-width: 0pt 0pt 1pt 0pt; padding: 5pt 10pt; margin: 0pt; }
 div.infobox p { padding: 3pt 10pt; margin: 0pt; }
 div.infobox p.hilight { background: #fcc; }
+div.infobox p.yellow { background: #ffb; }
+div.infobox p.red { background: #fcc; }
 
 /*
  * Computer and user list tables 

@@ -157,8 +157,9 @@ def _updatePerson(person):
     person['start_date_string'] \
       = datetime.date.fromordinal(person['start_date']).strftime(FORMAT_DATE)
     person['days_to_start'] = person['start_date'] - dt
-    if person['days_to_start'] < 0: person['days_to_start'] = None
-    elif person['days_to_start'] < ALERT_DAYS_START: person['hilight'] = True
+    if person['days_to_start'] <= 0: person['days_to_start'] = None
+    elif person['days_to_start'] < ALERT_DAYS_START:
+      person['hilight'] = 'tostart'
 
   if person['end_date']:
     person['end_date_string'] \
