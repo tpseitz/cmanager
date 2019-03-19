@@ -39,6 +39,10 @@ JQUERY_UI_LOCATION = None
 HTML_CELL_FREE = None
 HTML_CELL_RESERVED = None
 
+DATETIME_CONVERT = { '%y': 'yy', '%Y': 'yyyy',
+  '%m': 'MM', '%b': 'MMM', '%B': 'MMMM', '%d': 'dd', '%a': 'E', '%A': 'ddd',
+  '%I': 'hh', '%H': 'HH', '%M': 'mm', '%S': 'ss', '%p': 'a' }
+
 REGEX_FORM_VARIABLE = re.compile(r'{[a-z_]+}')
 REGEX_MUSTACHE_BLOCK = re.compile(r'\{\{\#(\$\d+|[A-Za-z_\.]+)(=[A-Za-z\d\._]+)?\}\}')
 REGEX_MUSTACHE_VARIABLE = re.compile(
@@ -46,6 +50,10 @@ REGEX_MUSTACHE_VARIABLE = re.compile(
 REGEX_MUSTACHE_BLOCK_BARE = re.compile(r'\{\{[^\{\}]+\}\}')
 
 def log(lvl, msg): pass
+
+def datetimeFormatToJS(frm):
+  for s, r in DATETIME_CONVERT.items(): frm = frm.replace(s, r)
+  return frm
 
 def init(lang_code):
   global GLOBALS, FORMS
@@ -65,8 +73,10 @@ def init(lang_code):
     GLOBALS['scripts'].append('%s/jquery-ui.min.js' % (JQUERY_UI_LOCATION,))
     GLOBALS['scripts'].append('%s/master/ui/i18n/datepicker-%s.js' \
       % (JQUERY_UI_LOCATION, lang_code))
-    GLOBALS['js_init'] += \
-      '$.datepicker.setDefaults($.datepicker.regional["fi"]);\n'
+    GLOBALS['js_init'] = GLOBALS['js_init'] \
+      + '$.datepicker.setDefaults($.datepicker.regional["fi"]);\n' \
+      + '$.datepicker.setDefaults({ dateFormat: "%s" });' \
+        % (datetimeFormatToJS(FORMAT_DATE),)
 
   return lang
 
