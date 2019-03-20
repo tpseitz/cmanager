@@ -164,6 +164,8 @@ def formData():
     rc = objects.assignShift(usr['pid'],
       int(web.POST['shift']), map(int, web.POST.get('days', [])))
     if web.POST.get('cid'): objects.assignComputer(usr['pid'], web.POST['cid'])
+    objects.setComment(usr['pid'], web.POST['comment'])
+    objects.assignCoach(usr['pid'], web.POST['coach'], True)
     objects.saveData()
     web.redirect('user/%s' % web.POST['pid'], 1, 'MSG_DATA_UPDATED')
   elif name == 'addcomputer':
@@ -262,6 +264,9 @@ def mainCGI():
       'ord': shf['ord'], 'presence': 5 * [(None, None, True)],
       'name': shf['status']=="space" and '{{lang.VACANT}}' or '{{lang.FULL}}',
       'status': shf['status'] == "space" and 'free' or 'full' })
+
+  # List coach names for auto complete
+  data['coach_names'] = [c['name'] for c in objects.listCoaches()]
 
   # List computers and shifts under them with user info
   data['computers'], computers = [], {}

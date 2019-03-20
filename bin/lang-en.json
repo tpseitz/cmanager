@@ -32,6 +32,7 @@
   "TO_START": "Days to start",
   "TO_END": "Days left (3 month)",
   "TO_YEAR": "Days left (year)",
+  "COACH": "coach",
   "COMMENTS": "comments",
   "WORKDAYS": ["mon", "tue", "wed", "thu", "fri"],
   "DAY_NAMES": ["monday", "tuesday", "wednesday", "thursday", "friday"],

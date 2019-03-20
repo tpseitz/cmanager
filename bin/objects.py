@@ -119,8 +119,37 @@ def listVacant(shift):
   cls = [c for c in listComputers() if c['cid'] not in els]
   return cls
 
+_COACHES, _COACHES_PER_ID = [], {}
+def listCoaches():
+  global _COACHES, _COACHES_PER_ID
+
+  if not _COACHES_PER_ID:
+    _COACHES = database.select('coaches', order='name')
+    _COACHES_PER_ID = { c['oid']: c for c in _COACHES }
+
+  return _COACHES
+
+def getCoach(search, create=False):
+  global _COACHES, _COACHES_PER_ID
+
+  listCoaches()
+
+  if isinstance(search, int): return _COACHES_PER_ID.get(search)
+
+  for ch in _COACHES:
+    if ch['name'] == search: return ch
+
+  if not create: return None
+
+  database.insert('coaches', { 'name': search })
+  saveData()
+
+  _COACHES, _COACHES_PER_ID = [], {}
+
+  return getCoach(search)
+
 def _updatePerson(person):
-  global FORMAT_DATE, ALERT_DAYS_START, \
+  global FORMAT_DATE, ALERT_DAYS_START, _COACHES_PER_ID, \
     ALERT_DAYS_END_RED, ALERT_DAYS_END_YELLOW
 
   dn, pr = [], []
@@ -138,6 +167,8 @@ def _updatePerson(person):
       'computer_name': _COMPUTERS_PER_CID[person['computer_id']]['name'] })
 
   if not person['comments']: person['comments'] = ''
+  if not person['coach_id']: person['coach_name'] = ''
+  else: person['coach_name'] = getCoach(person['coach_id'])['name']
 
   if person['shift_id'] is None:
     person.update({ 'shift_name': None, 'shift_ord': None })
@@ -283,6 +314,30 @@ def assignShift(person, shift=None, days=[]):
   for i in range(len(lang['WORKDAYS'])): data['day_%d' % i] = i in days
 
   return database.update('persons', data, { 'pid': person })
+
+def assignCoach(person, coach, create=False):
+  usr = getPerson(person)
+  if usr is None: return False
+
+  ch = { 'oid': None, 'name': '' }
+  if coach: ch = getCoach(coach, create)
+
+#  raise Exception('%r' % (ch,))
+  database.update('persons',
+    { 'coach_id': ch['oid'] }, { 'pid': usr['pid'] })
+
+  return True
+
+def setComment(person, comment):
+  usr = getPerson(person)
+  if usr is None: return False
+
+  comment = comment.strip()
+  if not comment: comment = None
+
+  database.update('persons', { 'comments': comment }, { 'pid': usr['pid'] })
+
+  return True
 
 def assignComputer(person, computer=None):
   usr = getPerson(person)

@@ -27,6 +27,13 @@ CREATE TABLE shifts (
   INDEX USING BTREE(name(8))
 ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_bin;
 
+CREATE TABLE coaches (
+  oid     INTEGER     NOT NULL AUTO_INCREMENT,
+  name    VARCHAR(16) UNIQUE NOT NULL,
+  INDEX USING BTREE(name(16)),
+  PRIMARY KEY (oid)
+) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_bin;
+
 CREATE TABLE computers (
   cid     INTEGER     NOT NULL AUTO_INCREMENT,
   created DATETIME    DEFAULT NOW(),
@@ -49,8 +56,10 @@ CREATE TABLE persons (
   day_2       BOOLEAN     DEFAULT FALSE,
   day_3       BOOLEAN     DEFAULT FALSE,
   day_4       BOOLEAN     DEFAULT FALSE,
+  coach_id    INTEGER     DEFAULT NULL,
   computer_id INTEGER     DEFAULT NULL,
   FOREIGN KEY (shift_id) REFERENCES shifts(sid),
+  FOREIGN KEY (coach_id) REFERENCES computers(cid),
   FOREIGN KEY (computer_id) REFERENCES computers(cid),
   INDEX USING BTREE(name(64)),
   PRIMARY KEY (pid)

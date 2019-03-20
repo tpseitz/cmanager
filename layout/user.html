@@ -21,7 +21,8 @@
 {{/user.hilight}}
 {{/user.days_to_end}}
 {{/user.days_to_start}}
-    <p>{{lang.COMMENTS}}: <input type="text" name="comment" id="start_date" value="{{user.comments}}"></p>
+    <p>{{lang.COACH}}: <input type="text" name="coach" id="coach" value="{{user.coach_name}}"></p>
+    <p>{{lang.COMMENTS}}: <input type="text" name="comment" id="comments" value="{{user.comments}}"></p>
     <p>{{lang.COMPUTER}}:{{#user.computer}}
       <input type="hidden" name="cid" value="{{user.computer_id}}">
       {{user.computer_name}}
@@ -40,6 +41,10 @@
 </form>
 <a href="{{script}}/users">{{lang.BACK}}</a><br>
 <script>
-  $(function() { $("#start_date").datepicker(); });
-  $(function() { $("#end_date").datepicker(); });
+  $(function() {
+    $("#start_date").datepicker();
+    $("#end_date").datepicker();
+    $("#coach").autocomplete({ source:
+      [ {{#coach_names}}"{{.}}", {{/coach_names}}]});
+  });
 </script>

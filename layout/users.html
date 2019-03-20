@@ -9,6 +9,8 @@
     <th>{{lang.SHIFT}} </th>
     <th>{{lang.DAYS}} </th>
     <th>{{lang.COMPUTER}} </th>
+    <th>{{lang.COACH}} </th>
+    <th>{{lang.COMMENTS}} </th>
 <!--    <th>{{lang.DELETE_USER}} </th>-->
   </tr>
 {{#users}}
@@ -26,6 +28,8 @@
       <a href="{{script}}/assign/{{pid}}">{{lang.NO_SEAT}}</a></td>
 {{/computer}}
 <!--    <td class="delete"><a href="{{script}}/delete/user/{{pid}}">{{lang.DELETE}}</a></td>-->
+    <td>{{coach_name}}</td>
+    <td>{{comments}}</td>
   </tr>{{/users}}
 </table>
-<script>setupSort('users', [0, 1, 2, 3, 4, 5, 7]);</script>
+<script>setupSort('users', [0, 1, 2, 3, 4, 5, 7, 8, 9]);</script>
