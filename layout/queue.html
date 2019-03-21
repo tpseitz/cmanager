@@ -3,7 +3,7 @@
   <tr>
     <th>{{lang.ORDER_NUM}}</th><th>{{lang.USER}}</th>
     <th>{{lang.START_DATE}}</th><th>{{lang.TO_START}}</th>
-    <th>{{lang.COMMENTS}}</th>
+    <th>{{lang.COACH}}</th><th>{{lang.COMMENTS}}</th>
 <!--    <th>{{lang.DELETE_USER}}</th>-->
   </tr>
 {{#queue}}
@@ -16,6 +16,9 @@
 {{#days_to_start}}    <td>{{days_to_start}}</td>
 {{^days_to_start}}    <td>&nbsp;</td>
 {{/days_to_start}}
+{{#coach}}    <td>{{coach}}</td>
+{{^coach}}    <td>&nbsp;</td>
+{{/coach}}
 {{#comments}}    <td>{{comments}}</td>
 {{^comments}}    <td>&nbsp;</td>
 {{/comments}}
