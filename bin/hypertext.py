@@ -39,12 +39,12 @@ JQUERY_UI_LOCATION = None
 HTML_CELL_FREE = None
 HTML_CELL_RESERVED = None
 
-DATETIME_CONVERT = { '%y': 'yy', '%Y': 'yyyy',
-  '%m': 'MM', '%b': 'MMM', '%B': 'MMMM', '%d': 'dd', '%a': 'E', '%A': 'ddd',
-  '%I': 'hh', '%H': 'HH', '%M': 'mm', '%S': 'ss', '%p': 'a' }
+DATE_CONVERT = { '%y': 'y', '%Y': 'yy', '%m': 'mm', '%b': 'M',
+  '%B': 'MM', '%d': 'dd', '%a': 'D', '%A': 'DD' }
 
 REGEX_FORM_VARIABLE = re.compile(r'{[a-z_]+}')
-REGEX_MUSTACHE_BLOCK = re.compile(r'\{\{\#(\$\d+|[A-Za-z_\.]+)(=[A-Za-z\d\._]+)?\}\}')
+REGEX_MUSTACHE_BLOCK = re.compile(
+  r'\{\{\#(\$\d+|[A-Za-z_\.]+)(=[A-Za-z\d\._]+)?\}\}')
 REGEX_MUSTACHE_VARIABLE = re.compile(
   r'\{\{(\&?)(\$\d+|[A-Za-z\._]+)(\:[A-Za-z\d_,]+)?\}\}')
 REGEX_MUSTACHE_BLOCK_BARE = re.compile(r'\{\{[^\{\}]+\}\}')
@@ -52,7 +52,7 @@ REGEX_MUSTACHE_BLOCK_BARE = re.compile(r'\{\{[^\{\}]+\}\}')
 def log(lvl, msg): pass
 
 def datetimeFormatToJS(frm):
-  for s, r in DATETIME_CONVERT.items(): frm = frm.replace(s, r)
+  for s, r in DATE_CONVERT.items(): frm = frm.replace(s, r)
   return frm
 
 def init(lang_code):
