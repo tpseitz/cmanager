@@ -69,6 +69,20 @@ def init():
 
   if 'lang' in web.GET: web.COOKIES['lang'] = web.GET['lang']
 
+def outputConfigPage():
+  data = { 'languages': sykeit.listLanguages() }
+  if web.POST:
+    data['POST'] = web.POST #XXX
+
+  data['time_format'] = objects.FORMAT_DATE
+  data['alert_days_end_red'] = objects.ALERT_DAYS_END_RED
+  data['alert_days_end_yellow'] = objects.ALERT_DAYS_END_YELLOW
+  data['shifts'] = objects.listShifts() #XXX
+  for lo in data['languages']:
+    if lo['id'] == sykeit.LANG: lo['selected'] = True
+
+  web.outputPage(hypertext.frame('config', data))
+
 def runCommand(cmd, *argv):
   argv = list(argv)
   if cmd == 'list':
@@ -384,6 +398,8 @@ def mainCGI():
       cid, x, y = path[1], int(path[2]), int(path[3])
       objects.moveComputer(cid, x, y)
       objects.saveData()
+    elif path[0] == 'config':
+      outputConfigPage()
 
   web.error404()
 

@@ -1,0 +1,21 @@
+{{lang.TIME_FORMAT}}
+<input type="text" id="time_format" value="{{time_format}}"><br>
+{{lang.ALERT_END_RED}}
+<input type="text" id="alert_days_end_red" value="{{alert_days_end_red}}"><br>
+{{lang.ALERT_END_YELLOW}}
+<input type="text" id="alert_days_end_yellow" value="{{alert_days_end_yellow}}"><br>
+<select id="lang">
+{{#languages}}  <option value="id"{{#selected}} selected="True"{{/selected}}>{{name}}</option>
+{{/languages}}
+</select>
+
+<table class="list">
+  <tr><th>{{lang.SHIFT}}</th><th>{{lang.MAX_USERS}}</th>
+    <th>{{lang.DESCRIPTION}}</th><th colspan="2">{{lang.MOVE}}</th>
+    <th>{{lang.DELETE}}</th></tr>
+{{#shifts}} <tr><!-- ord --><td>{{name}}</td><td>{{max_users}}</td>
+    <td>{{#description}}{{description}}{{^description}}&nbsp;{{/description}}</td>
+    <td><img src="move-up.svg"></td><td><img src="move-down.svg"></td>
+    <td class="delete"><a href="{{script}}/remove/shift">{{lang.DELETE}}</a></td></tr>
+{{/shifts}}
+</table>

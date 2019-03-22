@@ -95,6 +95,12 @@ def mainCGI():
     web.outputPage(hypertext.frame('<div class="form">\n' \
       + hypertext.form('login', target='login') + '\n</div>'))
 
+  if len(path) == 0: path = ['users']
+
+  if path[0] == 'profile':
+    data = { 'session': web.SESSION, 'languages': sykeit.listLanguages() }
+    web.outputPage(hypertext.frame('profile', data))
+
   if level < 200:
     log(0, lang['ERR_ACCESS_DENIED'])
   elif len(path) == 2 and path[0] == 'delete':
@@ -104,7 +110,7 @@ def mainCGI():
       rc = database.removeUser(path[1])
       web.redirect(os.environ.get('SCRIPT_NAME'), 3,
         lang['MSG_USER_DELETED'] % (path[1],))
-  elif len(path) == 0 or path[0] == 'users':
+  elif path[0] == 'users':
     accounts = database.listAccounts()
     for acc in accounts:
       for lvl in sorted(USER_LEVELS):
@@ -115,10 +121,6 @@ def mainCGI():
       else: acc['lastlogin_name'] = '{{lang.NEVER}}'
     data = { 'accounts': accounts }
     web.outputPage(hypertext.frame('accounts', data))
-
-  if len(path) == 0 or path[0] == 'profile':
-    data = { 'session': web.SESSION, 'languages': sykeit.listLanguages() }
-    web.outputPage(hypertext.frame('profile', data))
 
   web.error404()
 
