@@ -33,6 +33,8 @@ import database
 FORMAT_DATE = '%Y-%m-%d'
 ALERT_DAYS_START, ALERT_DAYS_END_RED, ALERT_DAYS_END_YELLOW = 7, 14, 28
 
+MAX_NAME_SIZE = 64
+
 REGEX_STRIP = re.compile(r'[^A-Za-z\d]')
 REGEX_INTEGER = re.compile(r'^\s*-?\s*\d+\s*$')
 
@@ -98,6 +100,7 @@ def createComputer(name):
   global _COMPUTERS, _COMPUTERS_PER_CID
   _COMPUTERS, _COMPUTERS_PER_CID = [], {}
 
+  if len(name) > MAX_NAME_SIZE: name = name[:MAX_NAME_SIZE]
   cid = database.insert('computers', { 'name': name })
   if not cid: return None
   return getComputer(cid)
@@ -130,11 +133,13 @@ def listCoaches():
   return _COACHES
 
 def getCoach(search, create=False):
-  global _COACHES, _COACHES_PER_ID
+  global MAX_NAME_SIZE, _COACHES, _COACHES_PER_ID
 
   listCoaches()
 
   if isinstance(search, int): return _COACHES_PER_ID.get(search)
+
+  if len(search) > MAX_NAME_SIZE: search = search[:MAX_NAME_SIZE]
 
   for ch in _COACHES:
     if ch['name'] == search: return ch
@@ -271,6 +276,7 @@ def createPerson(name, start_date, end_date, shift, days):
   shift = int(shift)
   days = set(map(int, days))
 
+  if len(name) > MAX_NAME_SIZE: name = name[:MAX_NAME_SIZE]
   data = collections.OrderedDict((
     ('name', name), ('start_date', start_date.toordinal()),
     ('end_date', end_date.toordinal()), ('shift_id', shift)))
