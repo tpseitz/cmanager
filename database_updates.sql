@@ -21,3 +21,6 @@ CREATE TABLE coaches (
 ALTER TABLE persons ADD COLUMN coach_id INTEGER DEFAULT NULL;
 ALTER TABLE persons ADD CONSTRAINT FOREIGN KEY (coach_id) REFERENCES coaches(oid);
 
+-- Database update for syke031B
+ALTER TABLE coaches MODIFY name VARCHAR(64);
+
