@@ -77,7 +77,8 @@ def outputConfigPage():
   data['time_format'] = objects.FORMAT_DATE
   data['alert_days_end_red'] = objects.ALERT_DAYS_END_RED
   data['alert_days_end_yellow'] = objects.ALERT_DAYS_END_YELLOW
-  data['shifts'] = objects.listShifts() #XXX
+  data['shifts'] = objects.listShifts()
+  data['coaches'] = objects.listCoaches()
   for lo in data['languages']:
     if lo['id'] == sykeit.LANG: lo['selected'] = True
 

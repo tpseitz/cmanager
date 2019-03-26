@@ -117,9 +117,12 @@ def init():
   web.STATIC_FILES.update({
     'sort.js':
       os.sep.join(os.path.realpath(__file__).split(os.sep)[:-1]+['sort.js']),
-    'sort-none.svg': hypertext.LAYOUT_DIRECTORY + os.sep + 'sort-none.svg',
-    'sort-asc.svg':  hypertext.LAYOUT_DIRECTORY + os.sep + 'sort-asc.svg',
-    'sort-desc.svg': hypertext.LAYOUT_DIRECTORY + os.sep + 'sort-desc.svg' })
+    'sort-none.svg':  hypertext.LAYOUT_DIRECTORY + os.sep + 'sort-none.svg',
+    'sort-asc.svg':   hypertext.LAYOUT_DIRECTORY + os.sep + 'sort-asc.svg',
+    'sort-desc.svg':  hypertext.LAYOUT_DIRECTORY + os.sep + 'sort-desc.svg',
+    'move-up.svg':    hypertext.LAYOUT_DIRECTORY + os.sep + 'move-up.svg',
+    'move-down.svg':  hypertext.LAYOUT_DIRECTORY + os.sep + 'move-down.svg',
+    'info.svg':       hypertext.LAYOUT_DIRECTORY + os.sep + 'info.svg' })
 
   lang = hypertext.init(LANG)
   hypertext.lang = lang
