@@ -194,9 +194,32 @@ def formData():
       objects.saveData()
       web.redirect('computer/%d' % cpu['cid'],
         1, lang['MSG_ADD_COMPUTER'] % (cpu['name'],))
+  elif name == 'addshift':
+    name, users, desc = map(web.POST.get, ('name', 'max_users', 'description'))
+    objects.addShift(name, users, desc)
+    objects.saveData()
+    web.redirect('config', 1, 'MSG_SHIFT_ADDED')
+  elif name == 'config':
+    conf = {}
+    if web.POST.get('lang') != sykeit.LANG: conf['lang'] = web.POST['lang']
+    if 'time_format' in web.POST \
+        and web.POST['time_format'] != objects.FORMAT_DATE:
+      conf['time_format'] = web.POST['time_format']
+    if 'alert_days_end_yellow' in web.POST \
+        and web.POST['alert_days_end_yellow'] != objects.ALERT_DAYS_END_YELLOW:
+      conf['alert_days_end_yellow'] = web.POST['alert_days_end_yellow']
+    if 'alert_days_end_yellow' in web.POST \
+        and web.POST['alert_days_end_red'] != objects.ALERT_DAYS_END_RED:
+      conf['alert_days_end_red'] = web.POST['alert_days_end_red']
+    if 'alert_days_start' in web.POST \
+        and web.POST['alert_days_start'] != objects.ALERT_DAYS_START:
+      conf['alert_days_start'] = web.POST['alert_days_start']
+
+    #TODO
+
   else: log(0, 'Unknown form: %s' % (name,))
 
-  web.redirect(web.POST.get('_next', '', message), 3)
+  web.redirect(web.POST.get('_next', ''), 3, message)
 
 web.handleForm = formData
 
@@ -379,21 +402,26 @@ def mainCGI():
         web.outputPage(hypertext.frame(hypertext.mustache(
           hypertext.layout('assign'), dt)))
     elif path[0] == 'delete' and len(path) == 3 \
-        and path[1] in ('computer', 'user') \
+        and path[1] in ('computer', 'user', 'shift', 'coach') \
         and objects.REGEX_INTEGER.match(path[2]):
       if path[1] == 'user': err = objects.deletePerson(int(path[2]))
       elif path[1] == 'computer': err = objects.deleteComputer(int(path[2]))
+      elif path[1] == 'coach': err = objects.deleteCoach(int(path[2]))
+      elif path[1] == 'shift': err = objects.deleteShift(int(path[2]))
       else: err = 'ERR_UNKNOWN_TYPE'
 
       if err is None:
         objects.saveData()
         if path[1] == 'user': web.redirect('users', 1, 'MSG_DELETE')
         elif path[1] == 'computer': web.redirect('computers', 1, 'MSG_DELETE')
+        elif path[1] in ('shift', 'coach'):
+          web.redirect('config', 1, 'MSG_DELETE')
         else: web.redirect('', 1, 'MSG_DELETE')
       else:
         log(1, 'Could not delete unit: %s %s' % (path[1], path[2]))
         if path[1] == 'user': web.redirect('users', 3, err)
         elif path[1] == 'computer': web.redirect('computers', 3, err)
+        elif path[1] in ('shift', 'coach'): web.redirect('config', 3, err)
         else: web.redirect('', 3, err)
     elif path[0] == 'update' and len(path) == 4:
       cid, x, y = path[1], int(path[2]), int(path[3])

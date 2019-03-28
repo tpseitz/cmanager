@@ -89,6 +89,7 @@ table.list tr.yellow td { background: #ffb; }
 table.list tr.red td { background: #fcc; }
 table.list a { text-decoration: none; font-weight: bold; color: #002; }
 table.list a:hover { color: #00a; }
+table.list input { margin: 0; padding: 0; font-size: 12pt; width: 95%; }
 /* User list status colors */
 table.list td.missing { background: #fdd; }
 table.list td.present { background: #dfd; }
