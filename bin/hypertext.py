@@ -99,6 +99,8 @@ def form(name, data={}, formdata=None, redirect=None, target=None):
     + ' method="post" enctype="multipart/form-data">\n'
   if title: html += '  <p>%s</p>\n' % (title,)
   html += '  <input type="hidden" name="_form" value="%s">\n' % (name,)
+  src = os.environ.get('REQUEST_URI')
+  if src: html += '  <input type="hidden" name="_source" value="%s">\n'% (src,)
 
   for iid, tp, nm, vls in formdata[1:]:
     if isinstance(vls, str) and REGEX_FORM_VARIABLE.match(vls):

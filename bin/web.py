@@ -210,7 +210,7 @@ def login():
   if err: redirect('', 5, err)
   elif SESSION.get('username'):
     writeSession()
-    redirect(POST.get('source') or POST['_next'], 3, 'MSG_LOGGED_IN')
+    redirect(POST.get('_source') or POST['_next'], 3, 'MSG_LOGGED_IN')
   else: redirect('', 5, 'MSG_LOGIN_FAILED')
 
 def changePassword():
