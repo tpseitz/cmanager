@@ -21,3 +21,10 @@ CREATE TABLE coaches (
 ALTER TABLE persons ADD COLUMN coach_id INTEGER DEFAULT NULL;
 ALTER TABLE persons ADD CONSTRAINT FOREIGN KEY (coach_id) REFERENCES coaches(oid);
 
+-- Database update for syke030F
+LOCK TABLES shifts WRITE, persons WRITE;
+-- Name of the foreing key rule may be different
+ALTER TABLE persons DROP FOREIGN KEY persons_ibfk_1;
+ALTER TABLE shifts MODIFY COLUMN sid INTEGER NOT NULL AUTO_INCREMENT;
+ALTER TABLE persons ADD CONSTRAINT persons_ibfk_1 FOREIGN KEY (shift_id) REFERENCES shifts (sid);
+UNLOCK TABLES;

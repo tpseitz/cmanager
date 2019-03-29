@@ -202,20 +202,38 @@ def formData():
   elif name == 'config':
     conf = {}
     if web.POST.get('lang') != sykeit.LANG: conf['lang'] = web.POST['lang']
-    if 'time_format' in web.POST \
-        and web.POST['time_format'] != objects.FORMAT_DATE:
+    if 'time_format' in web.POST:
       conf['time_format'] = web.POST['time_format']
-    if 'alert_days_end_yellow' in web.POST \
-        and web.POST['alert_days_end_yellow'] != objects.ALERT_DAYS_END_YELLOW:
-      conf['alert_days_end_yellow'] = web.POST['alert_days_end_yellow']
-    if 'alert_days_end_yellow' in web.POST \
-        and web.POST['alert_days_end_red'] != objects.ALERT_DAYS_END_RED:
-      conf['alert_days_end_red'] = web.POST['alert_days_end_red']
-    if 'alert_days_start' in web.POST \
-        and web.POST['alert_days_start'] != objects.ALERT_DAYS_START:
-      conf['alert_days_start'] = web.POST['alert_days_start']
+    if 'alert_days_end_yellow' in web.POST:
+      conf['alert_days_end_yellow'] = int(web.POST['alert_days_end_yellow'])
+    if 'alert_days_end_yellow' in web.POST:
+      conf['alert_days_end_red'] = int(web.POST['alert_days_end_red'])
+    if 'alert_days_start' in web.POST:
+      conf['alert_days_start'] = int(web.POST['alert_days_start'])
+    if not conf: web.redirect('config', 1, 'MSG_NO_CHANGES')
 
-    #TODO
+    if not sykeit.CONF_FFN: raise Exception('No configuration file')
+    if not sykeit.DATA_DIRECTORY: raise Exception('No data directory')
+    ffn = os.path.join(sykeit.DATA_DIRECTORY, 'generated_config.json')
+    with open(sykeit.CONF_FFN, 'r') as f: manual = json.loads(f.read())
+    tffn = ffn + '.back'
+    if os.path.isfile(tffn): raise Exception('File is being modified')
+    if os.path.isfile(ffn):
+      os.rename(ffn, tffn)
+      with open(tffn, 'r') as f: tmp = json.loads(f.read())
+      tmp.update(conf)
+      conf = tmp
+
+    dl = set()
+    for k, v in conf.items():
+      if k in manual and manual[k] == v: dl.add(k)
+    for k in dl: del conf[k]
+    #TODO check that settings can be reseted
+    if not conf: web.redirect('config', 1, 'MSG_NO_CHANGES')
+
+    with open(ffn, 'w') as f: f.write(json.dumps(conf))
+    if os.path.isfile(tffn): os.unlink(tffn)
+    web.redirect('config', 1, 'MSG_SETTINGS_SAVED')
 
   else: log(0, 'Unknown form: %s' % (name,))
 

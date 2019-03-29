@@ -104,6 +104,8 @@
   "MSG_LOGGED_OUT": "You have been logged out",
   "MSG_LOGGED_IN": "You are now logged in",
   "MSG_PASSWORD_CHANGED": "Password successfully changed",
+  "MSG_SETTINGS_SAVED": "Settings succesfully saved",
+  "MSG_NO_CHANGES": "No changes",
   "ERR_ADD_COMPUTER": "Could not add computer",
   "ERR_ASSIGN": "Could not assign computer for user",
   "ERR_COMPUTER_HAS_USERS": "Computer has active users",

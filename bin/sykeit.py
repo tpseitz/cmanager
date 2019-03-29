@@ -35,6 +35,7 @@ CONFIG_FILES = [
   '/etc/computer_manager.json',
   os.sep.join(os.path.realpath(__file__).split(os.sep)[:-2]) \
     + '/computer_manager.json']
+DATA_DIRECTORY, CONF_FFN = None, None
 AVAILABLE_LANGUAGES = { 'en', 'fi' }
 LANG = 'en'
 
@@ -66,7 +67,7 @@ def listLanguages():
   return lls
 
 def init():
-  global CONFIG_FILES, AVAILABLE_LANGUAGES, LANG, lang
+  global CONFIG_FILES, DATA_DIRECTORY, CONF_FFN, AVAILABLE_LANGUAGES, LANG, lang
 
   hypertext.GLOBALS['script'] = os.environ.get('SCRIPT_NAME', '')
 
@@ -76,9 +77,16 @@ def init():
   conf = {}
   for ffn in CONFIG_FILES:
     if os.path.exists(os.path.expanduser(ffn)):
+      CONF_FFN = ffn
       with open(ffn, 'r') as f: conf = json.loads(f.read())
       break
-  if not conf: raise Exception('No config file')
+  if not conf: raise Exception('No configuration file')
+
+  DATA_DIRECTORY = conf.get('data_directory', DATA_DIRECTORY)
+
+  ffn = os.path.join(DATA_DIRECTORY, 'generated_config.json')
+  if os.path.isfile(ffn):
+    with open(ffn, 'r') as f: conf.update(json.loads(f.read()))
 
   hypertext.JQUERY_UI_LOCATION = conf.get(
     'jquery_iu_location', hypertext.JQUERY_UI_LOCATION)

@@ -104,6 +104,8 @@
   "MSG_LOGGED_IN": "Kirjautuminen onnistui",
   "MSG_PASSWORD_CHANGED": "Salasanan vaihto onnistui",
   "MSG_DELETE": "Poistaminen onnistui",
+  "MSG_SETTINGS_SAVED": "Asetukset tallennettiin onnistuneesti",
+  "MSG_NO_CHANGES": "Ei muutoksia",
   "ERR_ADD_COMPUTER": "Tietokonetta ei voitu luoda",
   "ERR_ASSIGN": "Tietokonetta ei voitu liitt\u00E4\u00E4 k\u00E4ytt\u00E4j\u00E4lle",
   "ERR_COMPUTER_HAS_USERS": "Tietokoneella on aktiivisia k\u00E4ytt\u00E4ji\u00E4",
