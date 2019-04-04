@@ -24,14 +24,14 @@
 <form id="settings" action="{{script}}/form"
      method="post" enctype="multipart/form-data">
   <input type="hidden" name="_form" value="addshift">
-  <table class="list">
+  <table class="list" id="shifts">
     <tr><th>{{lang.SHIFT}}</th><th>{{lang.SHIFT_MAX_USERS}}</th>
       <th>{{lang.DESCRIPTION}}</th><th colspan="2">{{lang.MOVE}}</th>
       <th>{{lang.DELETE}}</th></tr>
-  {{#shifts}} <tr><!-- ord --><td>{{name}}</td><td>{{max_users}}</td>
+  {{#shifts}} <tr><td><!-- {{ord}} -->{{name}}</td><td>{{max_users}}</td>
       <td>{{#description}}{{description}}{{^description}}&nbsp;{{/description}}</td>
-      <td><img src="move-up.svg" alt="{{lang.UP}}"></td>
-      <td><img src="move-down.svg" alt="{{lang.DOWN}}"></td>
+      <td><img src="move-up.svg" alt="{{lang.UP}}" class="up"></td>
+      <td><img src="move-down.svg" alt="{{lang.DOWN}}" class="down"></td>
       <td class="delete"><a href="{{script}}/delete/shift/{{sid}}">{{lang.DELETE}}</a></td></tr>
   {{/shifts}}
       <tr>
@@ -50,3 +50,5 @@
     <td class="delete"><a href="{{script}}/delete/coach/{{oid}}">{{lang.DELETE}}</a></td></tr>
 {{/coaches}}
 </table>
+
+<script>initMove('shifts');</script>

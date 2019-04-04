@@ -74,6 +74,8 @@ def outputConfigPage():
   if web.POST:
     data['POST'] = web.POST #XXX
 
+  hypertext.GLOBALS['scripts'].append('interface.js')
+
   data['time_format'] = objects.FORMAT_DATE
   data['alert_days_end_red'] = objects.ALERT_DAYS_END_RED
   data['alert_days_end_yellow'] = objects.ALERT_DAYS_END_YELLOW
