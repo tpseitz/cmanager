@@ -122,15 +122,17 @@ def init():
 
   hypertext.GLOBALS['scripts'].append('sort.js')
 
+  srcdr = os.sep.join(os.path.realpath(__file__).split(os.sep)[:-1])
+
   web.STATIC_FILES.update({
-    'sort.js':
-      os.sep.join(os.path.realpath(__file__).split(os.sep)[:-1]+['sort.js']),
-    'sort-none.svg':  hypertext.LAYOUT_DIRECTORY + os.sep + 'sort-none.svg',
-    'sort-asc.svg':   hypertext.LAYOUT_DIRECTORY + os.sep + 'sort-asc.svg',
-    'sort-desc.svg':  hypertext.LAYOUT_DIRECTORY + os.sep + 'sort-desc.svg',
-    'move-up.svg':    hypertext.LAYOUT_DIRECTORY + os.sep + 'move-up.svg',
-    'move-down.svg':  hypertext.LAYOUT_DIRECTORY + os.sep + 'move-down.svg',
-    'info.svg':       hypertext.LAYOUT_DIRECTORY + os.sep + 'info.svg' })
+    'sort.js': os.path.join(srcdr, 'sort.js'),
+    'interface.js': os.path.join(srcdr, 'interface.js'),
+    'sort-none.svg':  os.path.join(hypertext.LAYOUT_DIRECTORY, 'sort-none.svg'),
+    'sort-asc.svg':   os.path.join(hypertext.LAYOUT_DIRECTORY, 'sort-asc.svg'),
+    'sort-desc.svg':  os.path.join(hypertext.LAYOUT_DIRECTORY, 'sort-desc.svg'),
+    'move-up.svg':    os.path.join(hypertext.LAYOUT_DIRECTORY, 'move-up.svg'),
+    'move-down.svg':  os.path.join(hypertext.LAYOUT_DIRECTORY, 'move-down.svg'),
+    'info.svg':       os.path.join(hypertext.LAYOUT_DIRECTORY, 'info.svg') })
 
   lang = hypertext.init(LANG)
   hypertext.lang = lang
