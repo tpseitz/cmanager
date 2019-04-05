@@ -83,6 +83,24 @@ def deleteShift(shift_id):
   database.delete('shifts', { 'sid': shift_id })
   return None
 
+def moveShift(shift_id, down):
+  ls = listShifts()
+  if down: ls = reversed(ls)
+
+  prev, this = None, None
+  for s in ls:
+    if s['sid'] == shift_id:
+      this = s
+      break
+    else: prev = s
+
+  if not (prev and this):
+    raise Exception('Shift %d seems to be in the edge' % (shift_id,))
+
+  database.update('shifts', { 'ord': 0 }, { 'sid': prev['sid'] })
+  database.update('shifts', { 'ord': prev['ord'] }, { 'sid': this['sid'] })
+  database.update('shifts', { 'ord': this['ord'] }, { 'sid': prev['sid'] })
+
 _COMPUTERS, _COMPUTERS_PER_CID = [], {}
 def listComputers():
   global _COMPUTERS, _COMPUTERS_PER_CID

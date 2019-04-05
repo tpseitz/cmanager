@@ -52,7 +52,8 @@ def init():
     { 'title': '{{lang.COMPUTERS}}', 'path': 'computers' },
     { 'title': '{{lang.USERS}}', 'path': 'users' },
     { 'title': '{{lang.MAP}}', 'path': 'floorplan' },
-    { 'title': '{{lang.QUEUE}}', 'path': 'queue' }]
+    { 'title': '{{lang.QUEUE}}', 'path': 'queue' },
+    { 'title': '{{lang.SETTINGS}}', 'path': 'config' }]
 
   objects.lang = lang
   objects.FORMAT_DATE = hypertext.FORMAT_DATE
@@ -447,6 +448,14 @@ def mainCGI():
       cid, x, y = path[1], int(path[2]), int(path[3])
       objects.moveComputer(cid, x, y)
       objects.saveData()
+      web.outputJSON({ 'success': True })
+    elif path[0] == 'update' and len(path) == 3:
+      sid, ud = int(path[1]), path[2]
+      if ud == 'up': objects.moveShift(sid, False)
+      elif ud == 'down': objects.moveShift(sid, True)
+      else: raise ValueError('Unknown direction: %s' % ud)
+      objects.saveData()
+      web.outputJSON({ 'shifts': objects.listShifts(), 'success': True })
     elif path[0] == 'config':
       outputConfigPage()
 

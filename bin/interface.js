@@ -9,14 +9,11 @@ function moveRow(vnt) {
   var url = SCRIPT + '/update/' + row.identifier;
   if (elm.forward) {
     if (row.next) row.parentNode.insertBefore(row, row.next.nextSibling);
-    url += '/up';
-    console.log('Move ' + row.identifier + ' up'); //XXX
+    url += '/down';
   } else {
     if (row.prev) row.parentNode.insertBefore(row, row.prev);
-    url += '/down';
-    console.log('Move ' + row.identifier + ' down'); //XXX
+    url += '/up';
   }
-  console.log(url); //XXX
   var http = new XMLHttpRequest();
   http.open('GET', url, true);
   http.send(null);
@@ -48,8 +45,6 @@ function initMove(table) {
     var id = td.textContent || td.innerText || "";
     if (REGEX_NUMBER.test(id)) id = Number(id);
     row.identifier = id;
-
-    console.log(id); //XXX
 
     up.onclick = moveRow;
     up.row = row;

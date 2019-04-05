@@ -113,6 +113,13 @@ def outputPage(html):
   writeSession()
   sys.exit(0)
 
+def outputJSON(data):
+  sys.stdout.write(
+    'Content-Type: application/json; charset=%s\r\n\r\n' % (ENCODING,))
+  sys.stdout.flush()
+  sys.stdout.buffer.write(json.dumps(data).encode(ENCODING))
+  sys.exit(0)
+
 def outputFile(full_filename, replace=False):
   if not os.path.isfile(full_filename): log(0, "File not found")
   with open(full_filename, 'rb') as f: data = f.read()
