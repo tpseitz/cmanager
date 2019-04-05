@@ -1,0 +1,54 @@
+<div class="form">
+  <form id="settings" action="{{script}}/form" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="_form" value="config">
+    <p>{{lang.SETTINGS}}</p>
+    <p>
+      {{lang.LANGUAGE}}
+      <select name="lang">
+      {{#languages}}  <option value="{{id}}"{{#selected}} selected="True"{{/selected}}>{{name}}</option>
+      {{/languages}}
+      </select>
+      <br>
+      {{lang.TIME_FORMAT}}
+      <a href="https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior" target="_blank"><img src="info.svg" alt="{{lang.INFO}}"></a>
+      <input type="text" name="time_format" value="{{time_format}}"><br>
+      {{lang.ALERT_END_YELLOW}}
+      <input type="text" name="alert_days_end_yellow" value="{{alert_days_end_yellow}}"><br>
+      {{lang.ALERT_END_RED}}
+      <input type="text" name="alert_days_end_red" value="{{alert_days_end_red}}"><br>
+    </p>
+    <input type="submit" value="{{lang.SAVE}}">
+  </form>
+</div>
+
+<form id="settings" action="{{script}}/form"
+     method="post" enctype="multipart/form-data">
+  <input type="hidden" name="_form" value="addshift">
+  <table class="list" id="shifts">
+    <tr><th>{{lang.SHIFT}}</th><th>{{lang.SHIFT_MAX_USERS}}</th>
+      <th>{{lang.DESCRIPTION}}</th><th colspan="2">{{lang.MOVE}}</th>
+      <th>{{lang.DELETE}}</th></tr>
+  {{#shifts}} <tr><td><!-- {{sid}} -->{{name}}</td><td>{{max_users}}</td>
+      <td>{{#description}}{{description}}{{^description}}&nbsp;{{/description}}</td>
+      <td><img src="move-up.svg" alt="{{lang.UP}}" class="up"></td>
+      <td><img src="move-down.svg" alt="{{lang.DOWN}}" class="down"></td>
+      <td class="delete"><a href="{{script}}/delete/shift/{{sid}}">{{lang.DELETE}}</a></td></tr>
+  {{/shifts}}
+      <tr>
+        <td><input type="text" name="name" size="10"></td>
+        <td><input type="text" name="max_users" size="3"></td>
+        <td><input type="text" name="description"></td>
+        <td colspan="2">&nbsp;</td>
+        <td><input type="submit" value="{{lang.ADD_SHIFT}}"></td>
+      </tr>
+  </table>
+</form>
+
+<table class="list">
+  <tr><th>{{lang.NAME}}</th><th>{{lang.DELETE}}</th></tr>
+{{#coaches}}  <tr><td>{{name}}</td>
+    <td class="delete"><a href="{{script}}/delete/coach/{{oid}}">{{lang.DELETE}}</a></td></tr>
+{{/coaches}}
+</table>
+
+<script>initMove('shifts');</script>

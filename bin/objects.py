@@ -68,6 +68,41 @@ def getShift(search):
   elif isinstance(search, str): return _SHIFTS_PER_NM.get(search)
   else: raise TypeError('Illegal type for shift search: %r' % type(search))
 
+def addShift(name, max_users, description):
+  max_users = int(max_users)
+  description = description.strip()
+  if not description: description = None
+  place = max([s['ord'] for s in listShifts()]) + 1
+  database.insert('shifts', { 'ord': place, 'name': name,
+    'max_users': max_users, 'description': description })
+
+  return None
+
+def deleteShift(shift_id):
+  pc = len(database.select('persons', where=[('shift_id', '==', shift_id)]))
+  if pc > 0: return 'ERR_SHIFT_HAS_USERS'
+
+  database.delete('shifts', { 'sid': shift_id })
+  return None
+
+def moveShift(shift_id, down):
+  ls = listShifts()
+  if down: ls = reversed(ls)
+
+  prev, this = None, None
+  for s in ls:
+    if s['sid'] == shift_id:
+      this = s
+      break
+    else: prev = s
+
+  if not (prev and this):
+    raise Exception('Shift %d seems to be in the edge' % (shift_id,))
+
+  database.update('shifts', { 'ord': 0 }, { 'sid': prev['sid'] })
+  database.update('shifts', { 'ord': prev['ord'] }, { 'sid': this['sid'] })
+  database.update('shifts', { 'ord': this['ord'] }, { 'sid': prev['sid'] })
+
 _COMPUTERS, _COMPUTERS_PER_CID = [], {}
 def listComputers():
   global _COMPUTERS, _COMPUTERS_PER_CID
@@ -152,6 +187,13 @@ def getCoach(search, create=False):
   _COACHES, _COACHES_PER_ID = [], {}
 
   return getCoach(search)
+
+def deleteCoach(coach_id):
+  pc = len(database.select('persons', where=[('coach_id', '==', coach_id)]))
+  if pc > 0: return 'ERR_COACH_HAS_USERS'
+
+  database.delete('coaches', { 'oid': coach_id })
+  return None
 
 def _updatePerson(person):
   global FORMAT_DATE, ALERT_DAYS_START, _COACHES_PER_ID, \

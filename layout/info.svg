@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="1em">
+  <defs>
+    <style type="text/css">
+      .area { stroke-width: 2.5; stroke: #ccf; fill: #eef; }
+      .text { stroke-width: 1.5; stroke: #88f; fill: #ddf; }
+    </style>
+  </defs>
+  <circle cx="32" cy="32" r="30" class="area" />
+  <circle cx="32" cy="10" r="4" class="text" />
+  <path d="M28,18 L24,22 H28 V50 H24 V56 H40 V50 H36 V18 Z" class="text" />
+</svg>
+

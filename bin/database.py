@@ -90,7 +90,7 @@ def _createWhere(where, data):
       col, opr, dt = wd
       if opr not in ('==','<=','>=','<','>','!='): raise ValueError(
         'Illegal comparison operator for where clause: %s' % (oper,))
-      if opr == '==': oper = '='
+      if opr == '==': opr = '='
       if not ao: wq += ' AND '
       wq += '%s %s %%s' % (col, opr)
       data.append(dt)
@@ -111,8 +111,6 @@ def select(table, columns=None, where=None, order=None):
     if not isinstance(order, (list, tuple)): order = [order]
     #TODO Check order fields for illegal names
     query += ' ORDER BY %s' % ','.join(order)
-
-#  if where is not None: raise Exception('%s <= %r' % (query, data)) #XXX
 
   cur = _cursor()
   if not data: cur.execute(query)

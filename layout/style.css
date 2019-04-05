@@ -17,10 +17,10 @@ img.sort { width: 9pt; }
 
 div.select { border: solid 1pt #888; background: #eee;
   min-width: 200pt; max-width: 400pt; margin: 5pt; padding: 0pt; }
+div.select p { margin: 0; padding: 3pt 7pt; line-height: 2; }
 div.select p:first-child { background: #ddd; border: solid 0pt #444;
-  padding: 3pt 7pt; margin: 0pt; text-align: left;
+  padding: 5pt 7pt; margin: 0pt; text-align: left; line-height: 1;
   border-width: 0pt 0pt 1pt 0pt; text-align: left; display: block; }
-div.select p { padding: 3pt 7pt; }
 /* Side panel with minilogin */
 div#panel { float: right; }
 div.minilogin { border: solid 1pt #888; background: #eee; min-width: 150pt; }
@@ -89,6 +89,7 @@ table.list tr.yellow td { background: #ffb; }
 table.list tr.red td { background: #fcc; }
 table.list a { text-decoration: none; font-weight: bold; color: #002; }
 table.list a:hover { color: #00a; }
+table.list input { margin: 0; padding: 0; font-size: 12pt; width: 95%; }
 /* User list status colors */
 table.list td.missing { background: #fdd; }
 table.list td.present { background: #dfd; }

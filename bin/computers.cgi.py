@@ -52,7 +52,8 @@ def init():
     { 'title': '{{lang.COMPUTERS}}', 'path': 'computers' },
     { 'title': '{{lang.USERS}}', 'path': 'users' },
     { 'title': '{{lang.MAP}}', 'path': 'floorplan' },
-    { 'title': '{{lang.QUEUE}}', 'path': 'queue' }]
+    { 'title': '{{lang.QUEUE}}', 'path': 'queue' },
+    { 'title': '{{lang.SETTINGS}}', 'path': 'config' }]
 
   objects.lang = lang
   objects.FORMAT_DATE = hypertext.FORMAT_DATE
@@ -68,6 +69,23 @@ def init():
   hypertext.GLOBALS['viewbox'] = ' '.join(map(str, VIEWBOX))
 
   if 'lang' in web.GET: web.COOKIES['lang'] = web.GET['lang']
+
+def outputConfigPage():
+  data = { 'languages': sykeit.listLanguages() }
+  if web.POST:
+    data['POST'] = web.POST #XXX
+
+  hypertext.GLOBALS['scripts'].append('interface.js')
+
+  data['time_format'] = objects.FORMAT_DATE
+  data['alert_days_end_red'] = objects.ALERT_DAYS_END_RED
+  data['alert_days_end_yellow'] = objects.ALERT_DAYS_END_YELLOW
+  data['shifts'] = objects.listShifts()
+  data['coaches'] = objects.listCoaches()
+  for lo in data['languages']:
+    if lo['id'] == sykeit.LANG: lo['selected'] = True
+
+  web.outputPage(hypertext.frame('config', data))
 
 def runCommand(cmd, *argv):
   argv = list(argv)
@@ -179,9 +197,50 @@ def formData():
       objects.saveData()
       web.redirect('computer/%d' % cpu['cid'],
         1, lang['MSG_ADD_COMPUTER'] % (cpu['name'],))
+  elif name == 'addshift':
+    name, users, desc = map(web.POST.get, ('name', 'max_users', 'description'))
+    objects.addShift(name, users, desc)
+    objects.saveData()
+    web.redirect('config', 1, 'MSG_SHIFT_ADDED')
+  elif name == 'config':
+    conf = {}
+    if web.POST.get('lang') != sykeit.LANG: conf['lang'] = web.POST['lang']
+    if 'time_format' in web.POST:
+      conf['time_format'] = web.POST['time_format']
+    if 'alert_days_end_yellow' in web.POST:
+      conf['alert_days_end_yellow'] = int(web.POST['alert_days_end_yellow'])
+    if 'alert_days_end_yellow' in web.POST:
+      conf['alert_days_end_red'] = int(web.POST['alert_days_end_red'])
+    if 'alert_days_start' in web.POST:
+      conf['alert_days_start'] = int(web.POST['alert_days_start'])
+    if not conf: web.redirect('config', 1, 'MSG_NO_CHANGES')
+
+    if not sykeit.CONF_FFN: raise Exception('No configuration file')
+    if not sykeit.DATA_DIRECTORY: raise Exception('No data directory')
+    ffn = os.path.join(sykeit.DATA_DIRECTORY, 'generated_config.json')
+    with open(sykeit.CONF_FFN, 'r') as f: manual = json.loads(f.read())
+    tffn = ffn + '.back'
+    if os.path.isfile(tffn): raise Exception('File is being modified')
+    if os.path.isfile(ffn):
+      os.rename(ffn, tffn)
+      with open(tffn, 'r') as f: tmp = json.loads(f.read())
+      tmp.update(conf)
+      conf = tmp
+
+    dl = set()
+    for k, v in conf.items():
+      if k in manual and manual[k] == v: dl.add(k)
+    for k in dl: del conf[k]
+    #TODO check that settings can be reseted
+    if not conf: web.redirect('config', 1, 'MSG_NO_CHANGES')
+
+    with open(ffn, 'w') as f: f.write(json.dumps(conf))
+    if os.path.isfile(tffn): os.unlink(tffn)
+    web.redirect('config', 1, 'MSG_SETTINGS_SAVED')
+
   else: log(0, 'Unknown form: %s' % (name,))
 
-  web.redirect(web.POST.get('_next', '', message), 3)
+  web.redirect(web.POST.get('_next', ''), 3, message)
 
 web.handleForm = formData
 
@@ -364,26 +423,41 @@ def mainCGI():
         web.outputPage(hypertext.frame(hypertext.mustache(
           hypertext.layout('assign'), dt)))
     elif path[0] == 'delete' and len(path) == 3 \
-        and path[1] in ('computer', 'user') \
+        and path[1] in ('computer', 'user', 'shift', 'coach') \
         and objects.REGEX_INTEGER.match(path[2]):
       if path[1] == 'user': err = objects.deletePerson(int(path[2]))
       elif path[1] == 'computer': err = objects.deleteComputer(int(path[2]))
+      elif path[1] == 'coach': err = objects.deleteCoach(int(path[2]))
+      elif path[1] == 'shift': err = objects.deleteShift(int(path[2]))
       else: err = 'ERR_UNKNOWN_TYPE'
 
       if err is None:
         objects.saveData()
         if path[1] == 'user': web.redirect('users', 1, 'MSG_DELETE')
         elif path[1] == 'computer': web.redirect('computers', 1, 'MSG_DELETE')
+        elif path[1] in ('shift', 'coach'):
+          web.redirect('config', 1, 'MSG_DELETE')
         else: web.redirect('', 1, 'MSG_DELETE')
       else:
         log(1, 'Could not delete unit: %s %s' % (path[1], path[2]))
         if path[1] == 'user': web.redirect('users', 3, err)
         elif path[1] == 'computer': web.redirect('computers', 3, err)
+        elif path[1] in ('shift', 'coach'): web.redirect('config', 3, err)
         else: web.redirect('', 3, err)
     elif path[0] == 'update' and len(path) == 4:
       cid, x, y = path[1], int(path[2]), int(path[3])
       objects.moveComputer(cid, x, y)
       objects.saveData()
+      web.outputJSON({ 'success': True })
+    elif path[0] == 'update' and len(path) == 3:
+      sid, ud = int(path[1]), path[2]
+      if ud == 'up': objects.moveShift(sid, False)
+      elif ud == 'down': objects.moveShift(sid, True)
+      else: raise ValueError('Unknown direction: %s' % ud)
+      objects.saveData()
+      web.outputJSON({ 'shifts': objects.listShifts(), 'success': True })
+    elif path[0] == 'config':
+      outputConfigPage()
 
   web.error404()
 
