@@ -11,6 +11,7 @@
   "USERS": "users",
   "MAP": "map",
   "QUEUE": "queue",
+  "IN_QUEUE": "in queue",
   "ACCOUNT": "account",
   "LOGOUT": "logout",
   "SHIFT": "shift",

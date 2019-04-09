@@ -327,6 +327,9 @@ def mainCGI():
   # List coach names for auto complete
   data['coach_names'] = [c['name'] for c in objects.listCoaches()]
 
+  que = { (u['computer_id'], u['shift_id']): u for u in objects.listQueue()
+    if u.get('computer_id') and u.get('shift_id') }
+
   # List computers and shifts under them with user info
   data['computers'], computers = [], {}
   for cpu in sorted(objects.listComputers(),
@@ -338,6 +341,8 @@ def mainCGI():
     for shf in tmp['users']:
       u = uls.get(shf['sid'])
       if u is not None: shf.update(u)
+    for u in tmp['users']:
+      u['queue'] = que.get((cpu['cid'], u['sid']), {}).get('name', '')
     data['computers'].append(tmp)
     computers[tmp['cid']] = tmp
 
