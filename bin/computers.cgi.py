@@ -342,7 +342,7 @@ def mainCGI():
       u = uls.get(shf['sid'])
       if u is not None: shf.update(u)
     for u in tmp['users']:
-      u['queue'] = que.get((cpu['cid'], u['sid']), {}).get('name', '')
+      u['queue'] = que.get((cpu['cid'], u['sid']), {})
     data['computers'].append(tmp)
     computers[tmp['cid']] = tmp
 
