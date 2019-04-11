@@ -6,7 +6,7 @@ has simple login and user management system and of course the computer and
 people management system.
 
 Original source code for this application can be found on github:
-https://github.com/tpseitz/sykeit
+https://github.com/tpseitz/cmanager
 
 Lisence (BSD License 2.0)
 -------------------------
