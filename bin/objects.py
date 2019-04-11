@@ -153,7 +153,9 @@ def deleteComputer(search):
   else: return 'ERR_DELETE'
 
 def listVacant(shift):
-  els = set([u['computer_id'] for u in listPersons(shift_id=shift)])
+  els = [r['computer_id'] for r in database.select(
+    'persons', ['computer_id'],
+    [('computer_id', 'not null'), 'and' ,('shift_id', '==', shift)])]
   cls = [c for c in listComputers() if c['cid'] not in els]
   return cls
 
