@@ -32,7 +32,7 @@
 {{#user.presence}}{{#$3}}
     <td class="{{user.status}}">{{user.name}}</td>{{^$3}}
     <td class="reserved">{{lang.RESERVED}}</td>{{/$3}}{{/user.presence}}
-    <td>{{#user.queue}}{{user.queue.start_date_string}}{{/user.queue}}</td>
+    <td>{{#user.queue}}{{user.queue.name}}, {{user.queue.start_date_string}}{{/user.queue}}</td>
     <td rowspan="{{shift_count}}" class="delete">
       <a href="{{script}}/delete/computer/{{cid}}">{{lang.DELETE}}</a>
     </td>
@@ -43,7 +43,7 @@
 {{#presence}}{{#$3}}
     <td class="{{status}}">{{name}}</td>{{^$3}}
     <td class="reserved">{{lang.RESERVED}}</td>{{/$3}}{{/presence}}
-    <td>{{#queue}}{{queue.start_date_string}}{{/queue}}</td>
+    <td>{{#queue}}{{queue.name}}, {{queue.start_date_string}}{{/queue}}</td>
   </tr>{{/users}}
 {{/computers}}
 </table>
