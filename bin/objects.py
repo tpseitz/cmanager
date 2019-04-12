@@ -153,7 +153,9 @@ def deleteComputer(search):
   else: return 'ERR_DELETE'
 
 def listVacant(shift):
-  els = set([u['computer_id'] for u in listPersons(shift_id=shift)])
+  els = [r['computer_id'] for r in database.select(
+    'persons', ['computer_id'],
+    [('computer_id', 'not null'), 'and' ,('shift_id', '==', shift)])]
   cls = [c for c in listComputers() if c['cid'] not in els]
   return cls
 
@@ -238,6 +240,8 @@ def _updatePerson(person):
     if person['days_to_start'] <= 0: person['days_to_start'] = None
     elif person['days_to_start'] < ALERT_DAYS_START:
       person['hilight'] = 'tostart'
+  else:
+    person['start_date_string'] = ''
 
   if person['end_date']:
     person['end_date_string'] \
@@ -252,6 +256,8 @@ def _updatePerson(person):
     elif person['days_to_end'] < ALERT_DAYS_END_YELLOW:
       person['hilight'] = 'yellow'
     if person['days_to_year'] < 0: person['days_to_year'] = None
+  else:
+    person['end_date_string'] = ''
 
   return person
 
@@ -261,9 +267,9 @@ def listQueue():
 
   if not _QUEUE:
     dt = datetime.date.today().toordinal()
-    where = [('start_date', '>', dt), 'or', ('start_date', 'null'),
-      'or', ('end_date', '<', dt)]
-    _QUEUE = database.select('persons', where=where, order='created')
+    where = [('start_date', '>', dt), 'or', ('start_date', 'null')]
+    order = ['--start_date', 'created']
+    _QUEUE = database.select('persons', where=where, order=order)
     count = 1
     for p in _QUEUE:
       _updatePerson(p)
