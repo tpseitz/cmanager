@@ -28,7 +28,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import mimetypes, random, string, json, time, sys, os
-import database, sykeit
+import database
 
 SESSION_DIRECTORY = '/tmp/session'
 COOKIE_AGE, COOKIE_PATH = 14400, '/'
@@ -273,8 +273,6 @@ def handlePOST():
       else: POST[key] = [POST[key], val]
 
 def printDebugData():
-  global CONFIG_FILES
-
   html = ''
   for key in sorted(os.environ):
     html += "%s = %r<br>\n" % (key, os.environ[key])
@@ -284,8 +282,6 @@ def printDebugData():
   for t in COOKIES.items(): html += "%s = %r<br>\n" % t
   html += '<hr>\n'
   for k in sorted(SESSION): html += "%s = %r<br>\n" % (k, SESSION[k])
-  html += '<hr>\n'
-  for fn in sykeit.CONFIG_FILES: html += '%s<br>\n' % (os.path.expanduser(fn),)
 
   outputPage(html)
 
