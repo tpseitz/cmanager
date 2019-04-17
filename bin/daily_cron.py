@@ -29,12 +29,12 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import datetime, time, os
-import database, sykeit, web
+import database, cmanager, web
 
 log = database.log
 
 def main():
-  conf = sykeit.init()
+  conf = cmanager.init()
 
   max_mtime = time.time() - web.COOKIE_AGE
   for fn in os.listdir(web.SESSION_DIRECTORY):

@@ -29,7 +29,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import datetime, json, sys, os
-import database, objects, hypertext, sykeit, web
+import database, objects, hypertext, cmanager, web
 
 FLOORPLAN, VIEWBOX = None, [0, 0, 100, 100]
 
@@ -40,9 +40,9 @@ objects.log = log
 def init():
   global FLOORPLAN, VIEWBOX, lang
 
-  conf = sykeit.init()
+  conf = cmanager.init()
 
-  lang = sykeit.lang
+  lang = cmanager.lang
 
   FLOORPLAN = conf.get('floorplan', FLOORPLAN)
   VIEWBOX = conf.get('viewbox', VIEWBOX)
@@ -71,7 +71,7 @@ def init():
   if 'lang' in web.GET: web.COOKIES['lang'] = web.GET['lang']
 
 def outputConfigPage():
-  data = { 'languages': sykeit.listLanguages() }
+  data = { 'languages': cmanager.listLanguages() }
   if web.POST:
     data['POST'] = web.POST #XXX
 
@@ -83,7 +83,7 @@ def outputConfigPage():
   data['shifts'] = objects.listShifts()
   data['coaches'] = objects.listCoaches()
   for lo in data['languages']:
-    if lo['id'] == sykeit.LANG: lo['selected'] = True
+    if lo['id'] == cmanager.LANG: lo['selected'] = True
 
   web.outputPage(hypertext.frame('config', data))
 
@@ -204,7 +204,7 @@ def formData():
     web.redirect('config', 1, 'MSG_SHIFT_ADDED')
   elif name == 'config':
     conf = {}
-    if web.POST.get('lang') != sykeit.LANG: conf['lang'] = web.POST['lang']
+    if web.POST.get('lang') != cmanager.LANG: conf['lang'] = web.POST['lang']
     if 'time_format' in web.POST:
       conf['time_format'] = web.POST['time_format']
     if 'alert_days_end_yellow' in web.POST:
@@ -215,10 +215,10 @@ def formData():
       conf['alert_days_start'] = int(web.POST['alert_days_start'])
     if not conf: web.redirect('config', 1, 'MSG_NO_CHANGES')
 
-    if not sykeit.CONF_FFN: raise Exception('No configuration file')
-    if not sykeit.DATA_DIRECTORY: raise Exception('No data directory')
-    ffn = os.path.join(sykeit.DATA_DIRECTORY, 'generated_config.json')
-    with open(sykeit.CONF_FFN, 'r') as f: manual = json.loads(f.read())
+    if not cmanager.CONF_FFN: raise Exception('No configuration file')
+    if not cmanager.DATA_DIRECTORY: raise Exception('No data directory')
+    ffn = os.path.join(cmanager.DATA_DIRECTORY, 'generated_config.json')
+    with open(cmanager.CONF_FFN, 'r') as f: manual = json.loads(f.read())
     tffn = ffn + '.back'
     if os.path.isfile(tffn): raise Exception('File is being modified')
     if os.path.isfile(ffn):
