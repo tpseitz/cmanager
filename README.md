@@ -1,9 +1,9 @@
 Computer and user management scrip
 ==================================
 
-This collection of script was created for computer occupation management. It
-has simple login and user management system and of course the computer and
-people management system.
+This collection of script was created for computer seat management. It also has
+a simple login and user management system and of course the computer and people
+management system.
 
 Original source code for this application can be found on github:
 https://github.com/tpseitz/cmanager
