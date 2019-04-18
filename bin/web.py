@@ -37,6 +37,7 @@ LOG_BUFFER = 30
 SESSION, COOKIES, POST, GET = {}, {}, {}, {}
 STATIC_FILES = { 'svg_draw.js':
     os.sep.join(os.path.realpath(__file__).split(os.sep)[:-1]+['svg_draw.js'])}
+MODIFY_FILES = { 'svg_draw.js' }
 
 HTML_ERROR = '''<!DOCTYPE html><html>
   <head>
@@ -286,14 +287,12 @@ def printDebugData():
   outputPage(html)
 
 def startCGI(init=None):
-  global HTTP, COOKIES, SESSION, GET, STATIC_FILES
+  global HTTP, COOKIES, SESSION, GET, STATIC_FILES, MODIFY_FILES
 
   HTTP = True
 
   path = os.environ.get('PATH_INFO', '/')
   if path.endswith('.php'): error404()
-  basename = path.split('/')[-1]
-  if basename in STATIC_FILES: outputFile(STATIC_FILES[basename])
   path = [d for d in path.split('/') if d]
 
   GET = dict([('=' in o and o.split('=', 1) or (o, True))
@@ -309,9 +308,12 @@ def startCGI(init=None):
   if 'sessid' not in COOKIES: COOKIES['sessid'] = randomString(32)
   readSession(COOKIES['sessid'])
 
+  basename = path and path[-1] or ''
+
   if len(path) > 0:
     form = POST.get('_form')
-    if   path[-1] in STATIC_FILES: outputFile(STATIC_FILES[path[-1]], True)
+    if   path[-1] in STATIC_FILES:
+      outputFile(STATIC_FILES[path[-1]], basename in MODIFY_FILES)
     elif path[0] == 'login': login()
     elif form in ('login','minilogin'): login()
     elif path[0] == 'logout': destroySession()
