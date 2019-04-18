@@ -164,6 +164,8 @@ def formData():
   name = web.POST.get('_form', '')
   message = 'ERR_UNKNOWN_FORM'
   if name == 'adduser':
+    if len(web.POST['name'].strip()) < 2:
+      web.redirect('users', 3, 'ERR_SHORT_NAME')
     usr = objects.createPerson(
       web.POST['name'], web.POST['start_date'], web.POST['end_date'],
       int(web.POST['shift']), list(map(int, web.POST.get('days', []))))

@@ -319,8 +319,11 @@ def createPerson(name, start_date, end_date, shift, days):
 
   start_date = datetime.datetime.strptime(start_date, FORMAT_DATE).date()
   end_date   = datetime.datetime.strptime(end_date, FORMAT_DATE).date()
+  name = name.strip()
 
+  if len(name) < 2: raise ValueError('Too short name')
   #TODO Check person name for illegal characters
+
   shift = int(shift)
   days = set(map(int, days))
 

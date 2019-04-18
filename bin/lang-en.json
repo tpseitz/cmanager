@@ -135,6 +135,7 @@
   "ERR_DUPLICATE_USER": "Duplicate user: %s",
   "ERR_DUPLICATE_SEAT": "Duplicate computer for a shift %s %s",
   "ERR_SEAT_TAKEN": "This computer for the shift is already in use",
+  "ERR_SHORT_NAME": "Name is too short",
   "ERR_ILLEGAL_USERNAME": "Illegal username: %s",
   "ERR_ILLEGAL_FULLNAME": "Illegal name",
   "ERR_USER_ALLREADY_EXISTS": "User by the same name already exists: %s",

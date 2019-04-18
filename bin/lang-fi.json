@@ -135,6 +135,7 @@
   "ERR_DUPLICATE_USER": "K\u00E4ytt\u00E4j\u00E4 on olemassa kahteen kertaan: %s",
   "ERR_DUPLICATE_SEAT": "Tietokoneella %s on tuplabuukkaus vuoroon %s",
   "ERR_SEAT_TAKEN": "Tietokone on jo varattu kyseisell\u00E4 vuorolla",
+  "ERR_SHORT_NAME": "Nimi on liian lyhyt",
   "ERR_ILLEGAL_USERNAME": "K\u00E4ytt\u00E4j\u00E4nimess\u00E4 on virheellisi\u00E4 kirjaimia: %s",
   "ERR_ILLEGAL_FULLNAME": "K\u00E4ytt\u00E4j\u00E4n koko nimess\u00E4 on virheellisi\u00E4 kirjaimia: %s",
   "ERR_USER_ALLREADY_EXISTS": "K\u00E4ytt\u00E4j\u00E4 on jo olemassa: %s",
