@@ -153,9 +153,11 @@ def deleteComputer(search):
   else: return 'ERR_DELETE'
 
 def listVacant(shift):
+  dt = datetime.date.today().toordinal()
   els = [r['computer_id'] for r in database.select(
     'persons', ['computer_id'],
-    [('computer_id', 'not null'), 'and' ,('shift_id', '==', shift)])]
+    [('computer_id', 'not null'), 'and' ,('shift_id', '==', shift),
+      'and', ('end_date', '>=', dt)])]
   cls = [c for c in listComputers() if c['cid'] not in els]
   return cls
 
