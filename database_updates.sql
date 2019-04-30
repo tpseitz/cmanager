@@ -32,3 +32,6 @@ ALTER TABLE shifts MODIFY COLUMN sid INTEGER NOT NULL AUTO_INCREMENT;
 ALTER TABLE persons ADD CONSTRAINT persons_ibfk_1 FOREIGN KEY (shift_id) REFERENCES shifts (sid);
 UNLOCK TABLES;
 
+-- Database update to correct user id auto increment
+ALTER TABLE users MODIFY COLUMN uid INTEGER NOT NULL AUTO_INCREMENT;
+

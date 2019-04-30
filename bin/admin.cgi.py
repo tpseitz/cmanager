@@ -29,7 +29,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import datetime, os
-import hypertext, database, sykeit, web
+import hypertext, database, cmanager, web
 
 USER_LEVELS = { 0: 'User', 50: 'Observer', 100: 'Master', 200: 'Admin' }
 
@@ -39,8 +39,8 @@ log = web.log
 def init():
   global CONFIG_FILES, USER_LEVELS, lang
 
-  conf = sykeit.init()
-  lang = sykeit.lang
+  conf = cmanager.init()
+  lang = cmanager.lang
 
   if 'user_levels' in conf:
     USER_LEVELS = { int(k): v for k, v in conf['user_levels'].items() }
@@ -98,7 +98,7 @@ def mainCGI():
   if len(path) == 0: path = ['users']
 
   if path[0] == 'profile':
-    data = { 'session': web.SESSION, 'languages': sykeit.listLanguages() }
+    data = { 'session': web.SESSION, 'languages': cmanager.listLanguages() }
     web.outputPage(hypertext.frame('profile', data))
 
   if level < 200:

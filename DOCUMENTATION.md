@@ -18,7 +18,7 @@ Initial database
 Default database script creates two shifts and temporary superuser with
 username "admin" and password "temporary". It is recommend to delete this
 account when real superusers have been created. New users can also be directly
-inserted into database on creation time. Passwords are encrypted using pyhons
+inserted into database on creation time. Passwords are encrypted using python's
 crypt method of crypt module.
 
 Configuration file
@@ -32,11 +32,11 @@ Configuration file is searched in this order
 * From project root directory `computer_manager.json`. This means one level
    upper where the actual script file is located
 
-Configuration file is JSON -formated file and it can hold following properties:
+Configuration file is JSON-formatted file and it can hold following properties:
 
 | variable name        | description                                          |
 |----------------------|------------------------------------------------------|
-| `db_hostname`        | database server hostname                             |
+| `db_hostname`        | database server address                              |
 | `db_username`        | database username                                    |
 | `db_password`        | database password                                    |
 | `db_database`        | database name on server                              |
@@ -48,16 +48,15 @@ Configuration file is JSON -formated file and it can hold following properties:
 | `alert_days_end`     | highlight user for days before users perioid ends    |
 | `user_levels`        | list of user type translations as dictionary with    |
 |                      | level number as key and type name as value           |
-| `floorplan`          | full filename to SVG image of floorplan. This is not |
-|                      | required for working installation                    |
-| `viewbox`            | SCG ViewBox properties for floorplan                 |
+| `floorplan`          | full filename to SVG image of floor plan. This is    |
+|                      | not required for working installation                |
+| `viewbox`            | SVG ViewBox properties for floorplan                 |
 | `path_admin`         | HTTP path of admin page ie `/admin`                  |
 | `path_computers`     | HTTP path of computer management page                |
 | `jquery_iu_location` | Location of jQuery UI installation directory as      |
 |                      | seen by from the web browser                         |
 
-The values of `shift_names` and `user_levels` are supposed to be moved into
-database in future
+The values of `user_levels` are supposed to be moved into database in future
 
 User levels can vary and higher level can access all the data a lover one can.
 Hard coded permissions are
@@ -90,11 +89,12 @@ Scripts and modules
 
 Binary directory content
 
-| variable name      | purpose                                               |
+| filename           | purpose                                               |
 |--------------------|-------------------------------------------------------|
 | `computers.cgi.py` | the computer management CGI script                    |
 | `admin.cgi.py`     | user management CGI script                            |
-| `objects.py`       | module for handling the actual computer and user data |
+| `daily_cron.py`    | script to clean session data                          |
+| `cmanager.py`      | project global settings and methods                   |
 | `database.py`      | module to handle MySQL database connections. It also  |
 |                    | has methods for managing user accounts and logging in |
 |                    | at the database level                                 |
@@ -103,7 +103,11 @@ Binary directory content
 | `hypertext.py`     | module for generating HTML data it has a method to    |
 |                    | fill mustache notated layout pages and a method for   |
 |                    | creating HTML forms                                   |
-| `forms.json`       | JSON formated data for generating forms               |
+| `objects.py`       | module for handling the actual computer and user data |
+| `interface.js`     | user side interface fucntionalities                   |
+| `sort.js`          | client side table sorting functionality               |
+| `svg_draw.js`      | functionality for moving computers on SVG map         |
+| `forms.json`       | JSON formatted data for generating forms              |
 | `lang-xx.json`     | language files in JSON format                         |
 
 For this program all python scripts and static data like language and form

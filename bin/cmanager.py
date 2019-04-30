@@ -133,6 +133,7 @@ def init():
     'move-up.svg':    os.path.join(hypertext.LAYOUT_DIRECTORY, 'move-up.svg'),
     'move-down.svg':  os.path.join(hypertext.LAYOUT_DIRECTORY, 'move-down.svg'),
     'info.svg':       os.path.join(hypertext.LAYOUT_DIRECTORY, 'info.svg') })
+  web.MODIFY_FILES |= { 'interface.js' }
 
   lang = hypertext.init(LANG)
   hypertext.lang = lang
