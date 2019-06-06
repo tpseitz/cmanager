@@ -166,12 +166,13 @@ def deleteComputer(search):
   if rc: return None
   else: return 'ERR_DELETE'
 
-def listVacant(shift):
-  dt = datetime.date.today().toordinal()
-  els = [r['computer_id'] for r in database.select(
-    'persons', ['computer_id'],
-    [('computer_id', 'not null'), 'and' ,('shift_id', '==', shift),
-      'and', ('end_date', '>=', dt)])]
+def listVacant(shift, end_date=None):
+  dt = end_date or datetime.date.today().toordinal()
+  # Generate where to search persons using computers at those shifts
+  where = [('computer_id', 'not null'), 'and', ('shift_id', '==', shift),
+    'and', ('end_date', '>=', dt), 'and', ('end_date', 'not null')]
+  els = [r['computer_id'] for r in
+    database.select('persons', ['computer_id'], where)]
   cls = [c for c in listComputers() if c['cid'] not in els]
   return cls
 

@@ -432,7 +432,8 @@ def mainCGI():
       elif len(path) == 2:
         usr = objects.getPerson(path[1])
         if usr is None: web.redirect('users', 3, 'ERR_NO_PERSON')
-        dt = { 'user': usr, 'computers': objects.listVacant(usr['shift_id']) }
+        dt = { 'user': usr,
+          'computers': objects.listVacant(usr['shift_id'], usr['start_date']) }
         web.outputPage(hypertext.frame(hypertext.mustache(
           hypertext.layout('assign'), dt)))
     elif path[0] == 'delete' and len(path) == 3 \
