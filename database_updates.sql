@@ -35,3 +35,6 @@ UNLOCK TABLES;
 -- Database update to correct user id auto increment
 ALTER TABLE users MODIFY COLUMN uid INTEGER NOT NULL AUTO_INCREMENT;
 
+-- Database update for syke036F
+ALTER TABLE computers ADD COLUMN comments VARCHAR(255) NULL AFTER name;
+

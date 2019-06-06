@@ -103,12 +103,18 @@ def moveShift(shift_id, down):
   database.update('shifts', { 'ord': prev['ord'] }, { 'sid': this['sid'] })
   database.update('shifts', { 'ord': this['ord'] }, { 'sid': prev['sid'] })
 
+def _updateComputer(computer):
+  if not computer['comments']: computer['comments'] = ''
+
+  return computer
+
 _COMPUTERS, _COMPUTERS_PER_CID = [], {}
 def listComputers():
   global _COMPUTERS, _COMPUTERS_PER_CID
 
   if not _COMPUTERS:
     _COMPUTERS = database.select('computers', order='name')
+    for c in _COMPUTERS: _updateComputer(c)
     _COMPUTERS_PER_CID = { c['cid']: c for c in _COMPUTERS }
 
   return _COMPUTERS
@@ -131,14 +137,22 @@ def moveComputer(search, x, y):
 
   return True
 
-def createComputer(name):
+def createComputer(name, comments):
   global _COMPUTERS, _COMPUTERS_PER_CID
   _COMPUTERS, _COMPUTERS_PER_CID = [], {}
 
   if len(name) > MAX_NAME_SIZE: name = name[:MAX_NAME_SIZE]
-  cid = database.insert('computers', { 'name': name })
+  cid = database.insert('computers', { 'name': name, 'comments': comments })
   if not cid: return None
   return getComputer(cid)
+
+def setComputerComment(search, comments):
+  cpu = getComputer(search)
+  if cpu is None: return 'ERR_NO_COMPUTER'
+
+  database.update('computers', { 'comments': comments }, { 'cid': cpu['cid'] })
+
+  return True
 
 def deleteComputer(search):
   cpu = getComputer(search)

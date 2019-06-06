@@ -191,7 +191,7 @@ def formData():
   elif name == 'addcomputer':
     if objects.getComputer(web.POST['name'], True) is not None:
       web.redirect('computers', 3, 'ERR_DUPLICATE_COMPUTER')
-    cpu = objects.createComputer(web.POST['name'])
+    cpu = objects.createComputer(web.POST['name'], web.POST['comments'])
     if cpu is None:
       web.redirect('computers', 3, 'ERR_ADD_COMPUTER')
     else:
@@ -199,6 +199,12 @@ def formData():
       objects.saveData()
       web.redirect('computer/%d' % cpu['cid'],
         1, lang['MSG_ADD_COMPUTER'] % (cpu['name'],))
+  elif name == 'updatecomputer':
+    cpu = objects.getComputer(web.POST['cid'])
+    if not cpu: web.redirect('computers', 3, 'ERR_NO_COMPUTER')
+    objects.setComputerComment(cpu['cid'], web.POST['comment'] or None)
+    objects.saveData()
+    web.redirect('computer/%d' % cpu['cid'], 1, lang['MSG_DATA_UPDATED'])
   elif name == 'addshift':
     name, users, desc = map(web.POST.get, ('name', 'max_users', 'description'))
     objects.addShift(name, users, desc)
