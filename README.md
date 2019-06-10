@@ -1,9 +1,8 @@
-Computer and user management scrip
-==================================
+Computer and user management system
+===================================
 
-This collection of script was created for computer seat management. It also has
-a simple login and user management system and of course the computer and people
-management system.
+This collection of CGI-script was created for computer seat management. It
+also contains simple login and user management functionalities.
 
 Original source code for this application can be found on github:
 https://github.com/tpseitz/cmanager
