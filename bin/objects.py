@@ -158,7 +158,8 @@ def deleteComputer(search):
   cpu = getComputer(search)
   if cpu is None: return 'ERR_NO_COMPUTER'
 
-  uls = listPersons(cpu['cid'])
+  date = datetime.date.today().toordinal()
+  uls = listPersons(date, cpu['cid'])
   if len(uls) > 0: return 'ERR_COMPUTER_HAS_USERS'
 
   rc = database.delete('computers', { 'cid': cpu['cid'] })
@@ -214,7 +215,7 @@ def deleteCoach(coach_id):
   database.delete('coaches', { 'oid': coach_id })
   return None
 
-def _updatePerson(person):
+def _updatePerson(person, date):
   global FORMAT_DATE, ALERT_DAYS_START, _COACHES_PER_ID, \
     ALERT_DAYS_END_RED, ALERT_DAYS_END_YELLOW
 
@@ -249,11 +250,10 @@ def _updatePerson(person):
   person['days_to_start'], person['days_to_end'] = None, None
   person['days_to_year'] = None
   person['ended'] = False
-  dt = datetime.date.today().toordinal()
   if person['start_date']:
     person['start_date_string'] \
       = datetime.date.fromordinal(person['start_date']).strftime(FORMAT_DATE)
-    person['days_to_start'] = person['start_date'] - dt
+    person['days_to_start'] = person['start_date'] - date
     if person['days_to_start'] <= 0: person['days_to_start'] = None
     elif person['days_to_start'] < ALERT_DAYS_START:
       person['hilight'] = 'tostart'
@@ -263,10 +263,10 @@ def _updatePerson(person):
   if person['end_date']:
     person['end_date_string'] \
       = datetime.date.fromordinal(person['end_date']).strftime(FORMAT_DATE)
-    if person['end_date'] < dt: person['ended'] = True
+    if person['end_date'] < date: person['ended'] = True
 
-    person['days_to_end']  = person['end_date']   - dt
-    person['days_to_year'] = person['start_date'] - dt + 365
+    person['days_to_end']  = person['end_date']   - date
+    person['days_to_year'] = person['start_date'] - date + 365
     if person['days_to_end'] < 0:  person['days_to_end'] = None
     elif person['days_to_end'] < ALERT_DAYS_END_RED:
       person['hilight'] = 'red'
@@ -279,17 +279,17 @@ def _updatePerson(person):
   return person
 
 _QUEUE = []
-def listQueue():
+def listQueue(date):
   global _QUEUE
 
   if not _QUEUE:
-    dt = datetime.date.today().toordinal()
-    where = [('start_date', '>', dt), 'or', ('start_date', 'null')]
+    where = [('end_date', '>', date), 'and', ('start_date', '>', date),
+      'or', ('start_date', 'null')]
     order = ['--start_date', 'created']
     _QUEUE = database.select('persons', where=where, order=order)
     count = 1
     for p in _QUEUE:
-      _updatePerson(p)
+      _updatePerson(p, date)
       p['ord'] = count
       count += 1
 
@@ -298,16 +298,15 @@ def listQueue():
   return _QUEUE
 
 _PERSONS, _PERSONS_PER_PID = [], {}
-def listPersons(computer_id=None, shift_id=None):
+def listPersons(date, computer_id=None, shift_id=None):
   global _PERSONS, _PERSONS_PER_PID
 
   if not _PERSONS:
     listShifts()
     listComputers()
-    dt = datetime.date.today().toordinal()
-    where = [('start_date', '<=', dt), 'and', ('end_date', '>=', dt)]
+    where = [('start_date', '<=', date), 'and', ('end_date', '>=', date)]
     _PERSONS = database.select('persons', where=where, order='name')
-    for p in _PERSONS: _updatePerson(p)
+    for p in _PERSONS: _updatePerson(p, date)
 
     _PERSONS_PER_PID.update({ p['pid']: p for p in _PERSONS })
 
@@ -320,9 +319,10 @@ def listPersons(computer_id=None, shift_id=None):
 
   return pl
 
-def getPerson(search):
-  listPersons()
-  listQueue()
+def getPerson(search, date=None):
+  date = date or datetime.date.today().toordinal()
+  listPersons(date)
+  listQueue(date)
 
   if isinstance(search, str) and REGEX_INTEGER.match(search):
     search = int(search)
@@ -417,8 +417,9 @@ def assignComputer(person, computer=None):
   usr = getPerson(person)
   if usr is None: return ()
 
+  date = datetime.date.today().toordinal()
   if computer is not None:
-    for cu in listPersons(computer, usr['shift_id']):
+    for cu in listPersons(date, computer, usr['shift_id']):
       if cu is not None:
         if cu['pid'] == usr['pid']: return True
         else: return False

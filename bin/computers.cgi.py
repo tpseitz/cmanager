@@ -267,7 +267,9 @@ def floorplan(shift=None, selected=None):
       yy += 32
     tmp['users'], cnt = [], 2
     sid = shift and shift['sid'] or None
-    for usr in sorted(objects.listPersons(computer_id=cpu['cid'], shift_id=sid),
+    date = int(web.GET.get('date') or datetime.date.today().toordinal())
+    for usr in sorted(
+        objects.listPersons(date, computer_id=cpu['cid'], shift_id=sid),
         key=lambda u: u['shift_ord']):
       usr = usr.copy()
       usr['line'] = cnt
@@ -305,6 +307,7 @@ def mainCGI():
   hypertext.GLOBALS['session'] = web.SESSION
 
   data = {}
+  date = int(web.GET.get('date') or datetime.date.today().toordinal())
 
   if usr_lvl <= 0:
     web.outputPage(hypertext.frame('<div class="form">' \
@@ -316,7 +319,7 @@ def mainCGI():
   shifts = []
   for shf in objects.listShifts():
     shf = shf.copy()
-    uls = objects.listPersons(shift_id=shf['sid'])
+    uls = objects.listPersons(date, shift_id=shf['sid'])
     user_count = len([u for u in uls])
     seated_users = len([u for u in uls if u['computer_id']])
     shf['shift_name'] = shf['name']
@@ -335,7 +338,7 @@ def mainCGI():
   # List coach names for auto complete
   data['coach_names'] = [c['name'] for c in objects.listCoaches()]
 
-  que = { (u['computer_id'], u['shift_id']): u for u in objects.listQueue()
+  que = { (u['computer_id'], u['shift_id']): u for u in objects.listQueue(date)
     if u.get('computer_id') and u.get('shift_id') }
 
   # List computers and shifts under them with user info
@@ -343,7 +346,7 @@ def mainCGI():
   for cpu in sorted(objects.listComputers(),
       key=lambda c: objects.strip(c['name'])):
     tmp = cpu.copy()
-    uls = { u['shift_id']: u.copy() for u in objects.listPersons()
+    uls = { u['shift_id']: u.copy() for u in objects.listPersons(date)
       if u['computer_id'] == tmp['cid'] }
     tmp['users'] = [s.copy() for s in shifts]
     for shf in tmp['users']:
@@ -355,10 +358,10 @@ def mainCGI():
     computers[tmp['cid']] = tmp
 
   # List users
-  data['users'] = [usr.copy() for usr in objects.listPersons()]
+  data['users'] = [usr.copy() for usr in objects.listPersons(date)]
 
   # List queue
-  data['queue'] = [usr.copy() for usr in objects.listQueue()]
+  data['queue'] = [usr.copy() for usr in objects.listQueue(date)]
   count = 1
   for usr in data['queue']:
     usr['ord'] = count
@@ -374,7 +377,7 @@ def mainCGI():
         and objects.REGEX_INTEGER.match(path[1]):
       cid = int(path[1])
       data['computer'] = objects.getComputer(cid)
-      data['computer']['users'] = objects.listPersons(computer_id=cid)
+      data['computer']['users'] = objects.listPersons(date, computer_id=cid)
       web.outputPage(hypertext.frame('computer', data))
     elif path[0] == 'computers':
       cls, shift = [], None
