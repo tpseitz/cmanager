@@ -307,7 +307,17 @@ def mainCGI():
   hypertext.GLOBALS['session'] = web.SESSION
 
   data = {}
-  date = int(web.GET.get('date') or datetime.date.today().toordinal())
+  date = datetime.date.today().toordinal()
+  if   'date' in web.GET and not web.GET['date']:
+    web.COOKIES['date'] = ''
+  elif 'date' in web.GET and objects.REGEX_INTEGER.match(web.GET['date']):
+    date = int(web.GET.get('date'))
+    web.COOKIES['date'] = str(date)
+  elif 'date' in web.COOKIES and web.COOKIES['date']:
+    date = int(web.COOKIES.get('date'))
+  data['date'] = date
+  data['date_string'] = \
+    datetime.date.fromordinal(date).strftime(hypertext.FORMAT_DATE)
 
   if usr_lvl <= 0:
     web.outputPage(hypertext.frame('<div class="form">' \

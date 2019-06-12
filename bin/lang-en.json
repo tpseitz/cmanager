@@ -86,6 +86,7 @@
   "ACCEPT": "Accept",
   "OK": "OK",
   "NO_COMPUTER": "Computer does not exist in database",
+  "SELECTED_DATE": "Selected date",
   "MSG_DELETE": "Object succesfully deleted",
   "MSG_DATA_UPDATED": "Data updated",
   "MSG_ADD_SHIFT": "Adding shift for user %s: %s (%s)",
