@@ -267,7 +267,10 @@ def floorplan(shift=None, selected=None):
       yy += 32
     tmp['users'], cnt = [], 2
     sid = shift and shift['sid'] or None
-    date = int(web.GET.get('date') or datetime.date.today().toordinal())
+    date = datetime.date.today().toordinal()
+    if 'date' in web.COOKIES \
+        and objects.REGEX_INTEGER.match(web.COOKIES['date']):
+      date = int(web.COOKIES['date'])
     for usr in sorted(
         objects.listPersons(date, computer_id=cpu['cid'], shift_id=sid),
         key=lambda u: u['shift_ord']):
@@ -311,13 +314,30 @@ def mainCGI():
   if   'date' in web.GET and not web.GET['date']:
     web.COOKIES['date'] = ''
   elif 'date' in web.GET and objects.REGEX_INTEGER.match(web.GET['date']):
-    date = int(web.GET.get('date'))
-    web.COOKIES['date'] = str(date)
+    if web.GET['date'] != date:
+      data['date_selected'] = True
+      date = int(web.GET['date'])
+      web.COOKIES['date'] = str(date)
+    else:
+      web.COOKIES['date'] = ''
+  elif 'date' in web.GET:
+    try:
+      dt = datetime.datetime.strptime(web.GET['date'], objects.FORMAT_DATE)
+      date = dt.date().toordinal()
+      data['date_selected'] = True
+      web.COOKIES['date'] = str(date)
+    except ValueError as ve:
+      web.redirect('', 5, 'ERR_ILLEGAL_DATE')
   elif 'date' in web.COOKIES and web.COOKIES['date']:
+    data['date_selected'] = True
     date = int(web.COOKIES.get('date'))
   data['date'] = date
-  data['date_string'] = \
-    datetime.date.fromordinal(date).strftime(hypertext.FORMAT_DATE)
+  try:
+    data['date_string'] = \
+      datetime.date.fromordinal(date).strftime(hypertext.FORMAT_DATE)
+  except ValueError as ve:
+    web.COOKIES['date'] = ''
+    web.redirect('', 5, 'ERR_ILLEGAL_DATE')
 
   if usr_lvl <= 0:
     web.outputPage(hypertext.frame('<div class="form">' \

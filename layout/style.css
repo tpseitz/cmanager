@@ -49,6 +49,10 @@ input[type=submit] { border: solid 1pt #888; border-width: 1pt;
 p.checklist { display: table-row; }
 p.checklist input { display: table-cell; margin: 3pt 7pt; }
 
+div.datebox { width: 300pt; margin: 0pt 5pt; padding: 1pt 3pt; }
+div.datebox input { width: 100pt; }
+div.datebox input[type=submit] { font-size: 12pt; margin: 2pt; width: 30pt; }
+
 /*
  * Computer list status box
  */

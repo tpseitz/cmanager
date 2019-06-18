@@ -1,4 +1,15 @@
 <div class="form">{{form:adduser}}</div>
+<div class="datebox">{{#date_selected}}
+  {{lang.SELECTED_DATE}}: {{date_string}}
+  <a href="{{script}}/users?date=">{{lang.CLEAR}}</a>
+{{^date_selected}}
+  <form action="{{script}}/users" method="get">
+    {{lang.SELECT_DATE}}:
+    <input type="text" name="date" id="select_date" size="10" value="">
+    <input class="go" type="submit" value="{{lang.OK}}">
+    <script>$(function() { $("#select_date").datepicker(); });</script>
+  </form>
+{{/date_selected}}</div>
 <table class="list" id="users">
   <tr>
     <th>{{lang.USER}} </th>
