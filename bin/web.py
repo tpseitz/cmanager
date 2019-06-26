@@ -171,7 +171,11 @@ def readSession(session_id):
     st = os.stat(ffn)
     if st.st_mtime > time.time() + COOKIE_AGE: os.unlink(ffn)
     elif st.st_size > 0:
-      with open(ffn, 'r') as f: SESSION = json.loads(f.read())
+      try:
+        with open(ffn, 'r') as f: SESSION = json.loads(f.read())
+      except json.decoder.JSONDecodeError() as jde:
+        os.unlink(ffn)
+        web.redect()
 
   SESSION['id'] = session_id
 

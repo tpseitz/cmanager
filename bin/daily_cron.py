@@ -31,9 +31,11 @@
 import datetime, time, os
 import database, cmanager, web
 
+DAYS_KEEP_OLD_USERS = -14
+
 log = database.log
 
-def main():
+def cleanCookies():
   conf = cmanager.init()
 
   max_mtime = time.time() - web.COOKIE_AGE
@@ -47,6 +49,13 @@ def main():
       log(3, 'Deleting old session file %s (%s)' % (fn, tt.strip()))
       os.unlink(ffn)
 
+def cleanOldUsers():
+  dt = datetime.date.today().toordinal() - DAYS_KEEP_OLD_USERS
+  old = database.select('persons', where=[
+    ('start_date', '<', dt), 'and', ('end_date', '<', dt)])
+  pids = [tp['pid'] for tp in old]
+
 if __name__ == '__main__':
-  main()
+  cleanCookies()
+  cleanOldUsers()
 
