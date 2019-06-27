@@ -63,7 +63,10 @@ def _cursor():
     log(0, 'Database not configured')
 
   if not __CONNECTION:
-    __CONNECTION = MySQLdb.connect(HOSTNAME, USERNAME, PASSWORD, DATABASE)
+    try:
+      __CONNECTION = MySQLdb.connect(HOSTNAME, USERNAME, PASSWORD, DATABASE)
+    except MySQLdb.OperationalError as oe:
+      log(0, 'Could not connect to database: %s' % (oe.args[1],))
   return __CONNECTION.cursor()
 
 def close():

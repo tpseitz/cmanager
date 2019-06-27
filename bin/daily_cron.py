@@ -31,7 +31,7 @@
 import datetime, time, os
 import database, cmanager, web
 
-DAYS_KEEP_OLD_USERS = -14
+DAYS_KEEP_OLD_USERS = 7
 
 log = database.log
 
@@ -51,9 +51,11 @@ def cleanCookies():
 
 def cleanOldUsers():
   dt = datetime.date.today().toordinal() - DAYS_KEEP_OLD_USERS
-  old = database.select('persons', where=[
-    ('start_date', '<', dt), 'and', ('end_date', '<', dt)])
-  pids = [tp['pid'] for tp in old]
+  old = database.select('persons', where=
+    [('start_date', '<', dt), 'and', ('end_date', '<', dt)])
+  for pid in [tp['pid'] for tp in old]:
+    log(2, 'Removing user %d from database' % (pid,))
+    database.delete('persons', { 'pid': pid })
 
 if __name__ == '__main__':
   cleanCookies()

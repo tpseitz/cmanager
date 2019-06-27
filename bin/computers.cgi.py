@@ -87,70 +87,6 @@ def outputConfigPage():
 
   web.outputPage(hypertext.frame('config', data))
 
-def runCommand(cmd, *argv):
-  argv = list(argv)
-  if cmd == 'list':
-    if not argv:
-      cls = sorted(objects.Computer._COMPUTERS.values(), key=lambda c: c.cid)
-      for cpu in cls:
-        print('%s' % (cpu,))
-        for usr in sorted(cpu.users, key=lambda u: u.shift):
-          print('  %s' % (usr,))
-    elif argv[0] in ('computers', 'computer', 'comp', 'cpu', 'c'):
-      cls = sorted(objects.Computer._COMPUTERS.values(), key=lambda c: c.cid)
-      for cpu in cls:
-        print('%s' % (cpu,))
-    elif argv[0] in ('users', 'user', 'usr', 'u'):
-      for usr in sorted(objects.User._USERS.values(), key=lambda u: u.uid):
-        print('%s' % (usr,))
-    else:
-      log(0, lang['ERR_UNKNOWN_LIST'] % argv[0])
-  elif cmd == 'add':
-    if not argv:
-      print('You must give type')
-      return
-    tp = argv.pop(0)
-    if   tp in ('computer', 'comp', 'cpu', 'c'):
-      for cpu in argv:
-        print('Adding computer %s' % cpu)
-        objects.Computer(cpu)
-    elif tp in ('user', 'usr', 'u'):
-      for usr in argv:
-        print('Adding user %s' % usr)
-        objects.User(usr)
-    else:
-      print('Unknown type: %s' % tp)
-    objects.saveData()
-  elif cmd in ('delete', 'del', 'remove'):
-    for nm in argv: objects.delete(nm)
-    objects.saveData()
-  elif cmd == 'shift':
-    if len(argv) < 3:
-      print('Not enough parameters')
-      return
-    addShift(argv[0], argv[1], argv[2:])
-
-  elif cmd == 'seat':
-    if len(argv) == 2: usr, cpu = argv
-    elif len(argv) == 1: usr, cpu = argv[0], None
-
-    usr = REGEX_STRIP.sub('', usr.lower())
-    if usr in objects.User._USERS:
-      usr = objects.User._USERS[usr]
-      print('Adding seat %s for user %s' % (cpu, usr))
-      usr.assignComputer(cpu)
-      objects.saveData()
-    else:
-      print('Unknown user')
-  else:
-    print('Unknown command: %s' % cmd)
-
-def main():
-  init()
-
-  if len(sys.argv) < 2: runCommand('list')
-  else: runCommand(*sys.argv[1:])
-
 def computersVacant(shift):
   ls = []
   for cpu in objects.Computer._COMPUTERS.values():
@@ -510,5 +446,5 @@ def mainCGI():
 
 if __name__ == '__main__':
   if 'SERVER_ADDR' in os.environ: mainCGI()
-  else: main()
+  else: log(0, 'This is a CGI script')
 
