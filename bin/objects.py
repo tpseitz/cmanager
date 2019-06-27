@@ -159,7 +159,7 @@ def deleteComputer(search):
   if cpu is None: return 'ERR_NO_COMPUTER'
 
   date = datetime.date.today().toordinal()
-  uls = listPersons(date, cpu['cid'])
+  uls = database.select('persons', ['pid'], [('computer_id', '==', cpu['cid'])])
   if len(uls) > 0: return 'ERR_COMPUTER_HAS_USERS'
 
   rc = database.delete('computers', { 'cid': cpu['cid'] })
