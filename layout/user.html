@@ -29,11 +29,17 @@
       <a href="{{script}}/assign/{{user.pid}}/NULL">{{lang.DELETE}}</a>{{^user.computer}}
       <a href="{{script}}/assign/{{user.pid}}">{{lang.NO_SEAT}}</a>{{/user.computer}}
     </p>
+<p><b>{{lang.EXCEPTIONS}}:</b></p>
+{{#user.exceptions}}    <p>{{day_name}} {{shift_name}}: {{computer_name}}</p>
+{{/user.exceptions}}
   </div>
   <table class="userinfo">
     <tr>{{#lang.DAY_NAMES}}<th>{{.}}</th>{{/lang.DAY_NAMES}}</tr>
     <tr>{{#user.presence}}
-      <td class="{{#$3}}active{{^$3}}reserved{{/$3}}"><input type="checkbox" name="days" value="{{$1}}"{{#$3}} checked="true"{{/$3}}>{{$2}}</td>
+      <td class="{{#$3}}active{{^$3}}reserved{{/$3}}{{#$4}} exception{{/$4}}">
+        <input type="checkbox" name="days" value="{{$1}}"{{#$3}} checked="true"{{/$3}}>{{$2}}
+        {{#$4}}*{{/$4}}
+      </td>
 {{/user.presence}}    </tr>
   </table>
   <input id="send" class="button" type="submit" value="{{lang.UPDATE}}">

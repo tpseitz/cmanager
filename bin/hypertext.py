@@ -183,7 +183,7 @@ def _getValue(key, default, *values):
   return val
 
 MAX_ITERATIONS, MAX_PAGE_SIZE = 25, 1048576
-MAX_BLOCK_LOOPS, MAX_VARIABLE_LOOPS = 15, 150
+MAX_BLOCK_LOOPS, MAX_VARIABLE_LOOPS = 20, 150
 def mustache(html, data={}, default=None, *outside):
   global GLOBALS
 

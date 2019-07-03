@@ -89,6 +89,7 @@
   "NO_COMPUTER": "Computer does not exist in database",
   "SELECTED_DATE": "Selected date",
   "SELECT_DATE": "Select date",
+  "EXCEPTIONS": "exceptions",
   "MSG_DELETE": "Object succesfully deleted",
   "MSG_DATA_UPDATED": "Data updated",
   "MSG_ADD_SHIFT": "Adding shift for user %s: %s (%s)",

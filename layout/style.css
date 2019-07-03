@@ -122,8 +122,9 @@ tr.shift3 td.full { background: #544; }
 table.userinfo { border-collapse: collapse; margin: 3pt; }
 table.userinfo td { border: solid 1pt #444; padding: 3pt 10pt; }
 table.userinfo th { border: solid 1pt #444; padding: 3pt 10pt; }
-table.userinfo td.reserved { background: #aaa; color: #666; }
-table.userinfo td.active   { background: #6d6; color: #222; }
+table.userinfo td.reserved  { background: #aaa; color: #666; }
+table.userinfo td.active    { background: #6d6; color: #222; }
+table.userinfo td.exception { background: #ee6; color: #666; }
 
 /*
  * Floorplan SVG image

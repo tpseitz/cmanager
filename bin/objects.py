@@ -219,14 +219,22 @@ def _updatePerson(person, date):
   global FORMAT_DATE, ALERT_DAYS_START, _COACHES_PER_ID, \
     ALERT_DAYS_END_RED, ALERT_DAYS_END_YELLOW
 
+  person['exceptions'] = listException(person_id=person['pid'])
+  ed = set([ex['day'] for ex in person['exceptions']])
+
+  for ex in person['exceptions']:
+    ex['day_name'] = lang['DAY_NAMES'][ex['day']]
+    ex['computer_name'] = getComputer(ex['computer_id'])['name']
+    ex['shift_name'] = getShift(ex['shift_id'])['name']
+
   dn, pr = [], []
   person['presence'], person['day_names'] = [], []
   for di, dn in enumerate(lang['WORKDAYS']):
     if person['day_%d' % di]:
-      person['presence'].append((di, lang['DAY_NAMES'][di], True))
+      person['presence'].append((di, lang['DAY_NAMES'][di], True, di in ed))
       person['day_names'].append(dn)
     else:
-      person['presence'].append((di, lang['DAY_NAMES'][di], False))
+      person['presence'].append((di, lang['DAY_NAMES'][di], False, di in ed))
   if person['computer_id'] is None:
     person.update({ 'status': None, 'computer_name': None })
   else:
@@ -435,6 +443,19 @@ def assignComputer(person, computer=None):
 
   if cpu is not None: return cpu['name'],  usr['name']
   else: return (usr['name'],)
+
+_EXCEPTIONS = None
+def listException(person_id=None, computer_id=None):
+  global _EXCEPTIONS
+
+  if _EXCEPTIONS is None:
+    _EXCEPTIONS = database.select('exceptions')
+
+  if person_id is not None:
+    return [dt for dt in _EXCEPTIONS if dt['person_id'] == person_id]
+  if computer_id is not None:
+    return [dt for dt in _EXCEPTIONS if dt['computer_id'] == computer_id]
+  else: return _EXCEPTIONS
 
 def saveData():
   database.close()
