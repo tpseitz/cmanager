@@ -98,10 +98,11 @@ table.list input { margin: 0; padding: 0; font-size: 12pt; width: 95%; }
 table.list td.missing { background: #fdd; }
 table.list td.present { background: #dfd; }
 /* Computer list user status colors */
-table.list td.free     { background: #4e4; color: #020; }
-table.list td.full     { background: #444; color: #222; }
-table.list td.reserved { background: #777; color: #444; }
-table.list td.active   { background: #d66; color: #222; }
+table.list td.free      { background: #4e4; color: #020; }
+table.list td.full      { background: #444; color: #222; }
+table.list td.reserved  { background: #777; color: #444; }
+table.list td.active    { background: #d66; color: #222; }
+table.list td.exception { background: #dd6; color: #222; }
 /* Per shift seat status colors */
 tr.shift1 td.active,div.shift1 { background: #33a; color: #aac; }
 tr.shift2 td.active,div.shift2 { background: #3a3; }

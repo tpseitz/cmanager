@@ -343,7 +343,7 @@ def mainCGI():
         and objects.REGEX_INTEGER.match(path[1]):
       cid = int(path[1])
       data['computer'] = objects.getComputer(cid)
-      data['computer']['users'] = objects.listPersons(date, computer_id=cid)
+      data['shifts'] = objects.listShifts() #XXX
       web.outputPage(hypertext.frame('computer', data))
     elif path[0] == 'computers':
       cls, shift = [], None

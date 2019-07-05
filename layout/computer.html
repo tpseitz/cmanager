@@ -1,24 +1,30 @@
 <form id="update_user" action="{{script}}/form" method="post" enctype="multipart/form-data">
-  <h2>{{computer.name}}</h2>
-  <input type="hidden" name="_form" value="updatecomputer">
-  <input type="hidden" name="cid" value="{{computer.cid}}">
-  <p>{{lang.COMMENTS}}: <input type="text" name="comment" id="comments" value="{{computer.comments}}"></p>
+  <div class="infobox">
+    <h2>{{computer.name}}</h2>
+    <input type="hidden" name="_form" value="updatecomputer">
+    <input type="hidden" name="cid" value="{{computer.cid}}">
+    <p>{{lang.COMMENTS}}: <input type="text" name="comment" id="comments" value="{{computer.comments}}"></p>
+    <p><b>{{lang.EXCEPTIONS}}:</b></p>
+    {{#computer.exceptions}}
+    <p>{{day_name}} {{shift_name}}, {{person_name}}</p>
+    {{/computer.exceptions}}
+  </div>
   <table class="list">
     <tr>
       <th>{{lang.SHIFT}}</th>
       {{#lang.DAY_NAMES}}<th>{{_}}</th>{{/lang.DAY_NAMES}}
     </tr>
-  {{#computer.users}}
+  {{#computer.shifts}}
     <tr>
       <td>{{shift_name}}</td>
-  {{#presence}}{{#$3}}
-      <td class="{{status}}">{{name}}</td>{{^$3}}
-      <td class="reserved">{{lang.RESERVED}}</td>{{/$3}}{{/presence}}
-    </tr>{{/computer.users}}
+  {{#week}}{{#$1}}
+      <td class="{{$4}}">{{$3}}</td>{{^$1}}
+      <td class="{{$4}}">{{lang.RESERVED}}</td>{{/$1}}{{/week}}
+    </tr>{{/computer.shifts}}
   </table>
   {{#computer.x}}{{#floorplan}}-1,{{computer.cid}}{{/floorplan}}<br>
   {{/computer.x}}
   <input id="send" class="button" type="submit" value="{{lang.UPDATE}}"><br>
   <a href="{{script}}/delete/computer/{{computer.cid}}" class="delete">{{lang.DELETE_COMPUTER}}</a><br>
   <a href="{{script}}/computers">{{lang.BACK}}</a>
-</form
+</form>

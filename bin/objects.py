@@ -104,6 +104,26 @@ def moveShift(shift_id, down):
   database.update('shifts', { 'ord': this['ord'] }, { 'sid': prev['sid'] })
 
 def _updateComputer(computer):
+  if computer.get('_updated'): return computer
+  computer['_updated'] = True
+
+  date = datetime.date.today().toordinal()
+
+  computer['exceptions'] = listException(computer_id=computer['cid'])
+  computer['shifts'] = []
+  uls = { u['shift_id']: u
+    for u in listPersons(date, computer_id=computer['cid']) }
+  for shf in listShifts():
+    usr = uls.get(shf['sid'])
+    wk = [(False, False, lang['VACANT'], 'free') for d in lang['DAY_NAMES']]
+    if usr is not None: wk = [(p[2], False, usr['name'],
+      p[2] and 'active' or 'reserved') for p in usr['presence']]
+    for ex in computer['exceptions']:
+      if ex['shift_id'] == shf['sid']:
+        wk[ex['day']] = (True, True, ex['person_name'], 'exception')
+    computer['shifts'].append(
+      { 'shift_name': shf['name'], 'week': wk })
+
   if not computer['comments']: computer['comments'] = ''
 
   return computer
@@ -114,8 +134,8 @@ def listComputers():
 
   if not _COMPUTERS:
     _COMPUTERS = database.select('computers', order='name')
-    for c in _COMPUTERS: _updateComputer(c)
     _COMPUTERS_PER_CID = { c['cid']: c for c in _COMPUTERS }
+    for c in _COMPUTERS: _updateComputer(c)
 
   return _COMPUTERS
 
@@ -219,13 +239,11 @@ def _updatePerson(person, date):
   global FORMAT_DATE, ALERT_DAYS_START, _COACHES_PER_ID, \
     ALERT_DAYS_END_RED, ALERT_DAYS_END_YELLOW
 
+  if person.get('_updated'): return person
+  person['_updated'] = True
+
   person['exceptions'] = listException(person_id=person['pid'])
   ed = set([ex['day'] for ex in person['exceptions']])
-
-  for ex in person['exceptions']:
-    ex['day_name'] = lang['DAY_NAMES'][ex['day']]
-    ex['computer_name'] = getComputer(ex['computer_id'])['name']
-    ex['shift_name'] = getShift(ex['shift_id'])['name']
 
   dn, pr = [], []
   person['presence'], person['day_names'] = [], []
@@ -295,13 +313,12 @@ def listQueue(date):
       'or', ('start_date', 'null')]
     order = ['--start_date', 'created']
     _QUEUE = database.select('persons', where=where, order=order)
+    _PERSONS_PER_PID.update({ p['pid']: p for p in _QUEUE })
     count = 1
     for p in _QUEUE:
       _updatePerson(p, date)
       p['ord'] = count
       count += 1
-
-    _PERSONS_PER_PID.update({ p['pid']: p for p in _QUEUE })
 
   return _QUEUE
 
@@ -314,9 +331,8 @@ def listPersons(date, computer_id=None, shift_id=None):
     listComputers()
     where = [('start_date', '<=', date), 'and', ('end_date', '>=', date)]
     _PERSONS = database.select('persons', where=where, order='name')
-    for p in _PERSONS: _updatePerson(p, date)
-
     _PERSONS_PER_PID.update({ p['pid']: p for p in _PERSONS })
+    for p in _PERSONS: _updatePerson(p, date)
 
   pl = _PERSONS
 
@@ -444,12 +460,24 @@ def assignComputer(person, computer=None):
   if cpu is not None: return cpu['name'],  usr['name']
   else: return (usr['name'],)
 
+def _updateException(exception):
+  if exception.get('_updated'): return exception
+  exception['_updated'] = True
+
+  exception['day_name'] = lang['DAY_NAMES'][exception['day']]
+  exception['person_name'] = getPerson(exception['person_id'])['name']
+  exception['computer_name'] = getComputer(exception['computer_id'])['name']
+  exception['shift_name'] = getShift(exception['shift_id'])['name']
+
+  return exception
+
 _EXCEPTIONS = None
 def listException(person_id=None, computer_id=None):
   global _EXCEPTIONS
 
   if _EXCEPTIONS is None:
     _EXCEPTIONS = database.select('exceptions')
+    for ex in _EXCEPTIONS: _updateException(ex)
 
   if person_id is not None:
     return [dt for dt in _EXCEPTIONS if dt['person_id'] == person_id]
