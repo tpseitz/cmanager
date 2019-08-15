@@ -87,7 +87,7 @@ table.list { border-collapse: collapse; margin: 3pt; margin: 5pt; }
 table.list th { border: solid 1pt #444; padding: 3pt 10pt; background: #ccc; }
 table.list td { border: solid 1pt #444; padding: 3pt 10pt; background: #eee;
   vertical-align: top; }
-table.list tr.shift1 td { border-top: solid 2pt #222; }
+table.list tr.shift1 td { border-top: 0pt; }
 table.list tr.ended td { background: #f88; }
 table.list tr.yellow td { background: #ffb; }
 table.list tr.red td { background: #fcc; }
@@ -103,10 +103,19 @@ table.list td.full      { background: #444; color: #222; }
 table.list td.reserved  { background: #777; color: #444; }
 table.list td.active    { background: #d66; color: #222; }
 table.list td.exception { background: #dd6; color: #222; }
+/* Sub table for computer users */
+table.list td.subtable { padding: 0pt; margin: 0pt; }
+table.inside { border-collapse: collapse; margin: 0pt; border-width: 0px;
+  width: 100%; height: 100% }
+table.inside td.shift, table.list th.shift { width: 50pt; }
+table.inside td.day,   table.list th.day   { width: 90pt; }
+table.inside td.queue, table.list th.queue { width: 150pt; }
+table.inside td.shift { border-left: 0pt; }
+table.inside td.queue { border-right: 0pt; }
 /* Per shift seat status colors */
-tr.shift1 td.active,div.shift1 { background: #33a; color: #aac; }
-tr.shift2 td.active,div.shift2 { background: #3a3; }
-tr.shift3 td.active,div.shift3 { background: #a33; }
+tr.shift1 td.active, div.shift1 { background: #33a; color: #aac; }
+tr.shift2 td.active, div.shift2 { background: #3a3; }
+tr.shift3 td.active, div.shift3 { background: #a33; }
 tr.shift1 td.reserved { background: #667; }
 tr.shift2 td.reserved { background: #676; }
 tr.shift3 td.reserved { background: #766; }
@@ -116,6 +125,9 @@ tr.shift3 td.free { background: #6e4; }
 tr.shift1 td.full { background: #445; }
 tr.shift2 td.full { background: #454; }
 tr.shift3 td.full { background: #544; }
+tr.shift1 td.exception { background: #dd6; }
+tr.shift2 td.exception { background: #dd6; }
+tr.shift3 td.exception { background: #dd6; }
 
 /*
  * User timetable

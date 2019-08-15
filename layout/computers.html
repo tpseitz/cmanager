@@ -26,37 +26,40 @@
 <a href="{{script}}/floorplan{{#shift}}/{{shift_name}}{{/shift}}">
 {{#floorplan}}{{shift}}{{/floorplan}}
 </a>
-<table class="list">
+<table class="list" id="computers">
   <tr>
     <th>{{lang.COMPUTER}}</th>
-    <th>{{lang.SHIFT}}</th>
-    {{#lang.DAY_NAMES}}<th>{{_}}</th>{{/lang.DAY_NAMES}}
-    <th>{{lang.IN_QUEUE}}</th>
+<!--    <th>{{lang.SHIFTS}}</th> -->
+    <th class="shift">{{lang.SHIFT}}</th>
+    {{#lang.DAY_NAMES}}<th class="day">{{_}}</th>{{/lang.DAY_NAMES}}
+    <th class="queue">{{lang.IN_QUEUE}}</th>
     <th>{{lang.COMMENTS}} </th>
     <th>{{lang.DELETE}}</th>
   </tr>
 {{#computers}}
   <tr class="shift{{user.ord}}">
-    <td rowspan="{{shift_count}}">
+    <td>
       <a href="{{script}}/computer/{{cid}}">{{name}}</a></td>
-    <td>{{user.shift_name}}</td>
-<!-- {{user.presence}} -->
-{{#user.presence}}{{#$3}}
-    <td class="{{user.status}}">{{user.name}}</td>{{^$3}}
-    <td class="reserved">{{lang.RESERVED}}</td>{{/$3}}{{/user.presence}}
-    <td>{{#user.queue}}{{user.queue.name}}, {{user.queue.start_date_string}}{{/user.queue}}</td>
-    <td rowspan="{{shift_count}}">{{comments}}</td>
-    <td rowspan="{{shift_count}}" class="delete">
+
+    <td class="subtable" colspan="7">
+      <table class="inside">
+{{#shifts}}        <tr class="shift{{sid}}">
+          <td class="shift">{{shift_name}}</td>
+{{#presence}}          <td class="day {{$4}}">{{$3}}</td>
+{{/presence}}
+<!-- {{.}} -->
+          <td class="queue">{{#queue}}{{queue.name}}, {{queue.start_date_string}}{{/queue}}</td>
+        </tr>
+{{/shifts}}
+      </table>
+<!-- {{shifts}} -->
+    </td>
+
+    <td>{{comments}}</td>
+    <td class="delete">
       <a href="{{script}}/delete/computer/{{cid}}">{{lang.DELETE}}</a>
     </td>
   </tr>
-{{#users}}
-  <tr class="shift{{ord}}">
-    <td>{{shift_name}}</td>
-{{#presence}}{{#$3}}
-    <td class="{{status}}">{{name}}</td>{{^$3}}
-    <td class="reserved">{{lang.RESERVED}}</td>{{/$3}}{{/presence}}
-    <td>{{#queue}}{{queue.name}}, {{queue.start_date_string}}{{/queue}}</td>
-  </tr>{{/users}}
 {{/computers}}
 </table>
+<script>setupSort('computers', [0, 8]);</script>

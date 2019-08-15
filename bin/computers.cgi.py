@@ -308,18 +308,35 @@ def mainCGI():
     if u.get('computer_id') and u.get('shift_id') }
 
   # List computers and shifts under them with user info
+  ex_csd = { (e['computer_id'], e['shift_id'], e['day']): e
+    for e in objects.listExceptions() }
+  ex_pd = { (e['person_id'], e['day']): e
+    for e in objects.listExceptions() }
   data['computers'], computers = [], {}
   for cpu in sorted(objects.listComputers(),
       key=lambda c: objects.strip(c['name'])):
     tmp = cpu.copy()
     uls = { u['shift_id']: u.copy() for u in objects.listPersons(date)
       if u['computer_id'] == tmp['cid'] }
-    tmp['users'] = [s.copy() for s in shifts]
-    for shf in tmp['users']:
+    tmp['shifts'] = [s.copy() for s in shifts]
+    for shf in tmp['shifts']:
+      cpy = shf
       u = uls.get(shf['sid'])
       if u is not None: shf.update(u)
-    for u in tmp['users']:
-      u['queue'] = que.get((cpu['cid'], u['sid']), {})
+      prs = []
+      for di, dn, pre in shf['presence']:
+        exc = False
+        if u and pre: cls, name = 'active', u['name']
+        elif u: cls, name = 'reserved', lang['RESERVED']
+        else: cls, name = shf['status'], cpy['name']
+        if u:
+          e = ex_pd.get((u['pid'], di))
+          if e: cls, name, exc = 'exception', lang['RESERVED'] + ' *', True
+        e = ex_csd.get((cpu['cid'], shf['sid'], di))
+        if e: cls, name, exc = 'exception', e['person_name'] + ' *', True
+        prs.append((pre, exc, name, cls))
+      shf['presence'] = prs
+      shf['queue'] = que.get((cpu['cid'], shf['sid']), {})
     data['computers'].append(tmp)
     computers[tmp['cid']] = tmp
 
@@ -343,19 +360,15 @@ def mainCGI():
         and objects.REGEX_INTEGER.match(path[1]):
       cid = int(path[1])
       data['computer'] = objects.getComputer(cid)
-      data['shifts'] = objects.listShifts() #XXX
       web.outputPage(hypertext.frame('computer', data))
     elif path[0] == 'computers':
       cls, shift = [], None
       if len(path) == 2: shift = objects.getShift(objects.strip(path[1]))
-#      raise Exception(objects._SHIFTS_PER_NM) #XXX
 
       for cpu in data['computers']:
         if shift is not None:
-          cpu['user'] = [u for u in cpu['users'] if u['ord']==shift['ord']][0]
-          cpu['users'] = []
-        else:
-          cpu['user'] = cpu['users'].pop(0)
+          cpu['shifts'] = \
+            [[u for u in cpu['users'] if u['ord']==shift['ord']][0]]
       if shift is not None:
         data['shift_name'] = shift['name']
         data['shift'] = shift['ord']

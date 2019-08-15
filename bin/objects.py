@@ -109,7 +109,7 @@ def _updateComputer(computer):
 
   date = datetime.date.today().toordinal()
 
-  computer['exceptions'] = listException(computer_id=computer['cid'])
+  computer['exceptions'] = listExceptions(computer_id=computer['cid'])
   computer['shifts'] = []
   uls = { u['shift_id']: u
     for u in listPersons(date, computer_id=computer['cid']) }
@@ -120,7 +120,7 @@ def _updateComputer(computer):
       p[2] and 'active' or 'reserved') for p in usr['presence']]
     for ex in computer['exceptions']:
       if ex['shift_id'] == shf['sid']:
-        wk[ex['day']] = (True, True, ex['person_name'], 'exception')
+        wk[ex['day']] = (True, True, ex['person_name'] + ' *', 'exception')
     computer['shifts'].append(
       { 'shift_name': shf['name'], 'week': wk })
 
@@ -242,17 +242,18 @@ def _updatePerson(person, date):
   if person.get('_updated'): return person
   person['_updated'] = True
 
-  person['exceptions'] = listException(person_id=person['pid'])
+  person['exceptions'] = listExceptions(person_id=person['pid'])
   ed = set([ex['day'] for ex in person['exceptions']])
 
   dn, pr = [], []
   person['presence'], person['day_names'] = [], []
   for di, dn in enumerate(lang['WORKDAYS']):
     if person['day_%d' % di]:
-      person['presence'].append((di, lang['DAY_NAMES'][di], True, di in ed))
+      person['presence'].append(
+        (di, lang['DAY_NAMES'][di], not di in ed))
       person['day_names'].append(dn)
     else:
-      person['presence'].append((di, lang['DAY_NAMES'][di], False, di in ed))
+      person['presence'].append((di, lang['DAY_NAMES'][di], False))
   if person['computer_id'] is None:
     person.update({ 'status': None, 'computer_name': None })
   else:
@@ -472,7 +473,7 @@ def _updateException(exception):
   return exception
 
 _EXCEPTIONS = None
-def listException(person_id=None, computer_id=None):
+def listExceptions(person_id=None, computer_id=None):
   global _EXCEPTIONS
 
   if _EXCEPTIONS is None:
