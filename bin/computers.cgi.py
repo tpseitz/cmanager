@@ -62,6 +62,8 @@ def init():
     = conf.get('alert_days_end_red', objects.ALERT_DAYS_END_RED)
   objects.ALERT_DAYS_END_YELLOW \
     = conf.get('alert_days_end_yellow', objects.ALERT_DAYS_END_YELLOW)
+  objects.DAYS_KEEP_OLD_USERS = \
+    conf.get('keep_persons', objects.DAYS_KEEP_OLD_USERS)
 
   hypertext.GLOBALS['list_days'] = enumerate(lang['WORKDAYS'])
   hypertext.GLOBALS['list_shifts'] \
@@ -80,8 +82,10 @@ def outputConfigPage():
   data['time_format'] = objects.FORMAT_DATE
   data['alert_days_end_red'] = objects.ALERT_DAYS_END_RED
   data['alert_days_end_yellow'] = objects.ALERT_DAYS_END_YELLOW
+  data['keep_persons'] = objects.DAYS_KEEP_OLD_USERS
   data['shifts'] = objects.listShifts()
   data['coaches'] = objects.listCoaches()
+  data['unlisted_persons'] = objects.listUnlistedPersons()
   for lo in data['languages']:
     if lo['id'] == cmanager.LANG: lo['selected'] = True
 
@@ -157,6 +161,8 @@ def formData():
       conf['alert_days_end_red'] = int(web.POST['alert_days_end_red'])
     if 'alert_days_start' in web.POST:
       conf['alert_days_start'] = int(web.POST['alert_days_start'])
+    if 'keep_persons' in web.POST:
+      conf['keep_persons'] = int(web.POST['keep_persons'])
     if not conf: web.redirect('config', 1, 'MSG_NO_CHANGES')
 
     if not cmanager.CONF_FFN: raise Exception('No configuration file')

@@ -29,14 +29,16 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import datetime, time, os
-import database, cmanager, web
-
-DAYS_KEEP_OLD_USERS = 7
+import database, cmanager, objects, web
 
 log = database.log
 
 def cleanCookies():
+  global DAYS_KEEP_OLD_USERS
+
   conf = cmanager.init()
+  objects.DAYS_KEEP_OLD_USERS = \
+    conf.get('keep_persons', objects.DAYS_KEEP_OLD_USERS)
 
   max_mtime = time.time() - web.COOKIE_AGE
   for fn in os.listdir(web.SESSION_DIRECTORY):

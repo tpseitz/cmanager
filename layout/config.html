@@ -16,6 +16,8 @@
       <input type="text" name="alert_days_end_yellow" value="{{alert_days_end_yellow}}"><br>
       {{lang.ALERT_END_RED}}
       <input type="text" name="alert_days_end_red" value="{{alert_days_end_red}}"><br>
+      {{lang.KEEP_PERSONS}}
+      <input type="text" name="keep_persons" value="{{keep_persons}}"><br>
     </p>
     <input type="submit" value="{{lang.SAVE}}">
   </form>
@@ -49,6 +51,28 @@
 {{#coaches}}  <tr><td>{{name}}</td>
     <td class="delete"><a href="{{script}}/delete/coach/{{oid}}">{{lang.DELETE}}</a></td></tr>
 {{/coaches}}
+</table>
+
+<h2>{{lang.UNLISTED_USERS}}</h2>
+<table class="list">
+  <tr>
+    <th>{{lang.USER}} </th>
+    <th>{{lang.START_DATE}} </th>
+    <th>{{lang.END_DATE}} </th>
+    <th>{{lang.COACH}} </th>
+    <th>{{lang.COMMENTS}} </th>
+    <th>{{lang.DELETE_USER}} </th>
+  </tr>
+{{#unlisted_persons}}
+  <tr>
+    <!-- {{.}} -->
+    <td><a href="{{script}}/user/{{pid}}">{{name}}</a></td>
+    <td><!--{{start_date}}-->{{start_date_string}}</td>
+    <td><!--{{end_date}}-->{{end_date_string}}</td>
+    <td>{{coach_name}}</td>
+    <td>{{comments}}</td>
+    <td class="delete"><a href="{{script}}/delete/user/{{pid}}">{{lang.DELETE}}</a></td>
+  </tr>{{/unlisted_persons}}
 </table>
 
 <script>initMove('shifts');</script>

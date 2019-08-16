@@ -33,6 +33,8 @@
   "TIME_FORMAT": "time format",
   "ALERT_END_RED": "second hiligh",
   "ALERT_END_YELLOW": "first hilight",
+  "KEEP_PERSONS": "clean old users",
+  "UNLISTED_USERS": "Unlisted users",
   "SHIFT_MAX_USERS": "max users",
   "DESCRIPTION": "description",
   "MOVE": "move",

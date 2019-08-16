@@ -32,6 +32,7 @@ import database
 
 FORMAT_DATE = '%Y-%m-%d'
 ALERT_DAYS_START, ALERT_DAYS_END_RED, ALERT_DAYS_END_YELLOW = 7, 14, 28
+DAYS_KEEP_OLD_USERS = 7
 
 MAX_NAME_SIZE = 64
 
@@ -318,6 +319,14 @@ def listPersons(date, computer_id=None, shift_id=None):
     pl = [p for p in pl if p['shift_id'] == shift_id]
 
   return pl
+
+def listUnlistedPersons(date=None):
+  date = date or datetime.date.today().toordinal()
+  pidls = [p['pid'] for p in listQueue(date) + listPersons(date)]
+  pls = database.select('persons', where=[('pid', 'not in', pidls)])
+  for p in pls: _updatePerson(p, date)
+
+  return pls
 
 def getPerson(search, date=None):
   date = date or datetime.date.today().toordinal()

@@ -80,14 +80,23 @@ def close():
 def _createWhere(where, data):
   wq, ao = '', True
   for wd in where:
-    if   isinstance(wd, str) and wd.lower() in ('and','or'):
+    if   isinstance(wd, str) and wd.lower() in ('and', 'or'):
       wq += ' %s ' % wd.upper()
       ao = True
     elif isinstance(wd, (tuple, list)) and len(wd) == 2 \
-        and wd[1].lower() in ('null','not null','!null'):
+        and wd[1].lower() in ('null', 'not null', '!null'):
       col, arg = wd
       if arg == '!null': arg = 'not null'
       wq += '%s IS %s' % (col, arg.upper())
+    elif isinstance(wd, (tuple, list)) and len(wd) == 3 \
+        and isinstance(wd[2], (tuple, list)):
+      col, opr, dt = wd
+      if opr == 'in':
+        wq += '%s IN (%s)' % (col, ','.join(map(str, dt)))
+      elif opr == 'not in':
+        wq += '%s NOT IN (%s)' % (col, ','.join(map(str, dt)))
+      else: raise ValueError(
+        'Illegal comparison operator for where clause: %s' % (opr,))
     elif isinstance(wd, (tuple, list)) and len(wd) == 3:
       #TODO Check where clause for illegal names
       col, opr, dt = wd

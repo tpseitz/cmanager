@@ -6,6 +6,9 @@ body { font-family: Sans-Serif; }
 article { width: 1100pt; }
 a { text-decoration: none; font-weight: bold; color: #008; }
 a:hover { text-decoration: underline; color: #66d; }
+h1 { font-size: 14pt; border-bottom: solid 1pt #000;
+  margin: 10pt auto 5pt 7pt; }
+h2 { font-size: 12pt; margin: 10pt auto 5pt 7pt; }
 /* Menu */
 li#menu { display: table; border: 1pt solid #888; background: #ddd;
   width: 100%; margin: 3pt; }

@@ -33,6 +33,8 @@
   "TIME_FORMAT": "ajan esitys",
   "ALERT_END_RED": "toinen korostusraja",
   "ALERT_END_YELLOW": "ensimm\u00E4inen korostusraja",
+  "KEEP_PERSONS": "k\u00E4ytt\u00E4jien siivoaminen",
+  "UNLISTED_USERS": "Listaamattomat k\u00E4ytt\u00E4j\u00E4t",
   "SHIFT_MAX_USERS": "vuoron koko",
   "DESCRIPTION": "kuvaus",
   "MOVE": "siirr\u00E4",
