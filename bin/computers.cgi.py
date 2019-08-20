@@ -181,8 +181,9 @@ def formData():
     for k, v in conf.items():
       if k in manual and manual[k] == v: dl.add(k)
     for k in dl: del conf[k]
-    #TODO check that settings can be reseted
-    if not conf: web.redirect('config', 1, 'MSG_NO_CHANGES')
+    if not conf:
+      if os.path.isfile(tffn): os.unlink(tffn)
+      web.redirect('config', 1, 'MSG_NO_CHANGES')
 
     with open(ffn, 'w') as f: f.write(json.dumps(conf))
     if os.path.isfile(tffn): os.unlink(tffn)
