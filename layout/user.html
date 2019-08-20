@@ -1,5 +1,5 @@
-<form id="update_user" action="{{script}}/form" method="post" enctype="multipart/form-data">
-  <div class="infobox">
+<div class="infobox">
+  <form id="update_user" action="{{script}}/form" method="post" enctype="multipart/form-data">
     <h2>{{lang.USER}}: {{user.name}}</h2>
     <!-- {{user}} -->
     <input type="hidden" name="_form" value="updateuser">
@@ -29,22 +29,50 @@
       <a href="{{script}}/assign/{{user.pid}}/NULL">{{lang.DELETE}}</a>{{^user.computer}}
       <a href="{{script}}/assign/{{user.pid}}">{{lang.NO_SEAT}}</a>{{/user.computer}}
     </p>
-<p><b>{{lang.EXCEPTIONS}}:</b></p>
-{{#user.exceptions}}    <p>{{day_name}} {{shift_name}}: {{computer_name}}</p>
+
+    <table class="userinfo">
+<!--      <tr>{{#lang.DAY_NAMES}}<th>{{.}}</th>{{/lang.DAY_NAMES}}</tr>-->
+      <tr>{{#user.presence}}
+        <td class="{{#$3}}active{{^$3}}reserved{{/$3}}{{#$4}} exception{{/$4}}">
+          <input type="checkbox" name="days" value="{{$1}}"{{#$3}} checked="true"{{/$3}}>{{$2}}
+          {{#$4}}*{{/$4}}
+        </td>
+{{/user.presence}}      </tr>
+    </table>
+    <input id="send" class="button" type="submit" value="{{lang.UPDATE}}">
+  </form>
+
+  <form id="exception" action="{{script}}/form" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="_form" value="exception">
+    <table class="inlist">
+      <tr><th colspan="3">{{lang.EXCEPTIONS}}</th></tr>
+{{#user.exceptions}}    <tr><td>{{day_name}}</td><td>{{shift_name}}</td><td>{{computer_name}}</td><td>&nbsp;</td></tr>
 {{/user.exceptions}}
+      <tr>
+        <td>
+          <select name="day" required="true">
+{{#day_names}}          <option value="{{index}}">{{name}}</option>
+{{/day_names}}
+          </select>
+        </td><td>
+          <select name="shift" required="true">
+{{#shifts}}          <option value="{{sid}}">{{name}}</option>
+{{/shifts}}
+          </select>
+        </td><td>
+          <select name="computer" required="true">
+{{#computers}}          <option value="{{cid}}">{{name}}</option>
+{{/computers}}
+          </select>
+          <input name="person" value="{{pid}}" type="hidden">
+        </td><td>
+          <input id="send" class="button" type="submit" value="{{lang.ADD}}">
+        </td>
+      </tr>
+    </table>
+  </form>
   </div>
-  <table class="userinfo">
-    <tr>{{#lang.DAY_NAMES}}<th>{{.}}</th>{{/lang.DAY_NAMES}}</tr>
-    <tr>{{#user.presence}}
-      <td class="{{#$3}}active{{^$3}}reserved{{/$3}}{{#$4}} exception{{/$4}}">
-        <input type="checkbox" name="days" value="{{$1}}"{{#$3}} checked="true"{{/$3}}>{{$2}}
-        {{#$4}}*{{/$4}}
-      </td>
-{{/user.presence}}    </tr>
-  </table>
-  <input id="send" class="button" type="submit" value="{{lang.UPDATE}}">
   <a class="delete" href="{{script}}/delete/user/{{user.pid}}">{{lang.DELETE_USER}}</a><br>
-</form>
 <a href="{{script}}/users">{{lang.BACK}}</a><br>
 <script>
   $(function() {

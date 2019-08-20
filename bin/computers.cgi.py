@@ -279,7 +279,11 @@ def mainCGI():
     web.outputPage(hypertext.frame('<div class="form">' \
       + hypertext.form('login', target='login') + '</div>'))
 
+  data['day_names'] = [{ 'index': i, 'name': nm }
+    for i, nm in enumerate(lang['DAY_NAMES'])]
+
   # Compile shift status list
+  data['shifts'] = objects.listShifts()
   data['shift_count'] = len(objects.listShifts())
   data['shift_users'] = []
   shifts = []
@@ -297,7 +301,7 @@ def mainCGI():
     data['shift_users'].append(shf)
 
     shifts.append({ 'shift_name': shf['shift_name'], 'sid': shf['sid'],
-      'ord': shf['ord'], 'presence': 5 * [(None, None, True)],
+      'ord': shf['ord'], 'presence': 5 * [(None, None, True, False)],
       'name': shf['status']=="space" and '{{lang.VACANT}}' or '{{lang.FULL}}',
       'status': shf['status'] == "space" and 'free' or 'full' })
 
@@ -320,12 +324,11 @@ def mainCGI():
       if u['computer_id'] == tmp['cid'] }
     tmp['shifts'] = [s.copy() for s in shifts]
     for shf in tmp['shifts']:
-      cpy = shf
+      cpy = shf.copy()
       u = uls.get(shf['sid'])
       if u is not None: shf.update(u)
       prs = []
-      for di, dn, pre in shf['presence']:
-        exc = False
+      for di, dn, pre, exc in shf['presence']:
         if u and pre: cls, name = 'active', u['name']
         elif u: cls, name = 'reserved', lang['RESERVED']
         else: cls, name = shf['status'], cpy['name']
@@ -353,12 +356,14 @@ def mainCGI():
   if usr_lvl >= 50:
     if path[0] == 'user' and len(path) == 2 \
         and objects.REGEX_INTEGER.match(path[1]):
+      data['computers'] = objects.listComputers()
       data['user'] = objects.getPerson(path[1])
       if data['user'] is None: web.redirect('users', 3, 'NO_USER')
       web.outputPage(hypertext.frame('user', data))
     elif path[0] == 'computer' and len(path) == 2 \
         and objects.REGEX_INTEGER.match(path[1]):
       cid = int(path[1])
+      data['persons'] = objects.listPersons(date)
       data['computer'] = objects.getComputer(cid)
       web.outputPage(hypertext.frame('computer', data))
     elif path[0] == 'computers':
@@ -368,7 +373,7 @@ def mainCGI():
       for cpu in data['computers']:
         if shift is not None:
           cpu['shifts'] = \
-            [[u for u in cpu['users'] if u['ord']==shift['ord']][0]]
+            [[u for u in cpu['users'] if u['ord'] == shift['ord']][0]]
       if shift is not None:
         data['shift_name'] = shift['name']
         data['shift'] = shift['ord']

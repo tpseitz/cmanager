@@ -77,6 +77,7 @@ div.infobox p { padding: 3pt 10pt; margin: 0pt; }
 div.infobox p.hilight { background: #fcc; }
 div.infobox p.yellow { background: #ffb; }
 div.infobox p.red { background: #fcc; }
+div.infobox input[type=submit] { font-size: 12pt; margin: 1pt 5pt; }
 
 /*
  * Computer and user list tables 
@@ -128,6 +129,13 @@ tr.shift3 td.full { background: #544; }
 tr.shift1 td.exception { background: #dd6; }
 tr.shift2 td.exception { background: #dd6; }
 tr.shift3 td.exception { background: #dd6; }
+
+/*
+ * Small list inside panel
+ */
+table.inlist { border-collapse: collapse; margin: 3pt 9pt; }
+table th { text-align: left; }
+table select { border: solid 1pt #888; }
 
 /*
  * User timetable

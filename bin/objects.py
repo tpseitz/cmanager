@@ -249,11 +249,10 @@ def _updatePerson(person, date):
   person['presence'], person['day_names'] = [], []
   for di, dn in enumerate(lang['WORKDAYS']):
     if person['day_%d' % di]:
-      person['presence'].append(
-        (di, lang['DAY_NAMES'][di], not di in ed))
+      person['presence'].append((di, lang['DAY_NAMES'][di], True, di in ed))
       person['day_names'].append(dn)
     else:
-      person['presence'].append((di, lang['DAY_NAMES'][di], False))
+      person['presence'].append((di, lang['DAY_NAMES'][di], False, di in ed))
   if person['computer_id'] is None:
     person.update({ 'status': None, 'computer_name': None })
   else:
