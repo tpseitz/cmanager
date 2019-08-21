@@ -146,6 +146,12 @@ def formData():
     objects.addShift(name, users, desc)
     objects.saveData()
     web.redirect('config', 1, 'MSG_SHIFT_ADDED')
+  elif name == 'addexception':
+    day, shift, computer, person = map(lambda k: int(web.POST.get(k)),
+      ('day', 'shift', 'computer', 'person'))
+    objects.addException(day, shift, computer, person)
+    objects.saveData()
+    web.redirect('user/%d' % person, 1, 'MSG_EXCEPTION_ADDED')
   elif name == 'config':
     conf = {}
     if web.POST.get('lang') != cmanager.LANG: conf['lang'] = web.POST['lang']
@@ -424,13 +430,15 @@ def mainCGI():
         web.outputPage(hypertext.frame(hypertext.mustache(
           hypertext.layout('assign'), dt)))
     elif path[0] == 'delete' and len(path) == 3 \
-        and path[1] in ('computer', 'user', 'shift', 'coach') \
+        and path[1] in ('computer', 'user', 'shift', 'coach', 'exception') \
         and objects.REGEX_INTEGER.match(path[2]):
-      if path[1] == 'user': err = objects.deletePerson(int(path[2]))
-      elif path[1] == 'computer': err = objects.deleteComputer(int(path[2]))
-      elif path[1] == 'coach': err = objects.deleteCoach(int(path[2]))
-      elif path[1] == 'shift': err = objects.deleteShift(int(path[2]))
-      else: err = 'ERR_UNKNOWN_TYPE'
+      if   path[1] == 'user':      err = objects.deletePerson(int(path[2]))
+      elif path[1] == 'computer':  err = objects.deleteComputer(int(path[2]))
+      elif path[1] == 'coach':     err = objects.deleteCoach(int(path[2]))
+      elif path[1] == 'shift':     err = objects.deleteShift(int(path[2]))
+      elif path[1] == 'exception': err = objects.deleteException(int(path[2]))
+      else: raise Exception('Unknown type')
+#      else: err = 'ERR_UNKNOWN_TYPE'
 
       if err is None:
         objects.saveData()

@@ -42,11 +42,13 @@
     <input id="send" class="button" type="submit" value="{{lang.UPDATE}}">
   </form>
 
-  <form id="exception" action="{{script}}/form" method="post" enctype="multipart/form-data">
-    <input type="hidden" name="_form" value="exception">
+  <form id="addexception" action="{{script}}/form" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="_form" value="addexception">
     <table class="inlist">
       <tr><th colspan="3">{{lang.EXCEPTIONS}}</th></tr>
-{{#user.exceptions}}    <tr><td>{{day_name}}</td><td>{{shift_name}}</td><td>{{computer_name}}</td><td>&nbsp;</td></tr>
+{{#user.exceptions}}    <tr><td>{{day_name}}</td><td>{{shift_name}}</td><td>{{computer_name}}</td>
+        <td><a class="delete" href="{{script}}/delete/exception/{{eid}}">{{lang.DELETE}}</a></td>
+      </tr>
 {{/user.exceptions}}
       <tr>
         <td>
@@ -64,7 +66,7 @@
 {{#computers}}          <option value="{{cid}}">{{name}}</option>
 {{/computers}}
           </select>
-          <input name="person" value="{{pid}}" type="hidden">
+          <input name="person" value="{{user.pid}}" type="hidden">
         </td><td>
           <input id="send" class="button" type="submit" value="{{lang.ADD}}">
         </td>

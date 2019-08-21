@@ -134,8 +134,10 @@ tr.shift3 td.exception { background: #dd6; }
  * Small list inside panel
  */
 table.inlist { border-collapse: collapse; margin: 3pt 9pt; }
-table th { text-align: left; }
-table select { border: solid 1pt #888; }
+table.inlist th { text-align: left; }
+table.inlist td { padding: 0pt 2pt; }
+table.inlist select { border: solid 1pt #888; }
+table.inlist a.delete { margin: 3pt 5pt; }
 
 /*
  * User timetable

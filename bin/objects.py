@@ -485,6 +485,18 @@ def listExceptions(person_id=None, computer_id=None):
     return [dt for dt in _EXCEPTIONS if dt['computer_id'] == computer_id]
   else: return _EXCEPTIONS
 
+def addException(day, shift_id, computer_id, person_id):
+  database.insert('exceptions',{ 'day': day, 'shift_id': shift_id,
+    'computer_id': computer_id, 'person_id': person_id })
+
+  return None
+
+def deleteException(exception_id):
+  rc = database.delete('exceptions', { 'eid': exception_id })
+
+  if rc: return None
+  else: return 'ERR_DELETE'
+
 def saveData():
   database.close()
 
