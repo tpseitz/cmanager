@@ -56,6 +56,7 @@ def cleanOldUsers():
   for pid in [tp['pid'] for tp in old]:
     log(2, 'Removing user %d from database' % (pid,))
     database.delete('persons', { 'pid': pid })
+  database.close()
 
 if __name__ == '__main__':
   cleanCookies()
