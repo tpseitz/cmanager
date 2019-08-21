@@ -150,6 +150,12 @@ def formData():
     objects.addShift(name, users, desc)
     objects.saveData()
     web.redirect('config', 1, 'MSG_SHIFT_ADDED')
+  elif name == 'addexception':
+    day, shift, computer, person = map(lambda k: int(web.POST.get(k)),
+      ('day', 'shift', 'computer', 'person'))
+    objects.addException(day, shift, computer, person)
+    objects.saveData()
+    web.redirect('user/%d' % person, 1, 'MSG_EXCEPTION_ADDED')
   elif name == 'config':
     conf = {}
     if web.POST.get('lang') != cmanager.LANG: conf['lang'] = web.POST['lang']
@@ -286,7 +292,11 @@ def mainCGI():
     web.outputPage(hypertext.frame('<div class="form">' \
       + hypertext.form('login', target='login') + '</div>'))
 
+  data['day_names'] = [{ 'index': i, 'name': nm }
+    for i, nm in enumerate(lang['DAY_NAMES'])]
+
   # Compile shift status list
+  data['shifts'] = objects.listShifts()
   data['shift_count'] = len(objects.listShifts())
   data['shift_users'] = []
   shifts = []
@@ -304,7 +314,7 @@ def mainCGI():
     data['shift_users'].append(shf)
 
     shifts.append({ 'shift_name': shf['shift_name'], 'sid': shf['sid'],
-      'ord': shf['ord'], 'presence': 5 * [(None, None, True)],
+      'ord': shf['ord'], 'presence': 5 * [(None, None, True, False)],
       'name': shf['status']=="space" and '{{lang.VACANT}}' or '{{lang.FULL}}',
       'status': shf['status'] == "space" and 'free' or 'full' })
 
@@ -315,18 +325,34 @@ def mainCGI():
     if u.get('computer_id') and u.get('shift_id') }
 
   # List computers and shifts under them with user info
+  ex_csd = { (e['computer_id'], e['shift_id'], e['day']): e
+    for e in objects.listExceptions() }
+  ex_pd = { (e['person_id'], e['day']): e
+    for e in objects.listExceptions() }
   data['computers'], computers = [], {}
   for cpu in sorted(objects.listComputers(),
       key=lambda c: objects.strip(c['name'])):
     tmp = cpu.copy()
     uls = { u['shift_id']: u.copy() for u in objects.listPersons(date)
       if u['computer_id'] == tmp['cid'] }
-    tmp['users'] = [s.copy() for s in shifts]
-    for shf in tmp['users']:
+    tmp['shifts'] = [s.copy() for s in shifts]
+    for shf in tmp['shifts']:
+      cpy = shf.copy()
       u = uls.get(shf['sid'])
       if u is not None: shf.update(u)
-    for u in tmp['users']:
-      u['queue'] = que.get((cpu['cid'], u['sid']), {})
+      prs = []
+      for di, dn, pre, exc in shf['presence']:
+        if u and pre: cls, name = 'active', u['name']
+        elif u: cls, name = 'reserved', lang['RESERVED']
+        else: cls, name = shf['status'], cpy['name']
+        if u:
+          e = ex_pd.get((u['pid'], di))
+          if e: cls, name, exc = 'exception', lang['RESERVED'] + ' *', True
+        e = ex_csd.get((cpu['cid'], shf['sid'], di))
+        if e: cls, name, exc = 'exception', e['person_name'] + ' *', True
+        prs.append((pre, exc, name, cls))
+      shf['presence'] = prs
+      shf['queue'] = que.get((cpu['cid'], shf['sid']), {})
     data['computers'].append(tmp)
     computers[tmp['cid']] = tmp
 
@@ -343,26 +369,24 @@ def mainCGI():
   if usr_lvl >= 50:
     if path[0] == 'user' and len(path) == 2 \
         and objects.REGEX_INTEGER.match(path[1]):
+      data['computers'] = objects.listComputers()
       data['user'] = objects.getPerson(path[1])
       if data['user'] is None: web.redirect('users', 3, 'NO_USER')
       web.outputPage(hypertext.frame('user', data))
     elif path[0] == 'computer' and len(path) == 2 \
         and objects.REGEX_INTEGER.match(path[1]):
       cid = int(path[1])
+      data['persons'] = objects.listPersons(date)
       data['computer'] = objects.getComputer(cid)
-      data['computer']['users'] = objects.listPersons(date, computer_id=cid)
       web.outputPage(hypertext.frame('computer', data))
     elif path[0] == 'computers':
       cls, shift = [], None
       if len(path) == 2: shift = objects.getShift(objects.strip(path[1]))
-#      raise Exception(objects._SHIFTS_PER_NM) #XXX
 
       for cpu in data['computers']:
         if shift is not None:
-          cpu['user'] = [u for u in cpu['users'] if u['ord']==shift['ord']][0]
-          cpu['users'] = []
-        else:
-          cpu['user'] = cpu['users'].pop(0)
+          cpu['shifts'] = \
+            [[u for u in cpu['users'] if u['ord'] == shift['ord']][0]]
       if shift is not None:
         data['shift_name'] = shift['name']
         data['shift'] = shift['ord']
@@ -413,13 +437,15 @@ def mainCGI():
         web.outputPage(hypertext.frame(hypertext.mustache(
           hypertext.layout('assign'), dt)))
     elif path[0] == 'delete' and len(path) == 3 \
-        and path[1] in ('computer', 'user', 'shift', 'coach') \
+        and path[1] in ('computer', 'user', 'shift', 'coach', 'exception') \
         and objects.REGEX_INTEGER.match(path[2]):
-      if path[1] == 'user': err = objects.deletePerson(int(path[2]))
-      elif path[1] == 'computer': err = objects.deleteComputer(int(path[2]))
-      elif path[1] == 'coach': err = objects.deleteCoach(int(path[2]))
-      elif path[1] == 'shift': err = objects.deleteShift(int(path[2]))
-      else: err = 'ERR_UNKNOWN_TYPE'
+      if   path[1] == 'user':      err = objects.deletePerson(int(path[2]))
+      elif path[1] == 'computer':  err = objects.deleteComputer(int(path[2]))
+      elif path[1] == 'coach':     err = objects.deleteCoach(int(path[2]))
+      elif path[1] == 'shift':     err = objects.deleteShift(int(path[2]))
+      elif path[1] == 'exception': err = objects.deleteException(int(path[2]))
+      else: raise Exception('Unknown type')
+#      else: err = 'ERR_UNKNOWN_TYPE'
 
       if err is None:
         objects.saveData()

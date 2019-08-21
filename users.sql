@@ -66,6 +66,18 @@ CREATE TABLE persons (
   PRIMARY KEY (pid)
 ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_bin;
 
+CREATE TABLE exceptions (
+  eid         INTEGER  NOT NULL AUTO_INCREMENT,
+  day         SMALLINT NOT NULL,
+  person_id   INTEGER  NOT NULL,
+  shift_id    INTEGER  NOT NULL,
+  computer_id INTEGER  NOT NULL,
+  FOREIGN KEY (person_id)   REFERENCES persons(pid),
+  FOREIGN KEY (shift_id)    REFERENCES shifts(sid),
+  FOREIGN KEY (computer_id) REFERENCES computers(cid),
+  PRIMARY KEY (eid)
+) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_bin;
+
 INSERT INTO users (username, fullname, level, password)
   VALUES ("admin", "Temporary superuser", 250,
     "$6$xjUUbJX./EMVfyiU$NJ1Tt9zhIizzaU1lHffT8P4pxpZftmnoOzh9qYro8kBbePBbiz36cGvpxju.Sc3IHGmsc1lKWM244JaGL151D/");

@@ -38,3 +38,16 @@ ALTER TABLE users MODIFY COLUMN uid INTEGER NOT NULL AUTO_INCREMENT;
 -- Database update for syke036F
 ALTER TABLE computers ADD COLUMN comments VARCHAR(255) NULL AFTER name;
 
+-- Database update for syke038F
+CREATE TABLE exceptions (
+  eid         INTEGER  NOT NULL AUTO_INCREMENT,
+  day         SMALLINT NOT NULL,
+  person_id   INTEGER  NOT NULL,
+  shift_id    INTEGER  NOT NULL,
+  computer_id INTEGER  NOT NULL,
+  FOREIGN KEY (person_id)   REFERENCES persons(pid),
+  FOREIGN KEY (shift_id)    REFERENCES shifts(sid),
+  FOREIGN KEY (computer_id) REFERENCES computers(cid),
+  PRIMARY KEY (eid)
+) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_bin;
+

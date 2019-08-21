@@ -1,24 +1,58 @@
-<form id="update_user" action="{{script}}/form" method="post" enctype="multipart/form-data">
-  <h2>{{computer.name}}</h2>
-  <input type="hidden" name="_form" value="updatecomputer">
-  <input type="hidden" name="cid" value="{{computer.cid}}">
-  <p>{{lang.COMMENTS}}: <input type="text" name="comment" id="comments" value="{{computer.comments}}"></p>
-  <table class="list">
-    <tr>
-      <th>{{lang.SHIFT}}</th>
-      {{#lang.DAY_NAMES}}<th>{{_}}</th>{{/lang.DAY_NAMES}}
+<div class="infobox">
+  <form id="update_user" action="{{script}}/form" method="post" enctype="multipart/form-data">
+    <h2>{{computer.name}}</h2>
+    <input type="hidden" name="_form" value="updatecomputer">
+    <input type="hidden" name="cid" value="{{computer.cid}}">
+    <p>{{lang.COMMENTS}}: <input type="text" name="comment" id="comments" value="{{computer.comments}}"></p>
+    <input id="send" class="button" type="submit" value="{{lang.UPDATE}}"><br>
+  </form>
+  <form id="addexception" action="{{script}}/form" method="post" enctype="multipart/form-data">
+  <input type="hidden" name="_form" value="addexception">
+  <table class="inlist">
+    <tr><th colspan="3">{{lang.EXCEPTIONS}}</th></tr>
+    {{#computer.exceptions}}
+    <tr><td>{{day_name}}</td><td>{{shift_name}}</td>
+      <td>{{person_name}}</td>
+      <td><a class="delete" href="{{script}}/delete/exception/{{eid}}">{{lang.DELETE}}</a></td>
+    {{/computer.exceptions}}
+  <tr>
+    <td>
+      <select name="day" required="true">
+{{#day_names}}            <option value="{{index}}">{{name}}</option>
+{{/day_names}}
+        </select>
+      </td><td>
+        <select name="shift" required="true">
+{{#shifts}}            <option value="{{sid}}">{{name}}</option>
+{{/shifts}}
+        </select>
+      </td><td>
+        <input name="computer" value="{{computer.cid}}" type="hidden">
+        <select name="person" required="true">
+{{#persons}}            <option value="{{pid}}">{{name}}</option>
+{{/persons}}
+        </select>
+      </td><td>
+        <input id="send" class="button" type="submit" value="{{lang.ADD}}">
+      </td>
     </tr>
-  {{#computer.users}}
-    <tr>
-      <td>{{shift_name}}</td>
-  {{#presence}}{{#$3}}
-      <td class="{{status}}">{{name}}</td>{{^$3}}
-      <td class="reserved">{{lang.RESERVED}}</td>{{/$3}}{{/presence}}
-    </tr>{{/computer.users}}
   </table>
-  {{#computer.x}}{{#floorplan}}-1,{{computer.cid}}{{/floorplan}}<br>
-  {{/computer.x}}
-  <input id="send" class="button" type="submit" value="{{lang.UPDATE}}"><br>
-  <a href="{{script}}/delete/computer/{{computer.cid}}" class="delete">{{lang.DELETE_COMPUTER}}</a><br>
-  <a href="{{script}}/computers">{{lang.BACK}}</a>
-</form
+  </form>
+</div>
+<table class="list">
+  <tr>
+    <th>{{lang.SHIFT}}</th>
+    {{#lang.DAY_NAMES}}<th>{{_}}</th>{{/lang.DAY_NAMES}}
+  </tr>
+{{#computer.shifts}}
+  <tr>
+    <td>{{shift_name}}</td>
+{{#week}}{{#$1}}
+    <td class="{{$4}}">{{$3}}</td>{{^$1}}
+    <td class="{{$4}}">{{lang.RESERVED}}</td>{{/$1}}{{/week}}
+  </tr>{{/computer.shifts}}
+</table>
+{{#computer.x}}{{#floorplan}}-1,{{computer.cid}}{{/floorplan}}<br>
+{{/computer.x}}
+<a href="{{script}}/delete/computer/{{computer.cid}}" class="delete">{{lang.DELETE_COMPUTER}}</a><br>
+<a href="{{script}}/computers">{{lang.BACK}}</a>
