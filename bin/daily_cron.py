@@ -34,8 +34,6 @@ import database, cmanager, objects, web
 log = database.log
 
 def cleanCookies():
-  global DAYS_KEEP_OLD_USERS
-
   conf = cmanager.init()
   objects.DAYS_KEEP_OLD_USERS = \
     conf.get('keep_persons', objects.DAYS_KEEP_OLD_USERS)
@@ -52,7 +50,7 @@ def cleanCookies():
       os.unlink(ffn)
 
 def cleanOldUsers():
-  dt = datetime.date.today().toordinal() - DAYS_KEEP_OLD_USERS
+  dt = datetime.date.today().toordinal() - objects.DAYS_KEEP_OLD_USERS
   old = database.select('persons', where=
     [('start_date', '<', dt), 'and', ('end_date', '<', dt)])
   for pid in [tp['pid'] for tp in old]:
