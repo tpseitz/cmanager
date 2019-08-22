@@ -47,9 +47,8 @@
 {{#computer.shifts}}
   <tr>
     <td>{{shift_name}}</td>
-{{#week}}{{#$1}}
-    <td class="{{$4}}">{{$3}}</td>{{^$1}}
-    <td class="{{$4}}">{{lang.RESERVED}}</td>{{/$1}}{{/week}}
+{{#week}}
+    <td class="{{$4}}">{{$3}}</td>{{/week}}
   </tr>{{/computer.shifts}}
 </table>
 {{#computer.x}}{{#floorplan}}-1,{{computer.cid}}{{/floorplan}}<br>

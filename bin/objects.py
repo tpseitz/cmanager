@@ -117,7 +117,8 @@ def _updateComputer(computer):
   for shf in listShifts():
     usr = uls.get(shf['sid'])
     wk = [(False, False, lang['VACANT'], 'free') for d in lang['DAY_NAMES']]
-    if usr is not None: wk = [(p[2], False, usr['name'],
+    if usr is not None: wk = [(p[2], False,
+      p[2] and usr['name'] or lang['RESERVED'],
       p[2] and 'active' or 'reserved') for p in usr['presence']]
     for ex in computer['exceptions']:
       if ex['shift_id'] == shf['sid']:
